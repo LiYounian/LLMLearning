@@ -24,15 +24,28 @@
 ├── 05-byte-level.html            字节级 BPE —— 含【UTF-8 字节编码可视化器】
 ├── 06-models.html                主流模型对比：GPT/Qwen/DeepSeek/LLaMA/Kimi + 词表趋势
 ├── 07-frontier.html              前沿：glitch token、ByT5、MegaByte、BLT、H-Net、SuperBPE
+├── 08-token-compare.html         tiktoken 切词对比 —— 含【真实分词器 token 数条形图 + 实际切分】
 ├── references.html               参考文献与来源（35 条，可点击溯源）
+├── scripts/
+│   └── gen_token_compare.py      用真实分词器(tiktoken+HF)跑 token 数, 生成 token_data.{json,js}
 └── assets/
     ├── style.css                 统一暗色主题样式
     ├── bpe-demo.js               BPE 训练可视化器 + 切分器
     ├── byte-demo.js              UTF-8 字节编码可视化器
+    ├── token-compare.js          切词对比图渲染逻辑(读 token_data.js)
+    ├── token_data.json / .js     真实分词器跑出的对比数据(8 个分词器 × 5 个样本)
     ├── research_history.md       调研原始材料（历史/算法）—— 溯源留档
     ├── research_models.md        调研原始材料（主流模型）
     └── research_frontier.md      调研原始材料（前沿）
 ```
+
+### 复现 08 页的对比数据
+
+```bash
+cd 第一课-Tokenizer/scripts
+python3 gen_token_compare.py   # 需要 tiktoken + transformers/tokenizers, 联网下载分词器文件
+```
+产出 `assets/token_data.{json,js}`。GPT 系走 tiktoken（gpt2/cl100k/o200k），Qwen/DeepSeek/LLaMA 走 HuggingFace 公共非门禁仓库，BERT/T5 作为 WordPiece/Unigram 对照。
 
 ### 内容主线
 
@@ -44,9 +57,9 @@
 
 三个方向（历史算法 / 主流模型实测 / 前沿趋势）分别由独立 agent 调研核对，一手来源（arXiv/ACL/IEEE/官方技术报告/代码仓库）汇总在 `references.html`。存疑处已在正文与参考页显式标注，不臆造。
 
-### 待办 / 可迭代方向（v2）
+### 待办 / 可迭代方向
 
-- 用真实 tiktoken/HF tokenizer 跑一个"同一句话在各模型下切成几个 token"的对比条形图
-- 加中文语料的 BPE 训练 demo（展示为什么中文需要大词表）
-- BLT 熵分块的动画示意
-- glitch token 的可点击案例展示
+- [x] 用真实 tiktoken/HF tokenizer 跑"同一句话在各模型下切成几个 token"的对比条形图 → **已完成，见 08 页**
+- [ ] 加中文语料的 BPE 训练 demo（展示为什么中文需要大词表）
+- [ ] BLT 熵分块的动画示意
+- [ ] glitch token 的可点击案例展示

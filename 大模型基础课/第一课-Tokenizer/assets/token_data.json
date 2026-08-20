@@ -1,0 +1,3128 @@
+{
+ "samples": [
+  {
+   "id": "en",
+   "label": "英文句子",
+   "text": "The quick brown fox jumps over the lazy dog."
+  },
+  {
+   "id": "zh",
+   "label": "中文句子",
+   "text": "深度学习模型把文字切成一个个词元，再查表变成向量。"
+  },
+  {
+   "id": "code",
+   "label": "Python 代码",
+   "text": "def add(a, b):\n    return a + b  # sum two ints"
+  },
+  {
+   "id": "num",
+   "label": "长数字",
+   "text": "The year 2025 has 31536000 seconds and pi is 3.14159265."
+  },
+  {
+   "id": "emoji",
+   "label": "emoji 混合",
+   "text": "Hi 你好 🚀 GPT-4o costs $5/1M tokens!"
+  }
+ ],
+ "tokenizers": [
+  {
+   "key": "gpt2",
+   "name": "GPT-2 / GPT-3",
+   "family": "gpt",
+   "vocab": 50257
+  },
+  {
+   "key": "cl100k",
+   "name": "GPT-3.5 / GPT-4",
+   "family": "gpt",
+   "vocab": 100277
+  },
+  {
+   "key": "o200k",
+   "name": "GPT-4o / o 系列",
+   "family": "gpt",
+   "vocab": 200019
+  },
+  {
+   "key": "qwen25",
+   "name": "Qwen2.5",
+   "family": "qwen",
+   "vocab": 151643
+  },
+  {
+   "key": "deepseek",
+   "name": "DeepSeek-V3",
+   "family": "deepseek",
+   "vocab": 128000
+  },
+  {
+   "key": "llama3",
+   "name": "LLaMA-3",
+   "family": "llama",
+   "vocab": 128000
+  },
+  {
+   "key": "bert",
+   "name": "BERT (WordPiece)",
+   "family": "other",
+   "vocab": 30522
+  },
+  {
+   "key": "t5",
+   "name": "T5 (Unigram/SP)",
+   "family": "other",
+   "vocab": 32100
+  }
+ ],
+ "counts": {
+  "en": {
+   "gpt2": 10,
+   "cl100k": 10,
+   "o200k": 10,
+   "qwen25": 10,
+   "deepseek": 10,
+   "llama3": 10,
+   "bert": 10,
+   "t5": 12
+  },
+  "zh": {
+   "gpt2": 54,
+   "cl100k": 28,
+   "o200k": 20,
+   "qwen25": 17,
+   "deepseek": 15,
+   "llama3": 20,
+   "bert": 25,
+   "t5": 4
+  },
+  "code": {
+   "gpt2": 21,
+   "cl100k": 16,
+   "o200k": 16,
+   "qwen25": 16,
+   "deepseek": 17,
+   "llama3": 16,
+   "bert": 17,
+   "t5": 22
+  },
+  "num": {
+   "gpt2": 17,
+   "cl100k": 21,
+   "o200k": 21,
+   "qwen25": 33,
+   "deepseek": 21,
+   "llama3": 21,
+   "bert": 20,
+   "t5": 17
+  },
+  "emoji": {
+   "gpt2": 22,
+   "cl100k": 20,
+   "o200k": 17,
+   "qwen25": 19,
+   "deepseek": 18,
+   "llama3": 19,
+   "bert": 18,
+   "t5": 16
+  }
+ },
+ "segments": {
+  "en": {
+   "gpt2": [
+    {
+     "t": "The",
+     "f": false
+    },
+    {
+     "t": " quick",
+     "f": false
+    },
+    {
+     "t": " brown",
+     "f": false
+    },
+    {
+     "t": " fox",
+     "f": false
+    },
+    {
+     "t": " jumps",
+     "f": false
+    },
+    {
+     "t": " over",
+     "f": false
+    },
+    {
+     "t": " the",
+     "f": false
+    },
+    {
+     "t": " lazy",
+     "f": false
+    },
+    {
+     "t": " dog",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ],
+   "cl100k": [
+    {
+     "t": "The",
+     "f": false
+    },
+    {
+     "t": " quick",
+     "f": false
+    },
+    {
+     "t": " brown",
+     "f": false
+    },
+    {
+     "t": " fox",
+     "f": false
+    },
+    {
+     "t": " jumps",
+     "f": false
+    },
+    {
+     "t": " over",
+     "f": false
+    },
+    {
+     "t": " the",
+     "f": false
+    },
+    {
+     "t": " lazy",
+     "f": false
+    },
+    {
+     "t": " dog",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ],
+   "o200k": [
+    {
+     "t": "The",
+     "f": false
+    },
+    {
+     "t": " quick",
+     "f": false
+    },
+    {
+     "t": " brown",
+     "f": false
+    },
+    {
+     "t": " fox",
+     "f": false
+    },
+    {
+     "t": " jumps",
+     "f": false
+    },
+    {
+     "t": " over",
+     "f": false
+    },
+    {
+     "t": " the",
+     "f": false
+    },
+    {
+     "t": " lazy",
+     "f": false
+    },
+    {
+     "t": " dog",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ],
+   "qwen25": [
+    {
+     "t": "The",
+     "f": false
+    },
+    {
+     "t": " quick",
+     "f": false
+    },
+    {
+     "t": " brown",
+     "f": false
+    },
+    {
+     "t": " fox",
+     "f": false
+    },
+    {
+     "t": " jumps",
+     "f": false
+    },
+    {
+     "t": " over",
+     "f": false
+    },
+    {
+     "t": " the",
+     "f": false
+    },
+    {
+     "t": " lazy",
+     "f": false
+    },
+    {
+     "t": " dog",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ],
+   "deepseek": [
+    {
+     "t": "The",
+     "f": false
+    },
+    {
+     "t": " quick",
+     "f": false
+    },
+    {
+     "t": " brown",
+     "f": false
+    },
+    {
+     "t": " fox",
+     "f": false
+    },
+    {
+     "t": " jumps",
+     "f": false
+    },
+    {
+     "t": " over",
+     "f": false
+    },
+    {
+     "t": " the",
+     "f": false
+    },
+    {
+     "t": " lazy",
+     "f": false
+    },
+    {
+     "t": " dog",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ],
+   "llama3": [
+    {
+     "t": "The",
+     "f": false
+    },
+    {
+     "t": " quick",
+     "f": false
+    },
+    {
+     "t": " brown",
+     "f": false
+    },
+    {
+     "t": " fox",
+     "f": false
+    },
+    {
+     "t": " jumps",
+     "f": false
+    },
+    {
+     "t": " over",
+     "f": false
+    },
+    {
+     "t": " the",
+     "f": false
+    },
+    {
+     "t": " lazy",
+     "f": false
+    },
+    {
+     "t": " dog",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ],
+   "bert": [
+    {
+     "t": "the",
+     "f": false
+    },
+    {
+     "t": "quick",
+     "f": false
+    },
+    {
+     "t": "brown",
+     "f": false
+    },
+    {
+     "t": "fox",
+     "f": false
+    },
+    {
+     "t": "jumps",
+     "f": false
+    },
+    {
+     "t": "over",
+     "f": false
+    },
+    {
+     "t": "the",
+     "f": false
+    },
+    {
+     "t": "lazy",
+     "f": false
+    },
+    {
+     "t": "dog",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ],
+   "t5": [
+    {
+     "t": " The",
+     "f": false
+    },
+    {
+     "t": " quick",
+     "f": false
+    },
+    {
+     "t": " brown",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "fox",
+     "f": false
+    },
+    {
+     "t": " jump",
+     "f": false
+    },
+    {
+     "t": "s",
+     "f": false
+    },
+    {
+     "t": " over",
+     "f": false
+    },
+    {
+     "t": " the",
+     "f": false
+    },
+    {
+     "t": " lazy",
+     "f": false
+    },
+    {
+     "t": " dog",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ]
+  },
+  "zh": {
+   "gpt2": [
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "一",
+     "f": false
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "。",
+     "f": false
+    }
+   ],
+   "cl100k": [
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "度",
+     "f": false
+    },
+    {
+     "t": "学",
+     "f": false
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "模",
+     "f": false
+    },
+    {
+     "t": "型",
+     "f": false
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "文字",
+     "f": false
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "成",
+     "f": false
+    },
+    {
+     "t": "一个",
+     "f": false
+    },
+    {
+     "t": "个",
+     "f": false
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "元",
+     "f": false
+    },
+    {
+     "t": "，",
+     "f": false
+    },
+    {
+     "t": "再",
+     "f": false
+    },
+    {
+     "t": "查",
+     "f": false
+    },
+    {
+     "t": "表",
+     "f": false
+    },
+    {
+     "t": "变",
+     "f": false
+    },
+    {
+     "t": "成",
+     "f": false
+    },
+    {
+     "t": "向",
+     "f": false
+    },
+    {
+     "t": "量",
+     "f": false
+    },
+    {
+     "t": "。",
+     "f": false
+    }
+   ],
+   "o200k": [
+    {
+     "t": "深",
+     "f": false
+    },
+    {
+     "t": "度",
+     "f": false
+    },
+    {
+     "t": "学习",
+     "f": false
+    },
+    {
+     "t": "模型",
+     "f": false
+    },
+    {
+     "t": "把",
+     "f": false
+    },
+    {
+     "t": "文字",
+     "f": false
+    },
+    {
+     "t": "切",
+     "f": false
+    },
+    {
+     "t": "成",
+     "f": false
+    },
+    {
+     "t": "一个",
+     "f": false
+    },
+    {
+     "t": "个",
+     "f": false
+    },
+    {
+     "t": "词",
+     "f": false
+    },
+    {
+     "t": "元",
+     "f": false
+    },
+    {
+     "t": "，再",
+     "f": false
+    },
+    {
+     "t": "查",
+     "f": false
+    },
+    {
+     "t": "表",
+     "f": false
+    },
+    {
+     "t": "变",
+     "f": false
+    },
+    {
+     "t": "成",
+     "f": false
+    },
+    {
+     "t": "向",
+     "f": false
+    },
+    {
+     "t": "量",
+     "f": false
+    },
+    {
+     "t": "。",
+     "f": false
+    }
+   ],
+   "qwen25": [
+    {
+     "t": "深度",
+     "f": false
+    },
+    {
+     "t": "学习",
+     "f": false
+    },
+    {
+     "t": "模型",
+     "f": false
+    },
+    {
+     "t": "把",
+     "f": false
+    },
+    {
+     "t": "文字",
+     "f": false
+    },
+    {
+     "t": "切成",
+     "f": false
+    },
+    {
+     "t": "一个个",
+     "f": false
+    },
+    {
+     "t": "词",
+     "f": false
+    },
+    {
+     "t": "元",
+     "f": false
+    },
+    {
+     "t": "，",
+     "f": false
+    },
+    {
+     "t": "再",
+     "f": false
+    },
+    {
+     "t": "查",
+     "f": false
+    },
+    {
+     "t": "表",
+     "f": false
+    },
+    {
+     "t": "变成",
+     "f": false
+    },
+    {
+     "t": "向",
+     "f": false
+    },
+    {
+     "t": "量",
+     "f": false
+    },
+    {
+     "t": "。",
+     "f": false
+    }
+   ],
+   "deepseek": [
+    {
+     "t": "深度学习",
+     "f": false
+    },
+    {
+     "t": "模型",
+     "f": false
+    },
+    {
+     "t": "把",
+     "f": false
+    },
+    {
+     "t": "文字",
+     "f": false
+    },
+    {
+     "t": "切成",
+     "f": false
+    },
+    {
+     "t": "一个个",
+     "f": false
+    },
+    {
+     "t": "词",
+     "f": false
+    },
+    {
+     "t": "元",
+     "f": false
+    },
+    {
+     "t": "，",
+     "f": false
+    },
+    {
+     "t": "再",
+     "f": false
+    },
+    {
+     "t": "查",
+     "f": false
+    },
+    {
+     "t": "表",
+     "f": false
+    },
+    {
+     "t": "变成",
+     "f": false
+    },
+    {
+     "t": "向量",
+     "f": false
+    },
+    {
+     "t": "。",
+     "f": false
+    }
+   ],
+   "llama3": [
+    {
+     "t": "深",
+     "f": false
+    },
+    {
+     "t": "度",
+     "f": false
+    },
+    {
+     "t": "学习",
+     "f": false
+    },
+    {
+     "t": "模型",
+     "f": false
+    },
+    {
+     "t": "把",
+     "f": false
+    },
+    {
+     "t": "文字",
+     "f": false
+    },
+    {
+     "t": "切",
+     "f": false
+    },
+    {
+     "t": "成",
+     "f": false
+    },
+    {
+     "t": "一个",
+     "f": false
+    },
+    {
+     "t": "个",
+     "f": false
+    },
+    {
+     "t": "词",
+     "f": false
+    },
+    {
+     "t": "元",
+     "f": false
+    },
+    {
+     "t": "，再",
+     "f": false
+    },
+    {
+     "t": "查",
+     "f": false
+    },
+    {
+     "t": "表",
+     "f": false
+    },
+    {
+     "t": "变",
+     "f": false
+    },
+    {
+     "t": "成",
+     "f": false
+    },
+    {
+     "t": "向",
+     "f": false
+    },
+    {
+     "t": "量",
+     "f": false
+    },
+    {
+     "t": "。",
+     "f": false
+    }
+   ],
+   "bert": [
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "学",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "文",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "成",
+     "f": false
+    },
+    {
+     "t": "一",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "元",
+     "f": false
+    },
+    {
+     "t": "，",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "成",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "。",
+     "f": false
+    }
+   ],
+   "t5": [
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "<unk>",
+     "f": false
+    },
+    {
+     "t": ",",
+     "f": false
+    },
+    {
+     "t": "<unk>",
+     "f": false
+    }
+   ]
+  },
+  "code": {
+   "gpt2": [
+    {
+     "t": "def",
+     "f": false
+    },
+    {
+     "t": " add",
+     "f": false
+    },
+    {
+     "t": "(",
+     "f": false
+    },
+    {
+     "t": "a",
+     "f": false
+    },
+    {
+     "t": ",",
+     "f": false
+    },
+    {
+     "t": " b",
+     "f": false
+    },
+    {
+     "t": "):",
+     "f": false
+    },
+    {
+     "t": "\\n",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": " return",
+     "f": false
+    },
+    {
+     "t": " a",
+     "f": false
+    },
+    {
+     "t": " +",
+     "f": false
+    },
+    {
+     "t": " b",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": " #",
+     "f": false
+    },
+    {
+     "t": " sum",
+     "f": false
+    },
+    {
+     "t": " two",
+     "f": false
+    },
+    {
+     "t": " int",
+     "f": false
+    },
+    {
+     "t": "s",
+     "f": false
+    }
+   ],
+   "cl100k": [
+    {
+     "t": "def",
+     "f": false
+    },
+    {
+     "t": " add",
+     "f": false
+    },
+    {
+     "t": "(a",
+     "f": false
+    },
+    {
+     "t": ",",
+     "f": false
+    },
+    {
+     "t": " b",
+     "f": false
+    },
+    {
+     "t": "):\\n",
+     "f": false
+    },
+    {
+     "t": "   ",
+     "f": false
+    },
+    {
+     "t": " return",
+     "f": false
+    },
+    {
+     "t": " a",
+     "f": false
+    },
+    {
+     "t": " +",
+     "f": false
+    },
+    {
+     "t": " b",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": " #",
+     "f": false
+    },
+    {
+     "t": " sum",
+     "f": false
+    },
+    {
+     "t": " two",
+     "f": false
+    },
+    {
+     "t": " ints",
+     "f": false
+    }
+   ],
+   "o200k": [
+    {
+     "t": "def",
+     "f": false
+    },
+    {
+     "t": " add",
+     "f": false
+    },
+    {
+     "t": "(a",
+     "f": false
+    },
+    {
+     "t": ",",
+     "f": false
+    },
+    {
+     "t": " b",
+     "f": false
+    },
+    {
+     "t": "):\\n",
+     "f": false
+    },
+    {
+     "t": "   ",
+     "f": false
+    },
+    {
+     "t": " return",
+     "f": false
+    },
+    {
+     "t": " a",
+     "f": false
+    },
+    {
+     "t": " +",
+     "f": false
+    },
+    {
+     "t": " b",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": " #",
+     "f": false
+    },
+    {
+     "t": " sum",
+     "f": false
+    },
+    {
+     "t": " two",
+     "f": false
+    },
+    {
+     "t": " ints",
+     "f": false
+    }
+   ],
+   "qwen25": [
+    {
+     "t": "def",
+     "f": false
+    },
+    {
+     "t": " add",
+     "f": false
+    },
+    {
+     "t": "(a",
+     "f": false
+    },
+    {
+     "t": ",",
+     "f": false
+    },
+    {
+     "t": " b",
+     "f": false
+    },
+    {
+     "t": "):\\n",
+     "f": false
+    },
+    {
+     "t": "   ",
+     "f": false
+    },
+    {
+     "t": " return",
+     "f": false
+    },
+    {
+     "t": " a",
+     "f": false
+    },
+    {
+     "t": " +",
+     "f": false
+    },
+    {
+     "t": " b",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": " #",
+     "f": false
+    },
+    {
+     "t": " sum",
+     "f": false
+    },
+    {
+     "t": " two",
+     "f": false
+    },
+    {
+     "t": " ints",
+     "f": false
+    }
+   ],
+   "deepseek": [
+    {
+     "t": "def",
+     "f": false
+    },
+    {
+     "t": " add",
+     "f": false
+    },
+    {
+     "t": "(a",
+     "f": false
+    },
+    {
+     "t": ",",
+     "f": false
+    },
+    {
+     "t": " b",
+     "f": false
+    },
+    {
+     "t": "):\\n",
+     "f": false
+    },
+    {
+     "t": "   ",
+     "f": false
+    },
+    {
+     "t": " return",
+     "f": false
+    },
+    {
+     "t": " a",
+     "f": false
+    },
+    {
+     "t": " +",
+     "f": false
+    },
+    {
+     "t": " b",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": " #",
+     "f": false
+    },
+    {
+     "t": " sum",
+     "f": false
+    },
+    {
+     "t": " two",
+     "f": false
+    },
+    {
+     "t": " int",
+     "f": false
+    },
+    {
+     "t": "s",
+     "f": false
+    }
+   ],
+   "llama3": [
+    {
+     "t": "def",
+     "f": false
+    },
+    {
+     "t": " add",
+     "f": false
+    },
+    {
+     "t": "(a",
+     "f": false
+    },
+    {
+     "t": ",",
+     "f": false
+    },
+    {
+     "t": " b",
+     "f": false
+    },
+    {
+     "t": "):\\n",
+     "f": false
+    },
+    {
+     "t": "   ",
+     "f": false
+    },
+    {
+     "t": " return",
+     "f": false
+    },
+    {
+     "t": " a",
+     "f": false
+    },
+    {
+     "t": " +",
+     "f": false
+    },
+    {
+     "t": " b",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": " #",
+     "f": false
+    },
+    {
+     "t": " sum",
+     "f": false
+    },
+    {
+     "t": " two",
+     "f": false
+    },
+    {
+     "t": " ints",
+     "f": false
+    }
+   ],
+   "bert": [
+    {
+     "t": "def",
+     "f": false
+    },
+    {
+     "t": "add",
+     "f": false
+    },
+    {
+     "t": "(",
+     "f": false
+    },
+    {
+     "t": "a",
+     "f": false
+    },
+    {
+     "t": ",",
+     "f": false
+    },
+    {
+     "t": "b",
+     "f": false
+    },
+    {
+     "t": ")",
+     "f": false
+    },
+    {
+     "t": ":",
+     "f": false
+    },
+    {
+     "t": "return",
+     "f": false
+    },
+    {
+     "t": "a",
+     "f": false
+    },
+    {
+     "t": "+",
+     "f": false
+    },
+    {
+     "t": "b",
+     "f": false
+    },
+    {
+     "t": "#",
+     "f": false
+    },
+    {
+     "t": "sum",
+     "f": false
+    },
+    {
+     "t": "two",
+     "f": false
+    },
+    {
+     "t": "int",
+     "f": false
+    },
+    {
+     "t": "s",
+     "f": false
+    }
+   ],
+   "t5": [
+    {
+     "t": " de",
+     "f": false
+    },
+    {
+     "t": "f",
+     "f": false
+    },
+    {
+     "t": " add",
+     "f": false
+    },
+    {
+     "t": "(",
+     "f": false
+    },
+    {
+     "t": "a",
+     "f": false
+    },
+    {
+     "t": ",",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "b",
+     "f": false
+    },
+    {
+     "t": ")",
+     "f": false
+    },
+    {
+     "t": ":",
+     "f": false
+    },
+    {
+     "t": " return",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "a",
+     "f": false
+    },
+    {
+     "t": " +",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "b",
+     "f": false
+    },
+    {
+     "t": " #",
+     "f": false
+    },
+    {
+     "t": " sum",
+     "f": false
+    },
+    {
+     "t": " two",
+     "f": false
+    },
+    {
+     "t": " in",
+     "f": false
+    },
+    {
+     "t": "t",
+     "f": false
+    },
+    {
+     "t": "s",
+     "f": false
+    }
+   ]
+  },
+  "num": {
+   "gpt2": [
+    {
+     "t": "The",
+     "f": false
+    },
+    {
+     "t": " year",
+     "f": false
+    },
+    {
+     "t": " 2025",
+     "f": false
+    },
+    {
+     "t": " has",
+     "f": false
+    },
+    {
+     "t": " 315",
+     "f": false
+    },
+    {
+     "t": "36",
+     "f": false
+    },
+    {
+     "t": "000",
+     "f": false
+    },
+    {
+     "t": " seconds",
+     "f": false
+    },
+    {
+     "t": " and",
+     "f": false
+    },
+    {
+     "t": " pi",
+     "f": false
+    },
+    {
+     "t": " is",
+     "f": false
+    },
+    {
+     "t": " 3",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    },
+    {
+     "t": "14",
+     "f": false
+    },
+    {
+     "t": "159",
+     "f": false
+    },
+    {
+     "t": "265",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ],
+   "cl100k": [
+    {
+     "t": "The",
+     "f": false
+    },
+    {
+     "t": " year",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "202",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": " has",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "315",
+     "f": false
+    },
+    {
+     "t": "360",
+     "f": false
+    },
+    {
+     "t": "00",
+     "f": false
+    },
+    {
+     "t": " seconds",
+     "f": false
+    },
+    {
+     "t": " and",
+     "f": false
+    },
+    {
+     "t": " pi",
+     "f": false
+    },
+    {
+     "t": " is",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "3",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    },
+    {
+     "t": "141",
+     "f": false
+    },
+    {
+     "t": "592",
+     "f": false
+    },
+    {
+     "t": "65",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ],
+   "o200k": [
+    {
+     "t": "The",
+     "f": false
+    },
+    {
+     "t": " year",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "202",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": " has",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "315",
+     "f": false
+    },
+    {
+     "t": "360",
+     "f": false
+    },
+    {
+     "t": "00",
+     "f": false
+    },
+    {
+     "t": " seconds",
+     "f": false
+    },
+    {
+     "t": " and",
+     "f": false
+    },
+    {
+     "t": " pi",
+     "f": false
+    },
+    {
+     "t": " is",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "3",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    },
+    {
+     "t": "141",
+     "f": false
+    },
+    {
+     "t": "592",
+     "f": false
+    },
+    {
+     "t": "65",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ],
+   "qwen25": [
+    {
+     "t": "The",
+     "f": false
+    },
+    {
+     "t": " year",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "2",
+     "f": false
+    },
+    {
+     "t": "0",
+     "f": false
+    },
+    {
+     "t": "2",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": " has",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "3",
+     "f": false
+    },
+    {
+     "t": "1",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": "3",
+     "f": false
+    },
+    {
+     "t": "6",
+     "f": false
+    },
+    {
+     "t": "0",
+     "f": false
+    },
+    {
+     "t": "0",
+     "f": false
+    },
+    {
+     "t": "0",
+     "f": false
+    },
+    {
+     "t": " seconds",
+     "f": false
+    },
+    {
+     "t": " and",
+     "f": false
+    },
+    {
+     "t": " pi",
+     "f": false
+    },
+    {
+     "t": " is",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "3",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    },
+    {
+     "t": "1",
+     "f": false
+    },
+    {
+     "t": "4",
+     "f": false
+    },
+    {
+     "t": "1",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": "9",
+     "f": false
+    },
+    {
+     "t": "2",
+     "f": false
+    },
+    {
+     "t": "6",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ],
+   "deepseek": [
+    {
+     "t": "The",
+     "f": false
+    },
+    {
+     "t": " year",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "202",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": " has",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "315",
+     "f": false
+    },
+    {
+     "t": "360",
+     "f": false
+    },
+    {
+     "t": "00",
+     "f": false
+    },
+    {
+     "t": " seconds",
+     "f": false
+    },
+    {
+     "t": " and",
+     "f": false
+    },
+    {
+     "t": " pi",
+     "f": false
+    },
+    {
+     "t": " is",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "3",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    },
+    {
+     "t": "141",
+     "f": false
+    },
+    {
+     "t": "592",
+     "f": false
+    },
+    {
+     "t": "65",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ],
+   "llama3": [
+    {
+     "t": "The",
+     "f": false
+    },
+    {
+     "t": " year",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "202",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": " has",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "315",
+     "f": false
+    },
+    {
+     "t": "360",
+     "f": false
+    },
+    {
+     "t": "00",
+     "f": false
+    },
+    {
+     "t": " seconds",
+     "f": false
+    },
+    {
+     "t": " and",
+     "f": false
+    },
+    {
+     "t": " pi",
+     "f": false
+    },
+    {
+     "t": " is",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "3",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    },
+    {
+     "t": "141",
+     "f": false
+    },
+    {
+     "t": "592",
+     "f": false
+    },
+    {
+     "t": "65",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ],
+   "bert": [
+    {
+     "t": "the",
+     "f": false
+    },
+    {
+     "t": "year",
+     "f": false
+    },
+    {
+     "t": "202",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": "has",
+     "f": false
+    },
+    {
+     "t": "315",
+     "f": false
+    },
+    {
+     "t": "36",
+     "f": false
+    },
+    {
+     "t": "00",
+     "f": false
+    },
+    {
+     "t": "0",
+     "f": false
+    },
+    {
+     "t": "seconds",
+     "f": false
+    },
+    {
+     "t": "and",
+     "f": false
+    },
+    {
+     "t": "pi",
+     "f": false
+    },
+    {
+     "t": "is",
+     "f": false
+    },
+    {
+     "t": "3",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    },
+    {
+     "t": "141",
+     "f": false
+    },
+    {
+     "t": "59",
+     "f": false
+    },
+    {
+     "t": "26",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": ".",
+     "f": false
+    }
+   ],
+   "t5": [
+    {
+     "t": " The",
+     "f": false
+    },
+    {
+     "t": " year",
+     "f": false
+    },
+    {
+     "t": " 20",
+     "f": false
+    },
+    {
+     "t": "25",
+     "f": false
+    },
+    {
+     "t": " has",
+     "f": false
+    },
+    {
+     "t": " 3",
+     "f": false
+    },
+    {
+     "t": "153",
+     "f": false
+    },
+    {
+     "t": "6000",
+     "f": false
+    },
+    {
+     "t": " seconds",
+     "f": false
+    },
+    {
+     "t": " and",
+     "f": false
+    },
+    {
+     "t": " pi",
+     "f": false
+    },
+    {
+     "t": " is",
+     "f": false
+    },
+    {
+     "t": " 3.",
+     "f": false
+    },
+    {
+     "t": "14",
+     "f": false
+    },
+    {
+     "t": "159",
+     "f": false
+    },
+    {
+     "t": "26",
+     "f": false
+    },
+    {
+     "t": "5.",
+     "f": false
+    }
+   ]
+  },
+  "emoji": {
+   "gpt2": [
+    {
+     "t": "Hi",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": " �",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": " G",
+     "f": false
+    },
+    {
+     "t": "PT",
+     "f": false
+    },
+    {
+     "t": "-",
+     "f": false
+    },
+    {
+     "t": "4",
+     "f": false
+    },
+    {
+     "t": "o",
+     "f": false
+    },
+    {
+     "t": " costs",
+     "f": false
+    },
+    {
+     "t": " $",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": "/",
+     "f": false
+    },
+    {
+     "t": "1",
+     "f": false
+    },
+    {
+     "t": "M",
+     "f": false
+    },
+    {
+     "t": " tokens",
+     "f": false
+    },
+    {
+     "t": "!",
+     "f": false
+    }
+   ],
+   "cl100k": [
+    {
+     "t": "Hi",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "你",
+     "f": false
+    },
+    {
+     "t": "好",
+     "f": false
+    },
+    {
+     "t": " �",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": " G",
+     "f": false
+    },
+    {
+     "t": "PT",
+     "f": false
+    },
+    {
+     "t": "-",
+     "f": false
+    },
+    {
+     "t": "4",
+     "f": false
+    },
+    {
+     "t": "o",
+     "f": false
+    },
+    {
+     "t": " costs",
+     "f": false
+    },
+    {
+     "t": " $",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": "/",
+     "f": false
+    },
+    {
+     "t": "1",
+     "f": false
+    },
+    {
+     "t": "M",
+     "f": false
+    },
+    {
+     "t": " tokens",
+     "f": false
+    },
+    {
+     "t": "!",
+     "f": false
+    }
+   ],
+   "o200k": [
+    {
+     "t": "Hi",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "你好",
+     "f": false
+    },
+    {
+     "t": " �",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": " GPT",
+     "f": false
+    },
+    {
+     "t": "-",
+     "f": false
+    },
+    {
+     "t": "4",
+     "f": false
+    },
+    {
+     "t": "o",
+     "f": false
+    },
+    {
+     "t": " costs",
+     "f": false
+    },
+    {
+     "t": " $",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": "/",
+     "f": false
+    },
+    {
+     "t": "1",
+     "f": false
+    },
+    {
+     "t": "M",
+     "f": false
+    },
+    {
+     "t": " tokens",
+     "f": false
+    },
+    {
+     "t": "!",
+     "f": false
+    }
+   ],
+   "qwen25": [
+    {
+     "t": "Hi",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "你好",
+     "f": false
+    },
+    {
+     "t": " �",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": " G",
+     "f": false
+    },
+    {
+     "t": "PT",
+     "f": false
+    },
+    {
+     "t": "-",
+     "f": false
+    },
+    {
+     "t": "4",
+     "f": false
+    },
+    {
+     "t": "o",
+     "f": false
+    },
+    {
+     "t": " costs",
+     "f": false
+    },
+    {
+     "t": " $",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": "/",
+     "f": false
+    },
+    {
+     "t": "1",
+     "f": false
+    },
+    {
+     "t": "M",
+     "f": false
+    },
+    {
+     "t": " tokens",
+     "f": false
+    },
+    {
+     "t": "!",
+     "f": false
+    }
+   ],
+   "deepseek": [
+    {
+     "t": "Hi",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "你好",
+     "f": false
+    },
+    {
+     "t": " �",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": " GPT",
+     "f": false
+    },
+    {
+     "t": "-",
+     "f": false
+    },
+    {
+     "t": "4",
+     "f": false
+    },
+    {
+     "t": "o",
+     "f": false
+    },
+    {
+     "t": " costs",
+     "f": false
+    },
+    {
+     "t": " $",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": "/",
+     "f": false
+    },
+    {
+     "t": "1",
+     "f": false
+    },
+    {
+     "t": "M",
+     "f": false
+    },
+    {
+     "t": " tokens",
+     "f": false
+    },
+    {
+     "t": "!",
+     "f": false
+    }
+   ],
+   "llama3": [
+    {
+     "t": "Hi",
+     "f": false
+    },
+    {
+     "t": " 你",
+     "f": false
+    },
+    {
+     "t": "好",
+     "f": false
+    },
+    {
+     "t": " �",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": "�",
+     "f": true
+    },
+    {
+     "t": " G",
+     "f": false
+    },
+    {
+     "t": "PT",
+     "f": false
+    },
+    {
+     "t": "-",
+     "f": false
+    },
+    {
+     "t": "4",
+     "f": false
+    },
+    {
+     "t": "o",
+     "f": false
+    },
+    {
+     "t": " costs",
+     "f": false
+    },
+    {
+     "t": " $",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": "/",
+     "f": false
+    },
+    {
+     "t": "1",
+     "f": false
+    },
+    {
+     "t": "M",
+     "f": false
+    },
+    {
+     "t": " tokens",
+     "f": false
+    },
+    {
+     "t": "!",
+     "f": false
+    }
+   ],
+   "bert": [
+    {
+     "t": "hi",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "[UNK]",
+     "f": false
+    },
+    {
+     "t": "gp",
+     "f": false
+    },
+    {
+     "t": "t",
+     "f": false
+    },
+    {
+     "t": "-",
+     "f": false
+    },
+    {
+     "t": "4",
+     "f": false
+    },
+    {
+     "t": "o",
+     "f": false
+    },
+    {
+     "t": "costs",
+     "f": false
+    },
+    {
+     "t": "$",
+     "f": false
+    },
+    {
+     "t": "5",
+     "f": false
+    },
+    {
+     "t": "/",
+     "f": false
+    },
+    {
+     "t": "1",
+     "f": false
+    },
+    {
+     "t": "m",
+     "f": false
+    },
+    {
+     "t": "token",
+     "f": false
+    },
+    {
+     "t": "s",
+     "f": false
+    },
+    {
+     "t": "!",
+     "f": false
+    }
+   ],
+   "t5": [
+    {
+     "t": " Hi",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "<unk>",
+     "f": false
+    },
+    {
+     "t": " ",
+     "f": false
+    },
+    {
+     "t": "<unk>",
+     "f": false
+    },
+    {
+     "t": " G",
+     "f": false
+    },
+    {
+     "t": "PT",
+     "f": false
+    },
+    {
+     "t": "-4",
+     "f": false
+    },
+    {
+     "t": "o",
+     "f": false
+    },
+    {
+     "t": " costs",
+     "f": false
+    },
+    {
+     "t": " $5",
+     "f": false
+    },
+    {
+     "t": "/1",
+     "f": false
+    },
+    {
+     "t": "M",
+     "f": false
+    },
+    {
+     "t": " token",
+     "f": false
+    },
+    {
+     "t": "s",
+     "f": false
+    },
+    {
+     "t": "!",
+     "f": false
+    }
+   ]
+  }
+ },
+ "errors": []
+}

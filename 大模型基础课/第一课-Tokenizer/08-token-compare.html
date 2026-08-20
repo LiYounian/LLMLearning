@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>tiktoken 切词对比 | 第一课 Tokenizer</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html">目录</a><a href="01-why.html">为什么分词</a>
+    <a href="02-history.html">历代方法</a><a href="03-bpe.html">BPE 详解</a>
+    <a href="04-wordpiece-unigram.html">WordPiece/Unigram</a><a href="05-byte-level.html">字节级</a>
+    <a href="06-models.html">主流模型</a><a href="07-frontier.html">前沿</a>
+    <a href="08-token-compare.html" class="active">切词对比</a><a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / 08 tiktoken 切词对比</div>
+  <h1>同一句话，各家切成几个 token？</h1>
+  <p class="lead">这一页的数字<b>不是估的</b>——是用<b>真实分词器</b>（GPT 系走 <code>tiktoken</code>，Qwen/DeepSeek/LLaMA/BERT/T5 走 HuggingFace）现跑出来的。同一段文本喂给 8 个分词器，看它切成多少 token、具体怎么切。生成脚本见 <code>scripts/gen_token_compare.py</code>。</p>
+
+  <div class="note g">
+    <div class="t">🎯 一句话看点</div>
+    token 数 = 你的 API 账单 + 占用的上下文长度。<b>词表越大、越针对某语言优化，同样内容切出的 token 越少 → 越便宜、上下文越经用</b>。下面选不同样本，尤其看<b>中文</b>和<b>长数字</b>两个样本的差距。
+  </div>
+
+  <h2>① 交互对比（点样本切换）</h2>
+  <div class="demo">
+    <div id="tc-picker"></div>
+    <div id="tc-text"></div>
+    <div style="color:var(--fg-dim);font-size:14px;margin-bottom:6px">token 数（越短越高效；<span style="color:var(--accent2)">绿=最少</span>）：</div>
+    <div id="tc-bars"></div>
+    <div style="color:var(--fg-dim);font-size:14px;margin:22px 0 4px">实际切分（<span style="color:var(--danger)">红色虚线 ▪ = 字节碎片，不足一个完整字符</span>；<span style="font-family:var(--mono)">␣</span> = 空格）：</div>
+    <div id="tc-segs"></div>
+  </div>
+
+  <h2>② 全量对比表</h2>
+  <p>所有样本 × 所有分词器的 token 数一览（<span style="color:var(--accent2)">绿=该行最少</span>，<span style="color:var(--danger)">红=最多</span>）：</p>
+  <div class="tablewrap" id="tc-table"></div>
+  <p style="font-size:13px;color:var(--fg-faint)">⚠️ BERT 与 T5 是英文导向分词器，遇到中文会退化成 <code>[UNK]</code>/<code>&lt;unk&gt;</code>——所以它们在"中文句子"上的 token 数看着少，其实是<b>把信息丢了</b>，不是高效，别被误导。</p>
+
+  <h2>③ 从真实数据里读出的三件事</h2>
+
+  <h3>㈠ 中文被狠狠"征税"，但差距在飞快缩小</h3>
+  <p>同一句中文，用真实分词器跑出来：</p>
+  <ul>
+    <li><b>GPT-2</b>（5万词表、英文导向）：<b>54</b> 个 token——几乎每个汉字被拆成 3 个字节碎片（看上面切分里满屏的红 ▪）。</li>
+    <li><b>GPT-4o</b>(o200k)：<b>20</b>；<b>Qwen2.5</b>：<b>17</b>；<b>DeepSeek-V3</b>：<b>15</b>（最省，甚至把"深度学习"整体压成 1 个 token）。</li>
+  </ul>
+  <p>从 54 → 15，<b>同样一句中文，token 数差 3.6 倍</b>。这就是第 06 节说的"大词表 + 针对中文优化合并"的真金白银收益：更便宜、上下文更经用。</p>
+
+  <h3>㈡ 数字：Qwen 故意"逐位拆"，所以数字样本反而最长</h3>
+  <p>"长数字"那一行，<b>Qwen2.5 = 33</b> 个 token，明显高于其它家的 ~21。不是 Qwen 差，而是它<b>刻意把每个数字拆成单独 token</b>（LLaMA、PaLM 也这么干）——为的是让模型看到干净的位值分解，<b>提升算术能力</b>。这正是第 07 节讲的"数字/算术"问题的一种对策，在数据里看得清清楚楚。</p>
+
+  <h3>㈢ 英文基本打平</h3>
+  <p>纯英文句子，几乎所有分词器都切成 <b>10</b> 个 token（T5 = 12）。因为它们的合并规则都在英文语料上训练得很充分，常用英文词早就整体成 token 了。<b>差距只在非英语和特殊内容上才拉开</b>——这也是为什么"词表变大"主要利好中文/多语言/代码。</p>
+
+  <div class="note o">
+    <div class="t">🔬 想自己验证？</div>
+    在线实时分词器：<a href="https://platform.openai.com/tokenizer">OpenAI Tokenizer</a>（GPT 系）、<a href="https://tiktokenizer.vercel.app/">Tiktokenizer</a>（可切 GPT/Llama/Qwen 等）。本页数据由 <code>scripts/gen_token_compare.py</code> 用 <code>tiktoken 0.13</code> + HuggingFace <code>transformers</code> 现跑生成，重跑即可复现。
+  </div>
+
+  <div class="pagenav">
+    <a href="07-frontier.html"><div class="lbl">← 上一节</div><div class="ttl">前沿趋势</div></a>
+    <a class="next" href="references.html"><div class="lbl">下一节 →</div><div class="ttl">参考文献与来源</div></a>
+  </div>
+</div>
+
+<script src="assets/token_data.js"></script>
+<script src="assets/token-compare.js"></script>
+</body>
+</html>
