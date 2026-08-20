@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>历代方法总览 | 第一课 Tokenizer</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html">目录</a><a href="01-why.html">为什么分词</a>
+    <a href="02-history.html" class="active">历代方法</a><a href="03-bpe.html">BPE 详解</a>
+    <a href="04-wordpiece-unigram.html">WordPiece/Unigram</a><a href="05-byte-level.html">字节级</a>
+    <a href="06-models.html">主流模型</a><a href="07-frontier.html">前沿</a><a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / 02 历代方法总览</div>
+  <h1>历代方法总览</h1>
+  <p class="lead">分词的历史，本质是围绕一个权衡曲面反复腾挪的历史：<b>词表大小 ↔ 序列长度 ↔ 覆盖率(OOV) ↔ 语义</b>。四个目标不可能同时最优，每一代方法都是在这个曲面上换了个落点。</p>
+
+  <h2>① 权衡曲面：一切方法的坐标系</h2>
+  <p>先记住这四个互相拉扯的量，后面每种方法都可以定位到它在这个曲面上的位置：</p>
+  <ul>
+    <li><b>词表大小</b> → 决定 embedding 表和输出 softmax 的成本。想要<em>小</em>。</li>
+    <li><b>序列长度</b> → 注意力是 O(n²)。想要 token <em>长</em>（一句话切出的 token 少）。</li>
+    <li><b>覆盖率 / OOV</b> → 任何输入都要能表示。想要<em>无未登录词</em>。</li>
+    <li><b>语义</b> → token 最好≈有意义的单位（词素/词）。想要<em>强</em>。</li>
+  </ul>
+  <div class="note"><div class="t">🧭 一句话</div>词级把语义拉满但覆盖率/词表崩了；字符级用极小词表换来零 OOV，却牺牲了语义和序列长度。<b>subword 就是被谈判出来的中间地带</b>——今天几乎所有 LLM 都站在这里。</div>
+
+  <h2>② 词级（word-level）：word2vec / 早期 NMT 时代</h2>
+  <p><b>做法</b>：按空格/标点切，每个不同的词就是一个原子 token。取语料里最高频的 V 个词（NMT 常见 3万~8万），其余全部映射成 <code>&lt;UNK&gt;</code>。是 word2vec<span class="cite" title="Mikolov et al. 2013">[a]</span>、早期 seq2seq 翻译<span class="cite" title="Sutskever 2014 / Bahdanau 2015">[b]</span> 的默认方案。</p>
+  <p><b>三个连锁死穴</b>：</p>
+  <ul>
+    <li><b>OOV 崩塌</b>：任何没见过的词（人名、数字、新词、错字、URL）都变成一个毫无意义的 <code>&lt;UNK&gt;</code>，信息直接丢失。</li>
+    <li><b>稀疏 / 长尾</b>：词频服从 Zipf 定律，大部分词只出现一两次，embedding 学不动。而且 <code>run/runs/running</code> 是三个毫不相关的 ID——词形变化对模型完全不可见。</li>
+    <li><b>词表又大又不全</b>：V 越大，softmax 成本越高（NMT 里 softmax 是主要开销），却<em>永远</em>覆盖不全——构词是无限的。</li>
+  </ul>
+  <p>还有个隐性负担：中文/日文/泰文没有空格，得先上一个<b>独立的分词器</b>（jieba、MeCab）做预处理。</p>
+
+  <h2>③ 字符级（character-level）：矫枉过正的另一极端</h2>
+  <p><b>做法</b>：词表 = 所有字符（或 256 个字节）。任何字符串都是这些原子的序列，<b>天生零 OOV</b>，且不需要训练。</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th></th><th>优点</th><th>缺点</th></tr></thead>
+    <tbody>
+      <tr><td>字符级</td>
+      <td style="color:var(--accent2)">词表极小、零 OOV、语言无关、无需预分词</td>
+      <td style="color:var(--danger)">序列很长（约词级的 4–5 倍，O(n²) 吃不消）；单字符几乎没语义，"字符→词素"的活全甩给模型自己学</td></tr>
+    </tbody>
+  </table></div>
+  <p>相对词级：用语义和序列效率，换来了彻底的零 OOV 和极小词表。<b>subword 就是为了坐到这两极中间而发明的。</b></p>
+
+  <h2>④ Subword 革命（2016 起）：坐进甜点区</h2>
+  <p>核心洞察：<b>常用词整体成一个 token（高效、有语义），罕见词自动拆成已知的更小片段（零 OOV、不丢信息）</b>。切分粒度不再人工规定，而是从语料统计里学出来。三条技术路线：</p>
+
+  <div class="grid" style="margin-top:20px">
+    <a class="card" href="03-bpe.html">
+      <div class="num">路线 A</div><h3>BPE（自底向上·频次）</h3>
+      <p>反复合并最高频的相邻对。GPT/Qwen/DeepSeek 的算法底座。<b>→ 详见第 03 节</b></p>
+      <div class="tags"><span class="tag g">2016 Sennrich</span></div>
+    </a>
+    <a class="card" href="04-wordpiece-unigram.html">
+      <div class="num">路线 B</div><h3>WordPiece（自底向上·似然）</h3>
+      <p>BERT 用。不按频次、按"似然增益"合并。<b>→ 详见第 04 节</b></p>
+      <div class="tags"><span class="tag o">2012 / BERT</span></div>
+    </a>
+    <a class="card" href="04-wordpiece-unigram.html">
+      <div class="num">路线 C</div><h3>Unigram（自顶向下·剪枝）</h3>
+      <p>反着来：从大词表 EM 剪枝。T5/LLaMA 系相关。<b>→ 详见第 04 节</b></p>
+      <div class="tags"><span class="tag p">2018 Kudo</span></div>
+    </a>
+  </div>
+
+  <h2>⑤ 演化速查表</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>方法</th><th>年代</th><th>方向</th><th>选择准则</th><th>推理方式</th><th>OOV?</th></tr></thead>
+    <tbody>
+      <tr><td>词级</td><td>~2013–15</td><td>—</td><td>取频次 top-V</td><td>查字典</td><td class="mono" style="color:var(--danger)">有→&lt;UNK&gt;</td></tr>
+      <tr><td>字符/字节级</td><td>—</td><td>—</td><td>全部字符 / 256 字节</td><td>直接映射</td><td class="mono" style="color:var(--accent2)">无</td></tr>
+      <tr><td>BPE</td><td>1994 / 2016</td><td>自底向上合并</td><td>最高频的对</td><td>按序重放合并</td><td class="mono" style="color:var(--accent2)">无(字节级)</td></tr>
+      <tr><td>WordPiece</td><td>2012 / BERT</td><td>自底向上合并</td><td>最大似然增益比</td><td>贪心最长匹配</td><td class="mono" style="color:var(--accent3)">词→[UNK]</td></tr>
+      <tr><td>Unigram</td><td>2018</td><td>自顶向下剪枝</td><td>移除后似然损失最小</td><td>Viterbi / 采样</td><td class="mono" style="color:var(--accent2)">无</td></tr>
+      <tr><td>SentencePiece</td><td>2018</td><td><em>框架</em></td><td>(继承 BPE/Unigram)</td><td>(继承)</td><td class="mono" style="color:var(--accent2)">无</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note g"><div class="t">🎯 主线（务必记住）</div>词/字符是两极；BPE、WordPiece、Unigram 是中间地带的三种算法；<b>SentencePiece 是让这块中间地带变得"语言无关 + 可无损还原"的工程框架</b>。之后 GPT-2 又把 BPE 挪到字节上（第 05 节），奠定了今天的主流。</div>
+
+  <div class="pagenav">
+    <a href="01-why.html"><div class="lbl">← 上一节</div><div class="ttl">为什么需要分词</div></a>
+    <a class="next" href="03-bpe.html"><div class="lbl">下一节 →</div><div class="ttl">BPE 详解（可交互）</div></a>
+  </div>
+</div>
+</body>
+</html>

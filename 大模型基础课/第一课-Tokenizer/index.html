@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第一课 · Tokenizer 的工作原理 | 大模型基础课</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html" class="active">目录</a>
+    <a href="01-why.html">为什么分词</a>
+    <a href="02-history.html">历代方法</a>
+    <a href="03-bpe.html">BPE 详解</a>
+    <a href="04-wordpiece-unigram.html">WordPiece/Unigram</a>
+    <a href="05-byte-level.html">字节级</a>
+    <a href="06-models.html">主流模型</a>
+    <a href="07-frontier.html">前沿</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap wide">
+  <div class="hero">
+    <div class="kicker">Lesson 01 · Tokenizer</div>
+    <h1>Tokenizer 的工作原理</h1>
+    <p>从单个字符，到词片（subword），再到字节流——大模型是如何把人类文字切成一个个 token，又是如何统计、编码、还原的？本课把历代分词方法讲透，并对比 GPT / Qwen / DeepSeek / Kimi 等主流模型的真实做法。</p>
+  </div>
+
+  <!-- 一句话主线 -->
+  <div class="note p" style="max-width:760px;margin:0 auto 10px">
+    <div class="t">🧭 一条主线</div>
+    <b>词（word） → 字符（char） → 词片（subword：BPE / WordPiece / Unigram） → 字节（byte-level BPE） → 动态字节块（frontier）</b>。
+    每一步都在解决上一步的痛点。这条线看懂了，你就理解了今天所有主流大模型分词器的来龙去脉。
+  </div>
+
+  <!-- 章节卡片 -->
+  <div class="grid">
+    <a class="card" href="01-why.html">
+      <div class="num">01</div><h3>为什么需要分词？</h3>
+      <p>神经网络只吃数字。文字必须先切成离散单元再查表变向量——分词是大模型的"第一道工序"。</p>
+      <div class="tags"><span class="tag b">动机</span><span class="tag">向量化</span></div>
+    </a>
+    <a class="card" href="02-history.html">
+      <div class="num">02</div><h3>历代方法总览</h3>
+      <p>词级、字符级各自的死穴，以及 2016 年 subword 革命如何一举破局。带时间线。</p>
+      <div class="tags"><span class="tag">词级</span><span class="tag">字符级</span><span class="tag g">subword</span></div>
+    </a>
+    <a class="card" href="03-bpe.html">
+      <div class="num">03</div><h3>BPE 详解（可交互）</h3>
+      <p>字节对编码：数相邻符号对频次→合并最高频→重复。含<b>可点击的训练动画</b>，一步步看它长出 token。</p>
+      <div class="tags"><span class="tag g">交互 demo</span><span class="tag b">核心算法</span></div>
+    </a>
+    <a class="card" href="04-wordpiece-unigram.html">
+      <div class="num">04</div><h3>WordPiece 与 Unigram</h3>
+      <p>BERT 的 WordPiece（按似然合并）与 SentencePiece 的 Unigram（自顶向下剪枝）——两条不同的技术路线。</p>
+      <div class="tags"><span class="tag o">WordPiece</span><span class="tag p">Unigram</span></div>
+    </a>
+    <a class="card" href="05-byte-level.html">
+      <div class="num">05</div><h3>字节级 BPE（可交互）</h3>
+      <p>GPT-2 的关键一招：不在字符上、而在 <b>UTF-8 字节</b>上做 BPE，从此再无"未知字符"。含字节编码可视化器。</p>
+      <div class="tags"><span class="tag g">交互 demo</span><span class="tag b">GPT-2</span><span class="tag">UTF-8</span></div>
+    </a>
+    <a class="card" href="06-models.html">
+      <div class="num">06</div><h3>主流大模型对比</h3>
+      <p>GPT / Qwen / DeepSeek / LLaMA / Kimi 到底各用什么分词器？词表多大？回答"是不是都一样"。</p>
+      <div class="tags"><span class="tag b">GPT</span><span class="tag g">Qwen</span><span class="tag o">DeepSeek</span><span class="tag p">Kimi</span></div>
+    </a>
+    <a class="card" href="07-frontier.html">
+      <div class="num">07</div><h3>前沿趋势</h3>
+      <p>tokenizer-free、字节隐变量 Transformer（BLT）、动态分块——大模型正在尝试"抛弃分词器"吗？</p>
+      <div class="tags"><span class="tag o">ByT5</span><span class="tag p">BLT</span><span class="tag">MegaByte</span></div>
+    </a>
+    <a class="card" href="references.html">
+      <div class="num">📚</div><h3>参考文献与来源</h3>
+      <p>全部结论对应的论文、官方技术报告、代码仓库索引，可点击溯源。</p>
+      <div class="tags"><span class="tag">arXiv</span><span class="tag">官方文档</span></div>
+    </a>
+  </div>
+
+  <!-- 总览时间线 -->
+  <h2 style="border:none;margin-top:56px">📜 分词技术演化时间线</h2>
+  <div class="timeline">
+    <div class="tl-item"><div class="yr">1994</div><h4>BPE 作为压缩算法诞生</h4><p>Philip Gage 提出字节对编码，本是一种数据压缩方法，与 NLP 无关。</p></div>
+    <div class="tl-item"><div class="yr">~2013</div><h4>词级时代</h4><p>word2vec / 早期神经机器翻译用固定词表，饱受 OOV（未登录词）与超大词表之苦。</p></div>
+    <div class="tl-item"><div class="yr">2016</div><h4>Subword 革命：BPE 进入 NLP</h4><p>Sennrich 等把 BPE 引入机器翻译处理稀有词，开创 subword 时代。</p></div>
+    <div class="tl-item"><div class="yr">2016 / 2018</div><h4>WordPiece 与 Unigram</h4><p>WordPiece 支撑 BERT；Kudo 提出 Unigram LM 与 SentencePiece 框架，语言无关、可逆。</p></div>
+    <div class="tl-item"><div class="yr">2019</div><h4>字节级 BPE（GPT-2）</h4><p>在 256 个字节上做 BPE，彻底消除未知字符，成为此后生成式大模型的主流范式。</p></div>
+    <div class="tl-item"><div class="yr">2021</div><h4>tokenizer-free 探索</h4><p>ByT5 / CANINE 直接吃字节/字符，追求"无分词器"的未来。</p></div>
+    <div class="tl-item"><div class="yr">2023–2026</div><h4>词表越做越大 & 动态分块</h4><p>GPT-4o 词表冲到 ~20 万；同时 MegaByte / BLT 用动态字节分块重新挑战"要不要分词器"。</p></div>
+  </div>
+
+  <div class="note o">
+    <div class="t">⚠️ 关于本课的准确性</div>
+    页面中每一条涉及具体模型/数字/算法的结论，都尽量对应到官方技术报告、论文或代码仓库，见<a href="references.html">参考文献</a>页。第一版如发现事实偏差，请指出，我会即时修正与补源。
+  </div>
+
+  <p style="text-align:center;margin-top:50px;color:var(--fg-faint);font-family:var(--mono);font-size:13px">大模型基础课 · 第一课 · v1 草稿</p>
+</div>
+</body>
+</html>

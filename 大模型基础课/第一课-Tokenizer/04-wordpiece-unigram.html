@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WordPiece 与 Unigram | 第一课 Tokenizer</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html">目录</a><a href="01-why.html">为什么分词</a>
+    <a href="02-history.html">历代方法</a><a href="03-bpe.html">BPE 详解</a>
+    <a href="04-wordpiece-unigram.html" class="active">WordPiece/Unigram</a><a href="05-byte-level.html">字节级</a>
+    <a href="06-models.html">主流模型</a><a href="07-frontier.html">前沿</a><a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / 04 WordPiece 与 Unigram</div>
+  <h1>WordPiece 与 Unigram</h1>
+  <p class="lead">BPE 用<b>频次</b>决定合并谁。但"最高频"真的等于"最该合并"吗？这一节看另外两条路线：WordPiece 改用<b>似然</b>来合并（BERT 用它），Unigram 干脆<b>反着来</b>——从大词表往下剪枝（T5、多语言模型用它）。</p>
+
+  <h2>① WordPiece：按"似然增益"合并（自底向上）</h2>
+  <p>出身：Schuster &amp; Nakajima 2012 为日韩语音搜索提出<span class="cite" title="Schuster & Nakajima 2012, ICASSP">[3]</span>，2019 年被 BERT 发扬光大<span class="cite" title="Devlin et al. 2019, BERT">[4]</span>。方向和 BPE 一样是自底向上合并，唯一的区别在<b>选谁来合并</b>：</p>
+
+  <div class="note g">
+    <div class="t">🔑 与 BPE 的唯一差别（一行讲清）</div>
+    <b>BPE 按 <code>freq(ab)</code> 排序</b>（原始频次）；<br>
+    <b>WordPiece 按 <code>freq(ab) / (freq(a)·freq(b))</code> 排序</b>（似然增益比）。
+  </div>
+
+  <p>为什么是这个比值？在一个 unigram 语言模型 <code>p(t)=freq(t)/总数</code> 下，把 <code>a,b</code> 合成 <code>ab</code> 带来的对数似然变化正比于 <code>log[ freq(ab) / (freq(a)·freq(b)) ]</code>。所以最大化这个比值 = 最大化训练语料的似然。</p>
+  <p><b>它的效果</b>：这个比值会<b>惩罚"本身就很常见"的片段</b>。比如 <code>the</code> 到处都是，光看频次它跟谁组合频次都高；但除以各自频次后，只有那些"<b>合起来出现的概率远高于各自独立出现</b>"的组合才会胜出——也就是真正像"词"的组合。</p>
+
+  <h3>训练与推理</h3>
+  <ul>
+    <li><b>训练</b>：初始化词表 = 所有字符的两种形态（词首形态、词内 <code>##</code> 形态）。反复挑<code>freq(ab)/(freq(a)·freq(b))</code>最高的对合并，直到词表达标。</li>
+    <li><b>推理</b>：<b>贪心最长匹配</b>——从词首找词表里最长的前缀切下来，往后重复。<code>unaffable → un ##aff ##able</code>。如果剩余部分怎么都匹配不到词表 → <b>整个词变 <code>[UNK]</code></b>。</li>
+  </ul>
+
+  <div class="note">
+    <div class="t">📌 <code>##</code> 是什么</div>
+    词内（非开头）的片段带 <code>##</code> 前缀：<code>playing → play + ##ing</code>。不带 <code>##</code> 的片段可以做词首；带 <code>##</code> 的必须接在前面。这跟 SentencePiece 的 <code>▁</code> 恰好相反——<code>##</code> 标记"<b>前面没有空格</b>"，<code>▁</code> 标记"<b>前面有空格</b>"。
+  </div>
+  <p><b>相对 BPE 的权衡</b>：似然准则给出更"信息量大"的片段（不会因为频次高就乱合并）。缺点：贪心最长匹配可能局部次优；解不出来的词直接整词 <code>[UNK]</code>——所以在"零 OOV"这点上不如字节级 BPE 硬。</p>
+
+  <h2>② Unigram：从大词表往下剪枝（自顶向下）</h2>
+  <p>出身：Taku Kudo 2018<span class="cite" title="Kudo 2018, Subword Regularization, ACL">[6]</span>。它和 BPE/WordPiece 的方向<b>完全相反</b>：不是从字符往上拼，而是<b>先搞一个很大的候选词表，再迭代剪掉"删了最不心疼"的 token</b>，直到缩到目标大小。</p>
+
+  <h3>核心模型</h3>
+  <p>每个 token 都带一个概率 <code>p(x)</code>，一段文本的一种切分 <code>x=(x₁…x_M)</code> 的概率 = <code>∏ p(xᵢ)</code>。同一个词因此有<b>很多种可能切分</b>，各有概率。</p>
+  <p><b>训练（种子词表 → EM 剪枝）</b>：</p>
+  <ol>
+    <li>构造一个<b>大</b>种子词表（所有字符 + 高频子串）。字符必须全留，保证覆盖。</li>
+    <li>用 <b>EM 算法</b>重估每个 token 的概率 <code>p(x)</code>（在所有可能切分的格上做前向-后向）。</li>
+    <li>对每个 token 算"删掉它，语料总似然会掉多少"（= loss）。</li>
+    <li><b>保留所有单字符</b>，剪掉 loss 最小的一批（如底部 10–20%）。回到第 2 步，直到词表缩到目标。</li>
+  </ol>
+  <p><b>推理</b>：默认用 <b>Viterbi</b> 找概率最大的那一种切分；训练时也可以<b>按概率采样</b>不同切分——这就是 Kudo 提出的 <b>subword regularization（子词正则）</b>，相当于数据增强，能提升鲁棒性（尤其低资源/跨域）。</p>
+
+  <h3>三条路线一图对比</h3>
+  <div class="tablewrap"><table>
+    <thead><tr><th></th><th>BPE / WordPiece</th><th>Unigram</th></tr></thead>
+    <tbody>
+      <tr><td>方向</td><td>自底向上合并</td><td>自顶向下剪枝(EM)</td></tr>
+      <tr><td>准则</td><td>最高频对 / 最大似然增益比</td><td>删除后似然损失最小</td></tr>
+      <tr><td>每个 token 有概率吗</td><td>无（只有合并顺序）</td><td class="mono" style="color:var(--accent2)">有 p(x)</td></tr>
+      <tr><td>一个词几种切分</td><td>恰好一种</td><td>多种，可打分/采样</td></tr>
+      <tr><td>自带正则</td><td>无（需 BPE-dropout）</td><td class="mono" style="color:var(--accent2)">有(子词正则)</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>③ SentencePiece：不是新算法，是"框架"</h2>
+  <p>常有人把 SentencePiece 当成一种分词算法，其实<b>它是个库/框架</b>（Kudo &amp; Richardson 2018<span class="cite" title="Kudo & Richardson 2018, EMNLP demo">[7]</span>），里面同时实现了 BPE 和 Unigram。它真正的贡献是一个工程改造：</p>
+  <div class="note p">
+    <div class="t">🔑 <code>▁</code> 的妙处：把空格当普通字符</div>
+    SentencePiece 把输入当成<b>原始 Unicode 流</b>，<b>不做任何语言相关的预分词</b>，而是把每个空格替换成元字符 <code>▁</code>(U+2581)。<code>"Hello world" → ▁Hello▁world</code>。于是：<br>
+    ① <b>无损可逆</b>：<code>text == decode(encode(text))</code>，把 token 拼回、<code>▁</code>换回空格就还原了；<br>
+    ② <b>语言无关</b>：中文/日文/泰文这种没空格的语言不再需要 jieba/MeCab 之类的预处理器。
+  </div>
+  <p>这就是为什么它成了多语言模型（mBART、T5、XLM-R）和 LLaMA 1/2 的标配。<b>算法还是 BPE/Unigram，贡献是让整条分词管线端到端、可逆、语言无关。</b></p>
+
+  <div class="note o">
+    <div class="t">🔗 承上启下</div>
+    到这里，subword 的三种算法 + SentencePiece 框架就齐了。但它们大多在<b>字符</b>上工作，会被生僻字/新 emoji 坑。<a href="05-byte-level.html">下一节</a>看 GPT-2 如何把 BPE 挪到<b>字节</b>上，彻底消灭未知字符——这才是今天主流大模型的真正做法。
+  </div>
+
+  <div class="pagenav">
+    <a href="03-bpe.html"><div class="lbl">← 上一节</div><div class="ttl">BPE 详解</div></a>
+    <a class="next" href="05-byte-level.html"><div class="lbl">下一节 →</div><div class="ttl">字节级 BPE（可交互）</div></a>
+  </div>
+</div>
+</body>
+</html>

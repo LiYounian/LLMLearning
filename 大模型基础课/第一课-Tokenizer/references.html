@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>参考文献与来源 | 第一课 Tokenizer</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html">目录</a><a href="01-why.html">为什么分词</a>
+    <a href="02-history.html">历代方法</a><a href="03-bpe.html">BPE 详解</a>
+    <a href="04-wordpiece-unigram.html">WordPiece/Unigram</a><a href="05-byte-level.html">字节级</a>
+    <a href="06-models.html">主流模型</a><a href="07-frontier.html">前沿</a><a href="references.html" class="active">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / 参考文献与来源</div>
+  <h1>参考文献与来源</h1>
+  <p class="lead">本课涉及的每一条具体结论都尽量对应一手来源：论文（arXiv / ACL / IEEE）、官方技术报告、代码仓库。全部经调研核对，存疑处已在正文和下方标注。</p>
+
+  <h2>核心算法与历史</h2>
+  <div class="reflist"><ol>
+    <li>[BPE 起源] Philip Gage (1994). <i>A New Algorithm for Data Compression</i>. The C Users Journal 12(2). <span style="color:var(--fg-faint)">（常被误引为 Dr. Dobb's Journal，C Users Journal 是原始出处）</span></li>
+    <li>[BPE 入 NLP] Sennrich, Haddow, Birch (2016). <i>Neural Machine Translation of Rare Words with Subword Units</i>. ACL 2016. <a href="https://aclanthology.org/P16-1162/">aclanthology.org/P16-1162</a> · <a href="https://arxiv.org/abs/1508.07909">arXiv:1508.07909</a></li>
+    <li>[WordPiece] Schuster &amp; Nakajima (2012). <i>Japanese and Korean Voice Search</i>. ICASSP 2012. <a href="https://research.google/pubs/pub37842/">research.google/pubs/pub37842</a></li>
+    <li>[BERT] Devlin et al. (2019). <i>BERT: Pre-training of Deep Bidirectional Transformers</i>. NAACL. <a href="https://arxiv.org/abs/1810.04805">arXiv:1810.04805</a></li>
+    <li>[GPT-2 / 字节级 BPE] Radford et al. (2019). <i>Language Models are Unsupervised Multitask Learners</i>. <a href="https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf">OpenAI PDF</a></li>
+    <li>[Unigram / 子词正则] Taku Kudo (2018). <i>Subword Regularization</i>. ACL 2018. <a href="https://aclanthology.org/P18-1007/">aclanthology.org/P18-1007</a> · <a href="https://arxiv.org/abs/1804.10959">arXiv:1804.10959</a></li>
+    <li>[SentencePiece] Kudo &amp; Richardson (2018). <i>SentencePiece</i>. EMNLP 2018 (demo). <a href="https://aclanthology.org/D18-2012/">aclanthology.org/D18-2012</a> · <a href="https://arxiv.org/abs/1808.06226">arXiv:1808.06226</a> · <a href="https://github.com/google/sentencepiece">代码</a></li>
+    <li>[字节级子词] Wang et al. (2019). <i>Neural Machine Translation with Byte-Level Subwords</i>. <a href="https://arxiv.org/abs/1909.03341">arXiv:1909.03341</a></li>
+  </ol></div>
+
+  <h2>词级 / 字符级背景</h2>
+  <div class="reflist"><ol start="9">
+    <li>Mikolov et al. (2013). <i>Distributed Representations of Words and Phrases (word2vec)</i>. <a href="https://arxiv.org/abs/1310.4546">arXiv:1310.4546</a></li>
+    <li>Sutskever et al. (2014). <i>Sequence to Sequence Learning</i>. <a href="https://arxiv.org/abs/1409.3215">arXiv:1409.3215</a></li>
+    <li>Bahdanau et al. (2015). <i>NMT by Jointly Learning to Align and Translate</i>. <a href="https://arxiv.org/abs/1409.0473">arXiv:1409.0473</a></li>
+    <li>Kim et al. (2016). <i>Character-Aware Neural Language Models</i>. <a href="https://arxiv.org/abs/1508.06615">arXiv:1508.06615</a></li>
+  </ol></div>
+
+  <h2>主流大模型技术报告与分词器</h2>
+  <div class="reflist"><ol start="13">
+    <li>[tiktoken] OpenAI. <a href="https://github.com/openai/tiktoken/blob/main/tiktoken_ext/openai_public.py">openai_public.py</a>（cl100k_base / o200k_base 定义与正则）</li>
+    <li>[Qwen] Bai et al. (2023). <i>Qwen Technical Report</i>. <a href="https://arxiv.org/pdf/2309.16609">arXiv:2309.16609</a> · <a href="https://github.com/QwenLM/Qwen/blob/main/tokenization_note.md">tokenization_note</a></li>
+    <li>[DeepSeek-V2] <a href="https://arxiv.org/abs/2405.04434">arXiv:2405.04434</a> · [DeepSeek-V3] <a href="https://arxiv.org/pdf/2412.19437">arXiv:2412.19437</a></li>
+    <li>[LLaMA 1] <a href="https://arxiv.org/abs/2302.13971">arXiv:2302.13971</a> · [LLaMA 2] <a href="https://arxiv.org/abs/2307.09288">arXiv:2307.09288</a> · [LLaMA 3] <a href="https://arxiv.org/abs/2407.21783">arXiv:2407.21783</a></li>
+    <li>[Kimi K2] <a href="https://arxiv.org/abs/2507.20534">arXiv:2507.20534</a> · <a href="https://huggingface.co/moonshotai/Kimi-K2-Instruct">HF 模型卡</a> <span style="color:var(--fg-faint)">（k1/k1.5 闭源，分词器未公开）</span></li>
+    <li>[Gemma] <a href="https://gemma-llm.readthedocs.io/en/latest/colab_tokenizer.html">tokenizer 文档</a>（SentencePiece，256k 词表）</li>
+  </ol></div>
+
+  <h2>前沿：tokenizer-free / 动态分块 / 词表 scaling</h2>
+  <div class="reflist"><ol start="19">
+    <li>[病根科普] Karpathy (2024). <i>Let's build the GPT Tokenizer</i>. <a href="https://www.youtube.com/watch?v=zduSFxRajkE">视频</a> · <a href="https://github.com/karpathy/minbpe">minbpe 代码</a></li>
+    <li>[Glitch token] Land &amp; Bartolo (2024). <i>Fishing for Magikarp</i>. EMNLP 2024. <a href="https://arxiv.org/abs/2405.05417">arXiv:2405.05417</a></li>
+    <li>[ByT5] Xue et al. (2021). <a href="https://arxiv.org/abs/2105.13626">arXiv:2105.13626</a></li>
+    <li>[CANINE] Clark et al. (2021). <a href="https://arxiv.org/abs/2103.06874">arXiv:2103.06874</a></li>
+    <li>[Charformer/GBST] Tay et al. (2021). <a href="https://arxiv.org/abs/2106.12672">arXiv:2106.12672</a></li>
+    <li>[MegaByte] Yu et al. (2023). <a href="https://arxiv.org/abs/2305.07185">arXiv:2305.07185</a></li>
+    <li>[BLT ⭐] Pagnoni et al. (2024). <i>Byte Latent Transformer</i>. <a href="https://arxiv.org/abs/2412.09871">arXiv:2412.09871</a></li>
+    <li>[MambaByte] Wang et al. (2024). <a href="https://arxiv.org/abs/2401.13660">arXiv:2401.13660</a></li>
+    <li>[T-FREE] Deiseroth et al. (2024). <a href="https://arxiv.org/abs/2406.19223">arXiv:2406.19223</a></li>
+    <li>[多 token 预测] Gloeckle et al. (2024). <a href="https://arxiv.org/abs/2404.19737">arXiv:2404.19737</a></li>
+    <li>[词表 Scaling Law] Tao et al. (2024). <a href="https://arxiv.org/abs/2407.13623">arXiv:2407.13623</a> · <a href="https://github.com/sail-sg/scaling-with-vocab">代码</a></li>
+    <li>[SuperBPE] Liu et al. (2025). <a href="https://arxiv.org/abs/2503.13423">arXiv:2503.13423</a> · <a href="https://superbpe.github.io/">项目页</a></li>
+    <li>[ZeTT 移植] Minixhofer et al. (2024). <a href="https://arxiv.org/abs/2405.07883">arXiv:2405.07883</a></li>
+    <li>[免训练移植 OMP] (2025). <a href="https://arxiv.org/abs/2506.06607">arXiv:2506.06607</a></li>
+    <li>[H-Net ⭐] Hwang, Wang &amp; Gu (2025). <i>Dynamic Chunking (H-Net)</i>. <a href="https://arxiv.org/abs/2507.07955">arXiv:2507.07955</a> · <a href="https://github.com/goombalab/hnet">代码</a></li>
+  </ol></div>
+
+  <h2>可玩的在线工具 & 免费图解教程</h2>
+  <div class="reflist"><ol start="34">
+    <li>[实时分词器] OpenAI Tokenizer <a href="https://platform.openai.com/tokenizer">platform.openai.com/tokenizer</a> · Tiktokenizer <a href="https://tiktokenizer.vercel.app/">tiktokenizer.vercel.app</a> · <a href="https://huggingface.co/spaces/Xenova/the-tokenizer-playground">HF Tokenizer Playground</a></li>
+    <li>[图解教程] Hugging Face LLM Course 第 6 章「The Tokenizers」：<a href="https://huggingface.co/learn/llm-course/chapter6/5">BPE</a> · <a href="https://huggingface.co/learn/llm-course/chapter6/6">WordPiece</a> · <a href="https://huggingface.co/learn/llm-course/chapter6/7">Unigram</a> · <a href="https://huggingface.co/learn/llm-course/chapter6/8">三者对比</a></li>
+  </ol></div>
+
+  <div class="note o">
+    <div class="t">⚠️ 已标注的存疑点（诚实起见）</div>
+    <ul style="margin:6px 0">
+      <li>Gage 1994 的发表刊物（C Users Journal vs 常被误引的 Dr. Dobb's）；</li>
+      <li>WordPiece 精确训练目标（Google 未开源原码，<code>freq(ab)/(freq(a)·freq(b))</code> 是社区公认重构）；</li>
+      <li>GPT-4/4o 词表"精确到个位"的数字（取决于是否计入特殊 token，故写"约 10 万/20 万"）；</li>
+      <li>Qwen 三个易混数字（BPE token 数 / embedding 行数）；</li>
+      <li>Kimi k1/k1.5 分词器官方未公开，只能推断；</li>
+      <li>截至 2026，尚未确认有<b>旗舰级、大规模生产</b>模型完全弃用 BPE 分词器。</li>
+    </ul>
+  </div>
+
+  <div class="pagenav">
+    <a href="07-frontier.html"><div class="lbl">← 上一节</div><div class="ttl">前沿趋势</div></a>
+    <a class="next" href="index.html"><div class="lbl">回到 →</div><div class="ttl">课程目录</div></a>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>为什么需要分词 | 第一课 Tokenizer</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html">目录</a><a href="01-why.html" class="active">为什么分词</a>
+    <a href="02-history.html">历代方法</a><a href="03-bpe.html">BPE 详解</a>
+    <a href="04-wordpiece-unigram.html">WordPiece/Unigram</a><a href="05-byte-level.html">字节级</a>
+    <a href="06-models.html">主流模型</a><a href="07-frontier.html">前沿</a><a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / 01 为什么需要分词</div>
+  <h1>为什么需要分词？</h1>
+  <p class="lead">一句话：神经网络只会做数学，不认识文字。Tokenizer 是把「人类语言」翻译成「模型能吃的数字序列」的第一道、也是唯一一道确定性工序。</p>
+
+  <h2>① 模型眼里没有"字"，只有"向量"</h2>
+  <p>大语言模型的内部全是矩阵乘法与浮点运算。它无法直接处理字符串 <code>"你好"</code>，只能处理数字。于是任何一段文本进入模型前，都要经过一条固定的流水线：</p>
+  <pre><code>原始文本  →  切成 token  →  查词表得到整数 ID  →  查 embedding 表得到向量  →  进入 Transformer
+"tokenizer"  →  ["token","izer"]  →  [3110, 7509]  →  [[0.02,-0.5,...],[...]]  →  ...</code></pre>
+  <p>其中<b>「切成 token」+「查词表得 ID」这两步合起来，就是 tokenizer（分词器）在做的事</b>。它是纯粹的、可逆的、无参数（或极少参数）的映射，不参与梯度训练——但它决定了模型"看世界的最小单位"。</p>
+
+  <div class="note">
+    <div class="t">💡 token 是模型的"原子"</div>
+    模型能表达的一切，都以 token 为最小单位。词表里没有的东西，模型只能用几个更小的 token 拼出来。所以分词方式直接影响：序列长度（=算力成本）、罕见词/多语言/代码的表达效率、甚至数学能力。
+  </div>
+
+  <h2>② 那么，最小单位该多大？这是全部问题的核心</h2>
+  <p>把文本切成"离散单元"，粒度可粗可细，构成一条光谱。粒度的选择是一场<b>三方权衡</b>：</p>
+
+  <div class="tablewrap"><table>
+    <thead><tr><th>粒度</th><th>词表大小</th><th>序列长度</th><th>未登录词(OOV)</th><th>语义</th></tr></thead>
+    <tbody>
+      <tr><td><b>词级</b> word</td><td>极大（数十万+）</td><td>短</td><td class="mono" style="color:var(--danger)">严重</td><td>强</td></tr>
+      <tr><td><b>字符级</b> char</td><td>极小（几十~几千）</td><td class="mono" style="color:var(--danger)">很长</td><td>无</td><td class="mono" style="color:var(--danger)">弱</td></tr>
+      <tr><td><b>词片级</b> subword ⭐</td><td>适中（3万~20万）</td><td>适中</td><td class="mono" style="color:var(--accent2)">几乎为零</td><td>较强</td></tr>
+      <tr><td><b>字节级</b> byte</td><td>极小(256)+合并</td><td>可控</td><td class="mono" style="color:var(--accent2)">彻底为零</td><td>较强</td></tr>
+    </tbody>
+  </table></div>
+
+  <p>三个互相拉扯的目标：</p>
+  <ul>
+    <li><b>词表要小</b>——词表就是模型输出层 softmax 的宽度，也是 embedding 矩阵的行数。词表越大，参数越多、训练越慢、罕见 token 越难学好。</li>
+    <li><b>序列要短</b>——Transformer 自注意力是 O(n²)。同一句话切出的 token 越多，算力和显存开销越大、上下文越"不经用"。</li>
+    <li><b>不能有未登录词</b>——一旦遇到词表里没有的东西（新词、错字、别的语言、emoji），要能优雅降级，而不是吐一个 <code>[UNK]</code> 把信息丢掉。</li>
+  </ul>
+
+  <div class="note g">
+    <div class="t">🎯 subword / byte-level 为什么赢</div>
+    词片级和字节级正好落在这条光谱的"甜点区"：词表适中、序列不长、几乎/彻底消灭 OOV。常用词整体成一个 token（高效），罕见词自动拆成更小的已知片段（不丢信息）。这就是今天几乎所有大模型都用 subword / byte-level 的根本原因——后面几课会把它们一个个讲透。
+  </div>
+
+  <h2>③ 一个直觉例子</h2>
+  <p>同一句 <code>"unhappiness"</code>：</p>
+  <ul>
+    <li><b>词级</b>：如果训练语料里没出现过这个词 → <code>[UNK]</code>，信息全丢。</li>
+    <li><b>字符级</b>：<code>u n h a p p i n e s s</code> → 11 个 token，序列很长，模型还得自己重新学"这些字母连起来啥意思"。</li>
+    <li><b>词片级</b>：<code>un + happ + iness</code> 或 <code>un + happiness</code> → 2~3 个 token，既短又保留了"un-"否定前缀这种可复用的语义积木。</li>
+  </ul>
+
+  <div class="pagenav">
+    <a href="index.html"><div class="lbl">← 返回</div><div class="ttl">课程目录</div></a>
+    <a class="next" href="02-history.html"><div class="lbl">下一节 →</div><div class="ttl">历代方法总览</div></a>
+  </div>
+</div>
+</body>
+</html>

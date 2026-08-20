@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>前沿趋势 | 第一课 Tokenizer</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html">目录</a><a href="01-why.html">为什么分词</a>
+    <a href="02-history.html">历代方法</a><a href="03-bpe.html">BPE 详解</a>
+    <a href="04-wordpiece-unigram.html">WordPiece/Unigram</a><a href="05-byte-level.html">字节级</a>
+    <a href="06-models.html">主流模型</a><a href="07-frontier.html" class="active">前沿</a><a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / 07 前沿趋势</div>
+  <h1>前沿：大模型正在"抛弃分词器"吗？</h1>
+  <p class="lead">分词器被越来越多研究者称为"大模型流水线里最后一个 hack"——一个<b>独立、不可微、单独统计训练</b>的预处理阶段，硬焊在一个本该端到端学习的模型前面。这一节讲清它的病根、正在替代它的技术，以及 2026 年的真实现状。</p>
+
+  <h2>① 病根：为什么说分词器是"最后一个 hack"</h2>
+  <p>Karpathy 那句广为流传的话点破了要害：<b>相当一部分大模型的"抽风"，是分词器的错，不是模型的错</b><span class="cite" title="Karpathy, Let's build the GPT Tokenizer">[1]</span>。具体症状：</p>
+  <ul>
+    <li><b>数字与算术</b>：BPE 对数字的合并前后不一致——<code>677</code> 可能是 1 个 token，<code>678</code> 却是 2 个。模型看不到数字干净的位值分解，算术脆弱的一大嫌疑源头。对策：强制单个数字成 token（LLaMA、PaLM）或按位分组。</li>
+    <li><b>Glitch token（幽灵 token）</b>：像 <code>SolidGoldMagikarp</code> 这种词，在<b>分词器训练语料</b>里高频（Reddit 用户名），却几乎没出现在<b>模型训练语料</b>里，导致它的 embedding 停留在随机初始化附近，一喂就让模型胡言乱语。"Fishing for Magikarp"<span class="cite" title="Land & Bartolo 2024, EMNLP">[2]</span> 证明这类欠训练 token 在各大生产模型里<b>普遍存在</b>。病根就是<b>分词器训练与模型训练两套语料、两个目标，彼此脱节</b>。</li>
+    <li><b>非英语被"征税"</b>：词表以英语/拉丁字母为主，同样的意思在中文/泰文/缅甸文里被切成 2–5 倍的 token → ① API 更贵 ② 上下文窗口实际更短 ③ 质量更差。这是 tokenizer-free 路线的核心动机之一。</li>
+    <li><b>空格 / 代码 / 缩进</b>：前导空格算进 token（<code>" the"≠"the"</code>），连续空格/制表符切法混乱，坑 Python 缩进。GPT-4 专门硬编码了多空格 token 来打补丁——反证问题真实存在。</li>
+    <li><b>提示边界的玄学</b>：prompt 结尾停在一个"自然 token"中间，会把模型推离训练分布（著名的"结尾空格问题"）。</li>
+  </ul>
+  <div class="note"><div class="t">🧬 一元论</div>所有这些症状都是同一个病：<b>一张手工设计、冻结、不参与梯度的词表，坐在梯度通路之外</b>。前沿议程就三个字——<b>缩小它、学习它、或干掉它</b>。</div>
+
+  <h2>② 第一波尝试（2021）：直接吃字节/字符</h2>
+  <div class="grid" style="margin-top:16px">
+    <div class="card" style="cursor:default">
+      <div class="num">ByT5</div><h3>直接吃 UTF-8 字节</h3>
+      <p>词表就 256+特殊符，无分词器。重编码器/轻解码器抵消长度。<b>对噪声/错字/大小写明显更鲁棒</b>，拼写类任务更强。<span class="cite" title="Xue et al. 2021, ByT5">[3]</span></p>
+      <div class="tags"><span class="tag o">2021</span><span class="tag">鲁棒性</span></div>
+    </div>
+    <div class="card" style="cursor:default">
+      <div class="num">CANINE</div><h3>字符级编码器</h3>
+      <p>直接吃 Unicode 码点、无词表。用<b>下采样</b>（局部注意力→步长卷积→深层 Transformer→上采样）控长度。多语言 QA 超过 mBERT。<span class="cite" title="Clark et al. 2021, CANINE">[4]</span></p>
+      <div class="tags"><span class="tag o">2021</span><span class="tag">下采样</span></div>
+    </div>
+    <div class="card" style="cursor:default">
+      <div class="num">Charformer</div><h3>可微分子词(GBST)</h3>
+      <p>让"如何把字符池化成子词"变成模型里<b>可梯度训练</b>的一部分。"学出来的切分"这一思想的种子。<span class="cite" title="Tay et al. 2021, Charformer">[5]</span></p>
+      <div class="tags"><span class="tag o">2021</span><span class="tag g">可学习切分</span></div>
+    </div>
+  </div>
+
+  <h2>③ 关键突破：动态字节分块，绕开 O(n²) 长度税</h2>
+  <p>字节序列比 token 长约 4 倍，注意力 O(n²) 直接劝退。统一思路：<b>别让大 Transformer 逐字节跑，先把字节打包成"块(patch)"，大部分算力花在块级别。</b></p>
+
+  <h3>MegaByte（2023, Meta）</h3>
+  <p>把字节切成<b>固定大小</b>的块（4–8 字节），大的"全局"模型跑短的块序列，小的"局部"模型预测块内字节。能到百万字节级序列，困惑度可与子词 Transformer 抗衡。<span class="cite" title="Yu et al. 2023, MEGABYTE">[6]</span> 遗留问题：块是<b>定长</b>的，不管内容好不好预测都花一样的算力——这正是 BLT 要修的。</p>
+
+  <div class="note p">
+    <div class="t">⭐ BLT · Byte Latent Transformer（2024, Meta）—— 本节的重头戏</div>
+    第一个在<b>规模上追平"带分词器"大模型</b>（8B 参数、4T 训练字节、FLOP 对齐的严格对比）、同时<b>完全没有固定词表</b>的字节级架构。<span class="cite" title="Pagnoni et al. 2024, BLT, ACL 2025">[7]</span>
+  </div>
+  <p><b>核心创新——基于熵的动态分块</b>：块的边界由"<b>下一个字节有多难预测</b>"动态决定：</p>
+  <ol>
+    <li>一个小的字节级"<b>熵模型</b>"（迷你自回归字节 LM）估计下一个字节分布的熵——即有多"意外"。</li>
+    <li><b>高熵</b>（难预测、像新词开头/罕见串）→ <b>开一个新块</b>；<b>低熵</b>（可预测、常见词中段/套话）→ <b>延长当前块</b>。</li>
+    <li>结果：<b>可预测的文本用长块，难啃的文本用短块</b>——算力被分配到数据复杂的地方。块长变成内容自适应的。</li>
+  </ol>
+  <p><b>结论</b>：① 首个把字节模型做 FLOP 对齐扩到 8B/4T 的研究，追平 Llama-3 级模型；② 固定推理成本下<b>扩展性更好</b>；③ 字符操作、加噪、长尾、低资源上<b>更鲁棒</b>；④ <b>没有词表 → 天然没有 glitch token、没有非英语税、没有数字病</b>。第①节那些病，从根上治好了。</p>
+
+  <h3>MambaByte（2024）</h3>
+  <p>换个思路：把 O(n²) 的 Transformer 换成 <b>Mamba 状态空间模型</b>，靠定长循环状态让长字节序列变便宜（线性时间）。直接吃原始字节，LM 能力可与子词 Transformer 抗衡，解码提速约 2.6×。<span class="cite" title="Wang et al. 2024, MambaByte">[8]</span></p>
+
+  <h2>④ 另一支：不动序列长度，改削词表参数</h2>
+  <ul>
+    <li><b>T-FREE（2024）</b>：保留"词"为单位，但扔掉学出来的词表——把每个词编码成<b>字符三元组的稀疏哈希激活</b>。无词表 → 无 glitch、无 OOV；embedding/输出层<b>参数减少 &gt;85%</b>，跨语言迁移更好。<span class="cite" title="Deiseroth et al. 2024, T-FREE">[9]</span></li>
+    <li><b>多 token 预测（2024）</b>：不是分词方案，但同源——每步用多个头并行预测<b>后 n 个 token</b>，训练无额外开销、自投机解码提速约 3×，已在 DeepSeek-V3 等生产模型出现。<span class="cite" title="Gloeckle et al. 2024, MTP">[10]</span></li>
+    <li><b>词表的 Scaling Law（2024）</b>：证明词表也是个可扩展变量，<b>计算最优的词表大小随模型增大而增大</b>——大多数大模型其实"词表不够大"（70B 级最优约 20 万 vs 常用 3.2 万）。这为行业往 128k–256k 漂移提供了理论依据。<span class="cite" title="Tao et al. 2024, Scaling Laws with Vocabulary">[11]</span></li>
+  </ul>
+
+  <h2>⑤ 2025 最新：改良派 vs 革命派</h2>
+  <ul>
+    <li><b>SuperBPE（2025，改良派）</b>：两阶段 BPE，先学子词、再<b>放开空格边界</b>学"超级词"（把多词短语当成一个 token）。20 万词表下 <b>token 数最多减 33%</b>，30 个任务平均 <b>+4.0%（MMLU +8.2%）、推理算力少 27%</b>——罕见的免费午餐。<span class="cite" title="Liu et al. 2025, SuperBPE">[12]</span></li>
+    <li><b>分词器移植（2024–25）</b>：不重训就换掉模型的分词器。ZeTT 用超网络把"任意分词器→embedding 矩阵"<span class="cite" title="Minixhofer et al. 2024, ZeTT">[13]</span>；免训练 OMP 用锚点 token 的稀疏线性组合重建新 token<span class="cite" title="2025, Training-Free Transplantation via OMP">[14]</span>。分词器变成<b>可热插拔组件</b>。</li>
+    <li><b>H-Net（2025，革命派）</b>：最激进——<b>在模型内部端到端学出字节分块</b>，靠可微的"动态分块"，不要熵模型、不要启发式、不要外部分词器。算力/数据对齐下，单层 H-Net <b>超过强 BPE Transformer</b>，字符鲁棒性大涨；是 MambaByte/BLT 的自然接班人。<span class="cite" title="Hwang, Wang & Gu 2025, H-Net">[15]</span></li>
+  </ul>
+
+  <h2>⑥ 总轨迹 & 2026 年真实现状</h2>
+  <pre><code>词级        （词表小，OOV 灾难）
+  ↓
+字符级      （无 OOV，但序列长、语义薄）
+  ↓
+子词 BPE/WordPiece/Unigram  （2016–2024 主力，甜点区）
+  ↓
+字节级 BPE  （GPT-2 起：无 OOV、Unicode 安全——但第①节的病全保留）
+  ↓
+前沿：动态字节分块(BLT) / 端到端学习分块(H-Net) / tokenizer-free(ByT5,T-FREE,MambaByte)
+      + 改良支线：更大词表 / 超级词(Scaling-Laws-with-Vocab, SuperBPE)</code></pre>
+
+  <div class="note g">
+    <div class="t">🎯 一句话共识（2026）</div>
+    <b>分词器已不再被看作永久设施，而是"借来的时间上的遗留 hack"；但截至 2026 年它在生产中尚未被推翻。</b>研究前沿明确朝"可学习、可微、内容自适应的分块"走（BLT、H-Net 都已越过"字节模型规模上打不过子词模型"这道十年门槛）；但所有在跑的旗舰大模型仍然用<b>大词表(128k–256k)的字节级 BPE</b>——快、便宜、经过实战、且整个服务栈(KV-cache、计费)都是按 token 建的。聪明钱押的是<b>渐进迁移</b>（动态字节分块/学习分块），而非一夜废除。
+  </div>
+
+  <div class="pagenav">
+    <a href="06-models.html"><div class="lbl">← 上一节</div><div class="ttl">主流大模型对比</div></a>
+    <a class="next" href="references.html"><div class="lbl">下一节 →</div><div class="ttl">参考文献与来源</div></a>
+  </div>
+</div>
+</body>
+</html>

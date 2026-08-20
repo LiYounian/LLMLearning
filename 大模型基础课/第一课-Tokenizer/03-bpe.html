@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BPE 详解 | 第一课 Tokenizer</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html">目录</a><a href="01-why.html">为什么分词</a>
+    <a href="02-history.html">历代方法</a><a href="03-bpe.html" class="active">BPE 详解</a>
+    <a href="04-wordpiece-unigram.html">WordPiece/Unigram</a><a href="05-byte-level.html">字节级</a>
+    <a href="06-models.html">主流模型</a><a href="07-frontier.html">前沿</a><a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / 03 BPE 详解</div>
+  <h1>BPE：字节对编码</h1>
+  <p class="lead">Byte Pair Encoding 是今天绝大多数生成式大模型分词器的算法底座。核心朴素到一句话就能说清：<b>反复把语料里出现最频繁的一对相邻符号，合并成一个新符号。</b></p>
+
+  <div class="note">
+    <div class="t">📜 出身</div>
+    BPE 最早是 1994 年 Philip Gage 提出的一种<b>数据压缩</b>算法，跟 NLP 毫无关系。2016 年 Sennrich 等人把它"借"来处理机器翻译里的稀有词，从此开启了 subword 时代<span class="cite" title="Sennrich et al. 2016, Neural Machine Translation of Rare Words with Subword Units">[2]</span>。它的思想和压缩一脉相承：高频的组合值得用一个更短的符号来表示。
+  </div>
+
+  <h2>① 训练：怎么"学"出一套合并规则</h2>
+  <p>给定语料，BPE 训练产出的是一份<b>有序的合并规则表（merge list）</b>。算法如下：</p>
+  <ol>
+    <li><b>初始化</b>：把每个词拆成单个字符序列，末尾加一个词尾标记（如 <code>&lt;/w&gt;</code>，本页可视化里用 ◻ 表示）。此时词表 = 所有出现过的字符。</li>
+    <li><b>统计</b>：数一遍语料里所有<b>相邻符号对</b>的出现频次。</li>
+    <li><b>合并</b>：挑出频次最高的那一对，合并成一个新符号，加入词表，并把这条规则追加到 merge list。</li>
+    <li><b>重复</b> 第 2–3 步，直到达到预设的词表大小（或没有值得合并的对为止）。</li>
+  </ol>
+
+  <div class="note g">
+    <div class="t">🔑 关键点：合并是"有序"的</div>
+    merge list 是<b>有先后顺序</b>的。规则 <code>e+s→es</code> 必须先于 <code>es+t→est</code>。推理时也严格按这个顺序应用——这保证了训练和推理切法一致、结果确定。
+  </div>
+
+  <h2>② 亲手玩一遍（可交互）</h2>
+  <p>下面用经典的教学语料 <code>low×5, lower×2, newest×6, widest×3</code>。<b>点"合并"按钮</b>，看它每一步选中哪一对、词表怎么长大：</p>
+
+  <div class="demo"><div id="bpe-demo"></div></div>
+
+  <p>训练完之后，遇到<b>没见过的新词</b>怎么切？答案：按学到的 merge list 顺序，能合就合。下面输入框试试 <code>lowest</code>（训练语料里没有这个词，但它能被拆成已知片段）：</p>
+  <div class="demo"><div id="apply-demo"></div></div>
+
+  <h2>③ 为什么这么做有效？</h2>
+  <ul>
+    <li><b>高频词整体成 token</b>：像 <code>the</code>、<code>ing</code> 这种高频组合会被反复合并，最终变成单个 token → 序列短、高效。</li>
+    <li><b>低频词自动降级</b>：罕见词没被合并到底，就留在较小的片段状态 → 不丢信息，也不炸词表。</li>
+    <li><b>确定性 & 可逆</b>：同样的 merge list，任何文本切法唯一；把 token 拼回去就能无损还原原文。</li>
+    <li><b>数据驱动</b>：切分粒度不是人拍脑袋定的，而是从语料统计里自然涌现的——语料里常见什么，什么就成为一个 token。</li>
+  </ul>
+
+  <h2>④ 伪代码</h2>
+  <pre><code># 训练
+vocab = 所有字符
+merges = []
+while len(vocab) &lt; 目标词表大小:
+    pairs = 统计语料中所有相邻符号对的频次
+    best  = argmax(pairs)           # 最高频的一对
+    if pairs[best] &lt; 2: break
+    合并语料中所有 best 出现处
+    vocab.add(best[0] + best[1])
+    merges.append(best)             # 记录规则（有序！）
+
+# 推理（切分新词）
+def encode(word):
+    seq = list(word) + ["&lt;/w&gt;"]
+    for (a, b) in merges:           # 严格按训练顺序
+        seq = 把 seq 中相邻的 (a,b) 都替换成 a+b
+    return seq</code></pre>
+
+  <div class="note o">
+    <div class="t">➡️ 下一步的两个分岔</div>
+    BPE 用<b>频次</b>决定合并谁。但"频次最高"真的等于"最该合并"吗？<a href="04-wordpiece-unigram.html">下一课</a>看 WordPiece 如何改用<b>似然</b>、Unigram 如何反着来<b>自顶向下剪枝</b>。另一个分岔是：在字符上做 BPE 会被生僻字/多语言坑到，于是 GPT-2 干脆改在<a href="05-byte-level.html">字节</a>上做。
+  </div>
+
+  <div class="pagenav">
+    <a href="02-history.html"><div class="lbl">← 上一节</div><div class="ttl">历代方法总览</div></a>
+    <a class="next" href="04-wordpiece-unigram.html"><div class="lbl">下一节 →</div><div class="ttl">WordPiece 与 Unigram</div></a>
+  </div>
+</div>
+
+<script src="assets/bpe-demo.js"></script>
+<script>initBPEDemo("bpe-demo");initApplyDemo("apply-demo");</script>
+</body>
+</html>
