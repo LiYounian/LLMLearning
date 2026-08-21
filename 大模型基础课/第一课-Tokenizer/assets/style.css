@@ -191,6 +191,11 @@ tbody tr:hover{background:rgba(88,166,255,.05)}
 .pc-arrow{align-self:center;color:var(--fg-faint);margin:0 1px}
 .pc-id{font-family:var(--mono);font-size:14px;border:1px solid;border-radius:7px;padding:5px 9px}
 
+/* glitch 画廊 */
+.glitch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.glitch-card{background:#0b0f16;border:1px solid var(--border);border-radius:10px;padding:12px 14px;transition:border-color .15s}
+.glitch-card:hover{border-color:var(--danger)}
+
 @media(max-width:600px){.hero h1{font-size:32px}.page h1{font-size:27px}
   .mtimeline{padding-left:30px}.mt-node::before{left:-26px}
   .kv{grid-template-columns:1fr}}

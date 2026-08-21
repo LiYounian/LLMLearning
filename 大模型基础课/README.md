@@ -68,6 +68,8 @@ python3 gen_token_compare.py   # 需要 tiktoken + transformers/tokenizers, 联�
 
 - [x] 用真实 tiktoken/HF tokenizer 跑"同一句话在各模型下切成几个 token"的对比条形图 → **已完成，见 compare 页**
 - [x] 以方法为中心、按发布时间线重构目录，每个方法可点进详解并标注使用模型 → **v3 完成**
-- [ ] 加中文语料的 BPE 训练 demo（展示为什么中文需要大词表）
-- [ ] BLT 熵分块的动画示意
-- [ ] glitch token 的可点击案例展示
+- [x] m3-bpe 加真实 Qwen 分词流水线着色可视化（文字→字节→切割）
+- [x] 中文语料的字节级 BPE 训练 demo（m7-bbpe，展示为什么中文需要大词表）
+- [x] BLT 熵分块的交互动画示意（m9-frontier，阈值滑块）
+- [x] glitch token 的可点击案例画廊（m9-frontier，真实 tiktoken ID）
+- [x] 实测并讲解"token 跨字符边界"现象（m7-bbpe，Qwen 韩/印地语实例，脚本 probe_crosschar.py）

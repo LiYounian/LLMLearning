@@ -44,6 +44,10 @@
   </ul>
   <div class="note"><div class="t">🧬 一元论</div>所有这些症状都是同一个病：<b>一张手工设计、冻结、不参与梯度的词表，坐在梯度通路之外</b>。前沿议程就三个字——<b>缩小它、学习它、或干掉它</b>。</div>
 
+  <h3>👾 Glitch token 画廊（可交互，真实 ID）</h3>
+  <p>把上面"glitch token"这条掰开看：下面每张卡片是一个真实的欠训练 token，点开看它在 GPT-2/GPT-3 里的<b>真实 token ID</b>，以及 GPT-4 换大词表后是否被"修复"。</p>
+  <div class="demo"><div id="glitch"></div></div>
+
   <h2>② 第一波尝试（2021）：直接吃字节/字符</h2>
   <div class="grid" style="margin-top:16px">
     <div class="card" style="cursor:default">
@@ -80,6 +84,9 @@
     <li>结果：<b>可预测的文本用长块，难啃的文本用短块</b>——算力被分配到数据复杂的地方。块长变成内容自适应的。</li>
   </ol>
   <p><b>结论</b>：① 首个把字节模型做 FLOP 对齐扩到 8B/4T 的研究，追平 Llama-3 级模型；② 固定推理成本下<b>扩展性更好</b>；③ 字符操作、加噪、长尾、低资源上<b>更鲁棒</b>；④ <b>没有词表 → 天然没有 glitch token、没有非英语税、没有数字病</b>。第①节那些病，从根上治好了。</p>
+
+  <p><b>亲手体验熵动态分块（可交互）</b>：拖动阈值滑块，看字节序列如何按"下一字节有多难预测"被切成<b>变长的块</b>——可预测处并成长块、难啃处切成短块。</p>
+  <div class="demo"><div id="blt"></div></div>
 
   <h3>MambaByte（2024）</h3>
   <p>换个思路：把 O(n²) 的 Transformer 换成 <b>Mamba 状态空间模型</b>，靠定长循环状态让长字节序列变便宜（线性时间）。直接吃原始字节，LM 能力可与子词 Transformer 抗衡，解码提速约 2.6×。<span class="cite" title="Wang et al. 2024, MambaByte">[8]</span></p>
@@ -120,5 +127,10 @@
     <a class="next" href="models.html"><div class="lbl">下一节 →</div><div class="ttl">模型 × 方法 矩阵</div></a>
   </div>
 </div>
+
+<script src="assets/blt-demo.js"></script>
+<script src="assets/glitch_data.js"></script>
+<script src="assets/glitch-demo.js"></script>
+<script>initBLT("blt");initGlitch("glitch");</script>
 </body>
 </html>
