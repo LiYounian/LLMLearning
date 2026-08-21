@@ -21,7 +21,7 @@
 │  —— 方法详解（按发布时间线，每页含：出身/算法/例子/权衡/被哪些模型使用）——
 ├── m1-word.html                  词级分词 word-level（2013）
 ├── m2-char.html                  字符级分词 character-level（2015）
-├── m3-bpe.html                   BPE 字节对编码（1994/2016）—— 含【可交互训练动画 + 切词 demo】
+├── m3-bpe.html                   BPE 字节对编码（1994/2016）—— 含【训练动画 + 切词 demo + Qwen 真实流水线着色可视化】
 ├── m4-wordpiece.html             WordPiece（2012/2018，似然增益合并）
 ├── m5-unigram.html               Unigram 语言模型分词（2018，EM 剪枝）
 ├── m6-sentencepiece.html         SentencePiece 框架（2018，▁ 语言无关可逆）
@@ -33,7 +33,8 @@
 ├── compare.html                  切词对比 —— 含【真实分词器 token 数条形图 + 实际切分】
 ├── references.html               参考文献与来源（35 条，可点击溯源）
 ├── scripts/
-│   └── gen_token_compare.py      用真实分词器(tiktoken+HF)跑 token 数, 生成 token_data.{json,js}
+│   ├── gen_token_compare.py      用真实分词器(tiktoken+HF)跑 token 数, 生成 token_data.{json,js}
+│   └── gen_qwen_pipeline.py      用真实 Qwen2.5 分词器跑"文字→字节→token"对齐数据, 生成 qwen_pipeline.{json,js}
 └── assets/
     ├── style.css                 统一暗色主题样式
     ├── bpe-demo.js               BPE 训练可视化器 + 切分器

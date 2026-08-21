@@ -88,7 +88,21 @@ def encode(word):
         seq = 把 seq 中相邻的 (a,b) 都替换成 a+b
     return seq</code></pre>
 
-  <h2>⑤ 被哪些主流大模型使用</h2>
+  <h2>⑤ 真实案例：Qwen 的完整流水线（文字 → 字节 → 切割）</h2>
+  <p>上面的玩具 demo 是在<b>字符</b>上做 BPE，方便理解算法。但今天的大模型（Qwen、GPT、DeepSeek…）都是在 <b>UTF-8 字节</b>上做 BPE——<b>切割发生在编码层，不是字符层</b>。下面这个流水线用<b>真实的 Qwen2.5 分词器</b>跑出来，一步步给你看：文字怎么转成字节、字节怎么被合并成 token。</p>
+  <div class="note">
+    <div class="t">👀 怎么看这张图（重点）</div>
+    <b>颜色 = 同一个 token</b>。看第 2 步的字节块：<b>同色的连续字节，就是被合并进同一个 token 的</b>。你会发现两件反直觉的事——① 一个 token 常常<b>跨多个字符</b>（如"深度"两个汉字=6 字节合成 1 个 token）；② token 边界<b>不一定对齐字符边界</b>（如 <code>café</code> 里 <code>f</code> 和 <code>é</code> 会并进同一个 token，emoji 🚀 反而被拆成几个<span style="color:var(--danger)">字节碎片 ▪</span>）。这就是"在编码部分切割"的真实样子。
+  </div>
+
+  <div class="demo"><div id="qwen-pipe"></div></div>
+
+  <div class="note g">
+    <div class="t">🔬 数据货真价实</div>
+    这些切分是用 HuggingFace 上真实的 <code>Qwen/Qwen2.5-7B</code> 分词器现跑的（脚本 <code>scripts/gen_qwen_pipeline.py</code>），token ID 就是真正喂给模型的数字。想换句子？改脚本里的样本重跑即可。字节级 BPE 的更多细节（byte-to-unicode 映射、空格归属、中文代价）见 <a href="m7-bbpe.html">字节级 BPE 专页</a>。
+  </div>
+
+  <h2>⑥ 被哪些主流大模型使用</h2>
   <p>BPE 是所有 subword 方法里传播最广的。要分清两种形态：</p>
   <div class="tablewrap"><table>
     <thead><tr><th>形态</th><th>在什么符号上合并</th><th>代表使用者</th></tr></thead>
@@ -114,6 +128,8 @@ def encode(word):
 </div>
 
 <script src="assets/bpe-demo.js"></script>
+<script src="assets/qwen_pipeline.js"></script>
+<script src="assets/token-pipeline.js"></script>
 <script>initBPEDemo("bpe-demo");initApplyDemo("apply-demo");</script>
 </body>
 </html>
