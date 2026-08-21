@@ -6,10 +6,11 @@
 
 ```
 大模型演进路线/
-├── index.html                 索引首页（按公司 / 按主题 双入口 + 四条主线）
-├── timeline.html              跨家族可交互时间线（按主题筛选：MoE/推理/长上下文…）
+├── index.html                 索引首页（按公司 / 按主题 双入口 + 四条主线 + 发布时间×量级散点图）
+├── timeline.html              跨家族可交互时间线（按年份 / 按公司泳道 双视图 + 主题筛选）
 ├── tech.html                  技术脉络 T1–T8（架构/MoE/对齐/推理/长上下文/多模态/Agentic/效率）
-├── metrics.html               指标脉络（评测三次迁移 + MMLU/GPQA/SWE-bench 爬升图）
+├── tech-deep.html             技术点深挖（MLA/GRPO/thinking-budget/MoE 均衡，含公式 + SVG 示意图）
+├── metrics.html               指标脉络（MMLU/GPQA/AIME/SWE-bench/HLE 爬升图，每点可溯源）
 ├── data.html                  数据规模脉络（预训练 token 量 log 增长图 + 明细表）
 ├── references.html            关键一手来源汇总 + 空白与不确定
 ├── 01-openai-gpt.html         OpenAI GPT
@@ -22,7 +23,8 @@
 ├── 08-bytedance-doubao.html   字节 豆包 (Seed)
 └── assets/
     ├── style.css              暗色主题 + 8 家品牌色
-    └── timeline.js            交互时间线数据与渲染
+    ├── timeline.js            交互时间线数据与渲染（按年份 / 泳道）
+    └── models.js              主页散点图数据与渲染（发布时间×参数量级）
 ```
 
 ## 打开方式
@@ -49,8 +51,14 @@ cd 大模型演进路线 && python3 -m http.server 8792
 
 8 家详情页由 8 个并行 agent 分别读取对应飞书子文档 + 核对/补齐一手来源（arXiv、官方博客、HF 模型卡、GitHub）产出；专题页由主文档汇总。闭源旗舰的参数/数据一律标"官方未公开"，传闻数字不采信，跑分标注口径与自评。调研日期 2026-08。
 
-## 待迭代（v2）
+## v2 已完成
 
-- 时间线支持"按公司泳道"视图切换
-- 各技术点（MLA/GRPO/MoE 负载均衡/thinking 三形态）单独深挖页
-- 能力爬升图接入更多带来源的锚点数据
+- ✅ 时间线"按公司泳道"视图切换（行=公司/列=年份，主题筛选联动）
+- ✅ 主页"发布时间 × 模型量级"交互散点图（对数轴 / MoE 棒棒糖 / 闭源旗舰仅示时间）
+- ✅ 技术点深挖页 `tech-deep.html`（MLA / GRPO / thinking-budget / MoE 均衡，公式 + 示意图）
+- ✅ 指标页扩展（AIME / HLE）+ 每个数据点可点到一手来源
+
+## 待迭代（v3 候选）
+
+- 长上下文外推（YARN/DCA vs 原生 1M）、FP8/MuonClip、Agentic RL 深挖页
+- 散点图加"按公司连线"看单家规模轨迹；HLE 等近似基准替换为可核实精确值
