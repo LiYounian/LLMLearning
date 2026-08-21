@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>技术点深挖：MLA / GRPO / thinking-budget | 大模型演进路线</title>
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .fml{background:#080b12;border:1px solid var(--border-s);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;
+    padding:14px 18px;margin:16px 0;font-family:var(--mono);font-size:14.5px;line-height:2;color:var(--fg);overflow-x:auto}
+  .fml .cm{color:var(--fg-faint);font-size:12.5px}
+  .fml b{color:var(--accent3)}
+  .diag{background:var(--bg-soft);border:1px solid var(--border-s);border-radius:12px;padding:16px;margin:18px 0}
+  .diag svg{width:100%;height:auto;display:block}
+  .keyrow{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:18px 0}
+  .kbox{background:var(--bg-soft);border:1px solid var(--border-s);border-radius:11px;padding:13px 15px}
+  .kbox .h{font-weight:700;margin-bottom:3px}
+  .kbox .d{font-size:13.5px;color:var(--fg-dim)}
+  .toc{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 6px}
+  .toc a{border:1px solid var(--border-s);background:var(--bg-soft);border-radius:20px;padding:6px 15px;font-size:14px;color:var(--fg-dim)}
+  .toc a:hover{border-color:var(--accent);color:var(--fg);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型演进路线 <span class="dot">·</span> 8家调研</span>
+  <nav>
+    <a href="index.html">目录</a><a href="timeline.html">跨家时间线</a>
+    <a href="tech.html" class="active">技术脉络</a><a href="metrics.html">指标脉络</a>
+    <a href="data.html">数据规模</a><a href="references.html">来源</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="tech.html">技术脉络</a> / 逐点深挖</div>
+  <h1>技术点深挖：三个关键机制的原理</h1>
+  <p class="lead">从技术脉络里挑出三个"读懂了就抓住主线"的机制，讲清<b>它解决什么问题、公式长什么样、和前代怎么取舍</b>。面向已知道 Transformer/注意力基础的读者。</p>
+  <div class="toc">
+    <a href="#mla">① MLA 多头潜在注意力</a>
+    <a href="#grpo">② GRPO 组相对策略优化</a>
+    <a href="#think">③ thinking-budget / 测试期算力</a>
+    <a href="#moe">④ MoE 负载均衡（延伸）</a>
+  </div>
+  <p class="src">公式为便于阅读的线性写法（非严格 LaTeX 排版）；结构图为示意，非等比。一手来源见文末与<a href="references.html">来源页</a>。</p>
+
+  <!-- ==================== MLA ==================== -->
+  <h2 id="mla">① MLA · 多头潜在注意力（DeepSeek V2 首创）</h2>
+  <p><b>要解决的问题：</b>自回归生成时，每生成一个 token 都要把历史所有 token 的 Key/Value 存进 <b>KV cache</b>。标准多头注意力（MHA）的 KV cache 大小 ∝ 头数×头维×层数×序列长——长上下文时显存被它吃满，成为推理成本与吞吐的头号瓶颈。GQA/MQA 通过"多个查询头共享一组 KV"来压缩，但要牺牲一点质量。</p>
+  <p><b>MLA 的思路：</b>不直接缓存 K、V，而是把它们<b>联合压缩成一个低维「潜在向量」</b> c<sup>KV</sup>（维度 d<sub>c</sub> ≪ 头数×头维），推理时只缓存这个潜在向量，用时再上投影还原出各头的 K、V。位置信息用一路<b>解耦 RoPE 键</b>单独携带。</p>
+
+  <div class="fml">
+<span class="cm"># 下投影：把隐藏态压成低维潜在向量（这就是要缓存的东西）</span>
+c<sup>KV</sup><sub>t</sub> = W<sup>DKV</sup> · h<sub>t</sub>        <span class="cm">// dim d_c，远小于 n_h·d_h</span>
+<span class="cm"># 用时上投影，还原每个头的 Key / Value（W 可在推理时吸收进别的矩阵，不必真存）</span>
+k<sup>C</sup><sub>t</sub> = W<sup>UK</sup> · c<sup>KV</sup><sub>t</sub>      v<sup>C</sup><sub>t</sub> = W<sup>UV</sup> · c<sup>KV</sup><sub>t</sub>
+<span class="cm"># 解耦 RoPE：另开一路小维度键携带位置，所有头共享</span>
+k<sup>R</sup><sub>t</sub> = RoPE( W<sup>KR</sup> · h<sub>t</sub> )      <span class="cm">// dim d_h^R</span>
+<span class="cm"># 最终每个头的键 = [还原键 ; 共享位置键]</span>
+k<sub>t,i</sub> = [ k<sup>C</sup><sub>t,i</sub> ; k<sup>R</sup><sub>t</sub> ]
+<span class="cm">════ 推理时每 token 只缓存： c^KV_t (d_c) + k^R_t (d_h^R) ════</span>
+  </div>
+
+  <div class="diag">
+    <svg viewBox="0 0 900 210" font-family="var(--sans)">
+      <text x="10" y="20" fill="#9aa7b8" font-size="13">每 token 的 KV cache（示意：格子数 ∝ 缓存量）</text>
+      <!-- MHA -->
+      <text x="70" y="52" fill="#e8eef6" font-size="14" font-weight="700" text-anchor="middle">MHA</text>
+      <text x="70" y="70" fill="#6a7688" font-size="11" text-anchor="middle">每头独立 K,V</text>
+      <g>
+        <!-- 8 columns x 2 rows of little boxes -->
+        <g fill="#ff7b72" opacity=".8">
+          <rect x="18" y="82" width="12" height="12"/><rect x="32" y="82" width="12" height="12"/><rect x="46" y="82" width="12" height="12"/><rect x="60" y="82" width="12" height="12"/><rect x="74" y="82" width="12" height="12"/><rect x="88" y="82" width="12" height="12"/><rect x="102" y="82" width="12" height="12"/><rect x="116" y="82" width="12" height="12"/>
+          <rect x="18" y="96" width="12" height="12"/><rect x="32" y="96" width="12" height="12"/><rect x="46" y="96" width="12" height="12"/><rect x="60" y="96" width="12" height="12"/><rect x="74" y="96" width="12" height="12"/><rect x="88" y="96" width="12" height="12"/><rect x="102" y="96" width="12" height="12"/><rect x="116" y="96" width="12" height="12"/>
+        </g>
+      </g>
+      <text x="70" y="130" fill="#9aa7b8" font-size="11" text-anchor="middle">= 2·n_h·d_h（大）</text>
+      <!-- GQA -->
+      <text x="330" y="52" fill="#e8eef6" font-size="14" font-weight="700" text-anchor="middle">GQA</text>
+      <text x="330" y="70" fill="#6a7688" font-size="11" text-anchor="middle">分组共享 K,V</text>
+      <g fill="#ffb454" opacity=".85">
+        <rect x="300" y="82" width="12" height="12"/><rect x="314" y="82" width="12" height="12"/><rect x="328" y="82" width="12" height="12"/>
+        <rect x="300" y="96" width="12" height="12"/><rect x="314" y="96" width="12" height="12"/><rect x="328" y="96" width="12" height="12"/>
+      </g>
+      <text x="330" y="130" fill="#9aa7b8" font-size="11" text-anchor="middle">= 2·n_g·d_h（中）</text>
+      <!-- MLA -->
+      <text x="620" y="52" fill="#e8eef6" font-size="14" font-weight="700" text-anchor="middle">MLA</text>
+      <text x="620" y="70" fill="#6a7688" font-size="11" text-anchor="middle">单个潜在向量 + 共享位置键</text>
+      <g>
+        <rect x="588" y="82" width="26" height="26" fill="#4d6bfe" opacity=".9"/>
+        <rect x="618" y="88" width="12" height="14" fill="#7ee787" opacity=".85"/>
+      </g>
+      <text x="620" y="130" fill="#9aa7b8" font-size="11" text-anchor="middle">= d_c + d_h^R（小，≈ GQA 2.25 组）</text>
+      <line x1="250" y1="45" x2="250" y2="140" stroke="#2a3242"/><line x1="510" y1="45" x2="510" y2="140" stroke="#2a3242"/>
+      <text x="450" y="175" fill="#7ee787" font-size="13" text-anchor="middle" font-weight="700">DeepSeek-V2：KV cache ↓ 约 93%，最大生成吞吐 ↑ 约 5.76×，且质量优于 MHA</text>
+    </svg>
+  </div>
+
+  <div class="tablewrap"><table>
+    <thead><tr><th>方案</th><th class="mono">每 token KV cache（元素数）</th><th>代价 / 特点</th></tr></thead>
+    <tbody>
+      <tr><td>MHA</td><td class="mono">2 · n_h · d_h</td><td>质量最好，显存最贵</td></tr>
+      <tr><td>MQA</td><td class="mono">2 · d_h</td><td>最省，质量掉得多</td></tr>
+      <tr><td>GQA</td><td class="mono">2 · n_g · d_h</td><td>折中（Llama 2/Qwen2 采用）</td></tr>
+      <tr><td><b>MLA</b></td><td class="mono">d_c + d_h<sup>R</sup>　<span style="color:var(--fg-faint)">(V2: 512+64=576)</span></td><td><b>省得多且质量不降</b>，长文本关键</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note g" style="padding:12px 16px"><b>一句话取舍：</b>GQA 是"减少 KV 的份数"，MLA 是"把 KV 压成低维再存、用时还原"——同样的显存预算下 MLA 拿到更好的质量，代价是多了投影矩阵的计算（可在推理时被吸收）。后续 DeepSeek 又在 MLA 上叠<b>稀疏注意力 DSA</b>（V3.2）把复杂度从 O(L²) 降到 O(L·k)。</p>
+
+  <!-- ==================== GRPO ==================== -->
+  <h2 id="grpo">② GRPO · 组相对策略优化（DeepSeek 首创）</h2>
+  <p><b>要解决的问题：</b>用强化学习做对齐/推理时，主流的 <b>PPO</b> 需要额外训练一个和策略模型同等大的 <b>价值网络（critic）</b>来估计基线（baseline），用于算优势 Â。critic 又贵又难训，还占一份显存。</p>
+  <p><b>GRPO 的思路：</b>干脆<b>不要 critic</b>。对同一个问题一次采样<b>一组</b> G 个回答，用这组回答奖励的<b>均值当基线、标准差做归一化</b>，直接得到每个回答的相对优势。"比同组其他答案好多少"就是优势信号。</p>
+
+  <div class="fml">
+<span class="cm"># PPO：优势 Â 依赖一个学习出来的价值网络 V_ψ（critic，额外一个大模型）</span>
+J<sub>PPO</sub> = 𝔼[ min( ρ·Â , clip(ρ, 1−ε, 1+ε)·Â ) ]     ρ = π<sub>θ</sub> / π<sub>θold</sub>
+<span class="cm">           Â 由 GAE 基于 critic V_ψ 估计  ← 就是要砍掉的部分</span>
+
+<span class="cm"># GRPO：对每个问题 q 采样一组 {o_1 … o_G}，各得奖励 r_i，组内归一化当优势</span>
+<b>Â<sub>i</sub> = ( r<sub>i</sub> − mean(r<sub>1..G</sub>) ) / std(r<sub>1..G</sub>)</b>          <span class="cm">// 无需 critic！</span>
+
+J<sub>GRPO</sub> = 𝔼[ (1/G) Σ<sub>i</sub> min( ρ<sub>i</sub>·Â<sub>i</sub> , clip(ρ<sub>i</sub>,1−ε,1+ε)·Â<sub>i</sub> ) − β·D<sub>KL</sub>(π<sub>θ</sub> ‖ π<sub>ref</sub>) ]
+  </div>
+
+  <div class="diag">
+    <svg viewBox="0 0 900 200" font-family="var(--sans)">
+      <!-- PPO -->
+      <text x="20" y="24" fill="#e8eef6" font-size="14" font-weight="700">PPO（需 critic）</text>
+      <rect x="20" y="40" width="120" height="40" rx="8" fill="#141926" stroke="#4d6bfe"/><text x="80" y="65" fill="#e8eef6" font-size="13" text-anchor="middle">策略 π_θ</text>
+      <rect x="20" y="100" width="120" height="40" rx="8" fill="#141926" stroke="#ff7b72"/><text x="80" y="125" fill="#ff7b72" font-size="13" text-anchor="middle">价值网络 V_ψ</text>
+      <rect x="180" y="70" width="120" height="40" rx="8" fill="#141926" stroke="#2a3242"/><text x="240" y="95" fill="#9aa7b8" font-size="13" text-anchor="middle">GAE → Â</text>
+      <line x1="140" y1="60" x2="180" y2="82" stroke="#4d6bfe" stroke-width="1.5"/><line x1="140" y1="120" x2="180" y2="98" stroke="#ff7b72" stroke-width="1.5"/>
+      <text x="240" y="140" fill="#ff7b72" font-size="11" text-anchor="middle">多一个同等大的模型</text>
+      <line x1="360" y1="90" x2="410" y2="90" stroke="#2a3242" stroke-width="2"/>
+      <!-- GRPO -->
+      <text x="440" y="24" fill="#e8eef6" font-size="14" font-weight="700">GRPO（无 critic）</text>
+      <rect x="440" y="40" width="120" height="40" rx="8" fill="#141926" stroke="#4d6bfe"/><text x="500" y="65" fill="#e8eef6" font-size="13" text-anchor="middle">策略 π_θ</text>
+      <text x="580" y="55" fill="#9aa7b8" font-size="12">一题采样 G 个答案</text>
+      <g fill="#141926" stroke="#7ee787"><rect x="580" y="66" width="40" height="22" rx="5"/><rect x="626" y="66" width="40" height="22" rx="5"/><rect x="672" y="66" width="40" height="22" rx="5"/><rect x="718" y="66" width="40" height="22" rx="5"/></g>
+      <text x="669" y="82" fill="#7ee787" font-size="11" text-anchor="middle">o₁  o₂  o₃ … o_G</text>
+      <rect x="580" y="108" width="178" height="40" rx="8" fill="#141926" stroke="#7ee787"/>
+      <text x="669" y="126" fill="#e8eef6" font-size="12.5" text-anchor="middle">组内归一化</text>
+      <text x="669" y="142" fill="#7ee787" font-size="11" text-anchor="middle">Âᵢ=(rᵢ−mean)/std</text>
+      <line x1="500" y1="80" x2="500" y2="77" stroke="#4d6bfe"/><line x1="560" y1="77" x2="578" y2="77" stroke="#4d6bfe" stroke-width="1.5"/>
+      <line x1="669" y1="88" x2="669" y2="108" stroke="#7ee787" stroke-width="1.5"/>
+      <text x="669" y="172" fill="#7ee787" font-size="12" text-anchor="middle" font-weight="700">省一半显存/算力，训练更稳</text>
+    </svg>
+  </div>
+
+  <div class="keyrow">
+    <div class="kbox"><div class="h">为什么能行</div><div class="d">推理/数学任务奖励可用<b>规则判定</b>（答案对不对、格式合不合规），组内比较天然给出稳定基线，不必学 critic。</div></div>
+    <div class="kbox"><div class="h">R1-Zero 的惊艳</div><div class="d">DeepSeek 用纯 GRPO、<b>不做 SFT 冷启动</b>直接在基座上 RL，模型自发涌现更长的思考链与"aha moment"。</div></div>
+    <div class="kbox"><div class="h">谱系</div><div class="d">RLHF(PPO) → DPO(去 RL 循环) → <b>GRPO(去 critic)</b>；GRPO 成为 2025 开源推理模型的事实标准。</div></div>
+  </div>
+
+  <!-- ==================== thinking budget ==================== -->
+  <h2 id="think">③ thinking-budget / 测试期算力（test-time compute）</h2>
+  <p><b>核心范式转变：</b>2024 年 o1 起，提升智能的杠杆从"训练期堆参数/数据"多了一条"<b>推理期让模型多想一会儿</b>"。模型在给出答案前先生成一段（通常隐藏的）思维链 CoT，<b>思考的 token 越多、准确率越高</b>——这就是测试期算力缩放（test-time scaling）。</p>
+
+  <div class="diag">
+    <svg viewBox="0 0 900 260" font-family="var(--sans)">
+      <text x="20" y="22" fill="#9aa7b8" font-size="13">准确率随「思考 token 预算」上升（示意：先快升、后饱和）</text>
+      <!-- axes -->
+      <line x1="70" y1="220" x2="850" y2="220" stroke="#2a3242" stroke-width="1.5"/>
+      <line x1="70" y1="40" x2="70" y2="220" stroke="#2a3242" stroke-width="1.5"/>
+      <text x="460" y="250" fill="#6a7688" font-size="12" text-anchor="middle">思考 token 预算（对数，越右越多算力/成本）</text>
+      <text transform="translate(30,130) rotate(-90)" fill="#6a7688" font-size="12" text-anchor="middle">准确率</text>
+      <!-- curve: concave rising -->
+      <path d="M70,205 C 220,150 340,95 480,78 C 620,62 740,58 850,56" fill="none" stroke="#6ea8fe" stroke-width="3"/>
+      <!-- tier markers -->
+      <g font-size="11">
+        <circle cx="150" cy="182" r="5" fill="#9aa7b8"/><text x="150" y="172" fill="#9aa7b8" text-anchor="middle">low</text>
+        <circle cx="330" cy="103" r="5" fill="#7ee787"/><text x="330" y="93" fill="#7ee787" text-anchor="middle">medium</text>
+        <circle cx="520" cy="76" r="5" fill="#ffb454"/><text x="520" y="66" fill="#ffb454" text-anchor="middle">high</text>
+        <circle cx="720" cy="59" r="5" fill="#d2a8ff"/><text x="720" y="49" fill="#d2a8ff" text-anchor="middle">xhigh</text>
+      </g>
+      <text x="700" y="205" fill="#ff7b72" font-size="12">← 边际收益递减：越往右每一分准确率越贵</text>
+    </svg>
+  </div>
+
+  <p><b>为什么要"预算/档位"：</b>既然多想=多花钱且收益递减，就得把"想多深"变成一个<b>可调旋钮</b>，让简单问题少想、难题多想。各家给了不同形态：</p>
+  <div class="keyrow">
+    <div class="kbox" style="border-left:3px solid var(--c-claude)"><div class="h">extended thinking（Claude）</div><div class="d">显式可开关的思考模式，用 <code>budget_tokens</code> 直接给思考 token 上限；后续加 effort 档位。</div></div>
+    <div class="kbox" style="border-left:3px solid var(--c-gemini)"><div class="h">Deep Think（Gemini）</div><div class="d">并行思考——同时展开多条推理路径再聚合，换取更难题目的正确率（IMO 金牌级）。</div></div>
+    <div class="kbox" style="border-left:3px solid var(--c-qwen)"><div class="h">thinking budget（Qwen3）</div><div class="d">thinking / 非-thinking 统一在一个模型里，用显式 token 预算控制思考长度。</div></div>
+    <div class="kbox" style="border-left:3px solid var(--c-openai)"><div class="h">reasoning_effort（OpenAI/通用）</div><div class="d">low / medium / high / xhigh 档位，本质是把思考 token 预算离散成几挡。</div></div>
+  </div>
+  <div class="fml">
+<span class="cm"># 两条常见的测试期缩放路径</span>
+① 单条更长： 让 CoT 更长 → 准确率随思考 token 近似 <b>对数上升</b>后饱和
+② 多条聚合： 采样 k 条独立解 → 多数投票 / 自洽（self-consistency）
+   acc(k) 随 k 提升，Deep Think 属此类（并行思考）
+<span class="cm"># 成本 ≈ 思考 token 数 × 单价，所以"档位"= 在准确率↔成本曲线上选工作点</span>
+  </div>
+  <p class="note o" style="padding:12px 16px"><b>和指标脉络的呼应：</b>正是测试期算力把 AIME、GPQA、SWE-bench 等硬基准从"做不动"推到 90%+（见<a href="metrics.html">指标脉络</a>）——但代价是单次调用成本与延迟大涨，于是 2026 又转向"<b>token 效率</b>"（用更少思考达到同等智能）。</p>
+
+  <!-- ==================== MoE 延伸 ==================== -->
+  <h2 id="moe">④ MoE 负载均衡：辅助损失 vs 无辅助损失（延伸）</h2>
+  <p><b>问题：</b>MoE 每个 token 只激活少数专家（如 671B 里只用 37B）。但路由容易"旱涝不均"——热门专家被挤爆、冷门专家学不到东西，既浪费容量又拖慢训练。</p>
+  <div class="keyrow">
+    <div class="kbox"><div class="h">辅助损失法（传统）</div><div class="d">在主损失外加一个<b>负载均衡辅助损失</b>惩罚不均。副作用：这个额外目标会和语言建模目标"打架"，略伤性能。</div></div>
+    <div class="kbox"><div class="h">无辅助损失（DeepSeek V3）</div><div class="d">给每个专家一个<b>可学习偏置</b>，只用它调整路由选择、<b>不进梯度</b>：过载就调低、闲置就调高。均衡不靠伤害主损失来实现。</div></div>
+    <div class="kbox"><div class="h">upcycling（Qwen 等）</div><div class="d">不从零训 MoE，而是把训好的 <b>dense 模型"回收"</b>复制成多专家再继续训，省算力。</div></div>
+  </div>
+  <p class="src">更多分支（稀疏注意力 DSA/iRoPE/KDA、长上下文外推 YARN/DCA、FP8/MuonClip 训练稳定性、Agentic RL）见<a href="tech.html">技术脉络 T1–T8</a>，可按需再开深挖页。</p>
+
+  <div class="reflist">
+    <b>本页一手来源</b>
+    <ol>
+      <li>MLA / DeepSeekMoE / 无辅助损失均衡：DeepSeek-V2 <a href="https://arxiv.org/abs/2405.04434">arXiv:2405.04434</a> · DeepSeek-V3 <a href="https://arxiv.org/abs/2412.19437">2412.19437</a></li>
+      <li>GRPO：DeepSeekMath <a href="https://arxiv.org/abs/2402.03300">arXiv:2402.03300</a> · 纯 RL 推理 DeepSeek-R1 <a href="https://arxiv.org/abs/2501.12948">2501.12948</a>（Nature 2025）</li>
+      <li>PPO：<a href="https://arxiv.org/abs/1707.06347">arXiv:1707.06347</a> · DPO（对照）：<a href="https://arxiv.org/abs/2305.18290">2305.18290</a></li>
+      <li>GQA（对照）：<a href="https://arxiv.org/abs/2305.13245">arXiv:2305.13245</a></li>
+      <li>thinking / test-time：各家为官方博客与技术报告，汇总见<a href="references.html">来源页</a>与各公司详情页底部。</li>
+    </ol>
+  </div>
+
+  <div class="pagenav">
+    <a href="tech.html"><div class="lbl">← 上一节</div><div class="ttl">技术脉络 T1–T8</div></a>
+    <a class="next" href="metrics.html"><div class="lbl">下一节 →</div><div class="ttl">指标脉络</div></a>
+  </div>
+</div>
+</body>
+</html>
