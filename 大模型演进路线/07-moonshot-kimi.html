@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>月之暗面 Kimi 发展脉络 | 大模型演进路线</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="inner">
+    <span class="brand">大模型演进路线<span class="dot">·</span></span>
+    <nav>
+      <a href="index.html">目录</a>
+      <a href="timeline.html">时间线</a>
+      <a href="tech.html">技术</a>
+      <a href="metrics.html">指标</a>
+      <a href="data.html">数据规模</a>
+      <a href="references.html">参考文献</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap page" style="--bar:#f0518b">
+
+  <div class="breadcrumb"><a href="index.html">目录</a> / 月之暗面 Kimi</div>
+
+  <h1>月之暗面 Kimi <span class="badge open">先闭源后开放权重</span></h1>
+
+  <p class="lead">从"超长上下文"起家的国内头部大模型产品线，经历产品闭源期 → RL 推理期 → agentic 开放权重期三阶段。K2 是分水岭：首创 MuonClip 优化器稳定万亿级 MoE 训练，以近乎 MIT 的许可开放权重；K3 进一步放大到 2.8T 参数、100 万上下文，号称"史上最大开源权重模型"。</p>
+
+  <div class="note o">
+    <div class="t">阅读说明 · 诚实边界</div>
+    参数量 / 训练 token / 上下文长度以官方（技术报告、官方 GitHub/HuggingFace/博客）披露为准；官方未公开的一律标注"官方未公开"，不臆造。助手知识截止 2026-01，K2.5 及之后版本（K2.6 / K2.7 / K3）主要依赖二手来源核实，相关不确定性已在文末集中标注。产品期（2023–2024）底层模型参数与训练数据<strong>官方从未公开</strong>。
+  </div>
+
+  <div class="statgrid">
+    <div class="stat"><div class="k">成立 / 创始人</div><div class="v">2023.03</div><div class="s">Moonshot AI · 杨植麟</div></div>
+    <div class="stat"><div class="k">起家卖点</div><div class="v">超长上下文</div><div class="s">20 万 → 200 万汉字</div></div>
+    <div class="stat"><div class="k">开源分水岭</div><div class="v">Kimi K2</div><div class="s">2025-07 · 修改版 MIT 许可</div></div>
+    <div class="stat"><div class="k">K2 规模</div><div class="v">1.04T / 32B</div><div class="s">MoE · 384 专家选 8 · 15.5T token</div></div>
+    <div class="stat"><div class="k">最大开源权重</div><div class="v">2.8T / 104B</div><div class="s">Kimi K3 · 2026-07（README 口径）</div></div>
+    <div class="stat"><div class="k">上下文演进</div><div class="v">128K → 1M</div><div class="s">K2 128K → K3 100 万 tokens</div></div>
+  </div>
+
+  <h2>发展时间线</h2>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="yr">2023-10 · 产品期（闭源）</div>
+      <h4>Kimi Chat（初代智能助手）</h4>
+      <p>以"支持 20 万汉字输入"（维基折合约 128K tokens）作为核心卖点，号称全球首个支持 20 万汉字输入的 AI 产品。底层模型不开源、参数量与训练数据官方未公开。<span class="cite" title="维基百科 Kimi (chatbot)">[1]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024-03 · 产品期（闭源）</div>
+      <h4>上下文扩容（内测）</h4>
+      <p>无损上下文从 20 万汉字扩展到 200 万汉字（内测），长文本能力大幅升级。底层模型规模仍未公开。<span class="cite" title="维基百科 Kimi (chatbot)">[1]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-01-20 · 推理期（技术报告公开）</div>
+      <h4>Kimi k1.5</h4>
+      <p>多模态 LLM + 强化学习。确立"用 RL 扩展 LLM 推理"路线：长上下文 RL（128K）+ 改进的策略优化，<strong>刻意不用 MCTS、价值函数、过程奖励模型（PRM）</strong>，主打简洁有效，并做长思维链→短思维链蒸馏。对标 OpenAI o1。参数量与预训练 token 官方未公开。<span class="cite" title="arXiv 2501.12599 Kimi k1.5">[2]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-04 / 2025-06 · 衍生开源</div>
+      <h4>Kimi-VL（16B/3B 激活）· Kimi-Dev（72B）</h4>
+      <p>轻量级开源多模态视觉语言模型 Kimi-VL，与面向 SWE-bench 类任务的代码专用模型 Kimi-Dev，标志权重开源的先行试水。训练细节多数未公开。<span class="cite" title="官方 GitHub MoonshotAI">[4]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-07 · Agentic / 开放权重期（分水岭）</div>
+      <h4>Kimi K2（Instruct / Base）</h4>
+      <p>稀疏 MoE，<strong>1.04T 总参 / 32B 激活</strong>（384 专家选 8 + 1 共享专家、61 层、MLA、词表 16 万）。首创 <strong>MuonClip 优化器</strong>（Muon + QK-Clip 防注意力 logit 爆炸），在 <strong>15.5T tokens 预训练中零 loss spike</strong>。明确定位 agentic，后训练用大规模 agentic 数据合成 + 联合 RL。以<strong>修改版 MIT 许可开放权重</strong>。<span class="cite" title="arXiv 2507.20534 / HuggingFace Kimi-K2-Instruct">[3][5]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-09-09 · 开放权重</div>
+      <h4>Kimi K2-Instruct-0905</h4>
+      <p>架构同 K2（1T/32B），上下文从 128K 翻倍到 <strong>256K</strong>，agentic / 前端编码能力增强，编码类基准提升。增量训练数据量官方未公开。<span class="cite" title="SCMP / HuggingFace">[6]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-11-06 · 开放权重</div>
+      <h4>Kimi K2 Thinking</h4>
+      <p>MoE 推理变体（1T/32B，256K）。提出<strong>交错式思考（interleaved thinking）</strong>：在工具调用之间穿插推理步骤，支持 200–300 次连续工具调用无需人工干预。HLE(带工具) 44.9、BrowseComp 60.2、SWE-bench Verified 71.3。<span class="cite" title="Turing Post">[7]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2026-01-27 · 开放权重（知识截止后，二手核实）</div>
+      <h4>Kimi K2.5</h4>
+      <p>原生多模态 MoE（1.04T/32B，384 专家选 8，MLA + SwiGLU，256K）。原生视觉+文本、引入 Agent Swarm 多智能体协同；续训约 15T 图文混合 tokens（二手口径）。HLE 50.2（Agent Swarm 模式，二手口径）。<span class="cite" title="Moonshot 官方页 / arXiv 2602.02276">[8]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2026-04（约）· 开放权重（二手口径）</div>
+      <h4>Kimi K2.6</h4>
+      <p>MoE，编码 / agentic 进一步优化。SWE-bench Verified 80.2、LiveCodeBench v6 89.6（均为二手口径，未见一手技术报告）。参数量、上下文官方未公开。<span class="cite" title="BenchLM（二手）">[9]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2026-07（约）· 开放权重（二手口径）</div>
+      <h4>Kimi K2.7 Code</h4>
+      <p>代码 / CLI agent 专用迭代。仅找到二手来源，编码基准未一手核实。发布月份与指标待一手核实。<span class="cite" title="AIToolsReview（二手）">[10]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2026-07 · 开放权重（README 口径）</div>
+      <h4>Kimi K3 —— 号称史上最大开源权重模型</h4>
+      <p>超大 MoE，<strong>2.8T 总参 / 104B 激活</strong>（896 专家选 16、93 层 = 69 KDA + 24 Gated MLA、词表 16 万、MoonViT-V2 视觉编码器 401M）。上下文跃升至 <strong>100 万 tokens（1,048,576）</strong>。新术语：KDA & Gated MLA 注意力、Stable LatentMoE、SiTU-GLU、MXFP4/MXFP8 量化感知训练。GPQA-Diamond 93.5、BrowseComp 91.2、DeepSWE 67.5、Video-MME 90.0（官方 README 口径）。训练 token 总量 README 未列。<span class="cite" title="官方仓库 MoonshotAI/Kimi-K3 README">[11]</span></p>
+    </div>
+
+  </div>
+
+  <h2>核心技术标签</h2>
+
+  <p>
+    <span class="tag b">超长上下文</span>
+    <span class="tag p">Muon / MuonClip 优化器</span>
+    <span class="tag p">QK-Clip</span>
+    <span class="tag g">RL 推理（不用 MCTS/PRM）</span>
+    <span class="tag o">交错式思考</span>
+    <span class="tag o">agentic 数据合成</span>
+    <span class="tag g">开放权重</span>
+    <span class="tag b">多智能体 Agent Swarm</span>
+  </p>
+
+  <h3>超长上下文（贯穿始终，最早的差异化标志）</h3>
+  <p>初代 Kimi Chat（2023-10）以"支持 20 万汉字"作为核心卖点，是当时全球领先的长文本产品；2024-03 无损扩到 200 万汉字（内测）。到大模型层面：k1.5 的 RL 训练上下文 128K；K2 初版 128K，K2-Instruct-0905（2025-09）翻倍到 256K；K3（2026-07）跃升到 100 万 tokens。</p>
+
+  <h3>Muon / MuonClip 优化器（K2 引入，稳定万亿级训练）</h3>
+  <p>Muon 优化器（基于矩阵谱域正交化，Keller Jordan 等 2024 提出）由 Moonshot 在《Muon is Scalable for LLM Training》中推向大规模，约为 AdamW 的 2 倍算力效率。<span class="cite" title="arXiv 2502.16982 Muon is Scalable">[12]</span> Kimi K2 进一步提出 <strong>MuonClip</strong>：在 Muon 基础上引入 <strong>QK-Clip</strong>——主动重缩放 query/key 投影权重，防止 MoE 大模型训练中的注意力 logit 爆炸。效果是 K2 在 15.5T tokens 预训练中实现"零 loss spike / 零训练不稳定"，这是把 MoE 稳定放大到 1T 级的关键（此前 Adam 系在该尺度易发散/尖峰）。<span class="cite" title="arXiv 2507.20534 Kimi K2">[3]</span></p>
+
+  <h3>强化学习驱动的推理（k1.5 引入，K2 Thinking 深化）</h3>
+  <p>Kimi k1.5（2025-01）确立"用 RL 扩展 LLM 推理"路线：长上下文 RL + 改进策略优化，刻意不用 MCTS、价值函数、PRM，主打简洁有效，同时做长→短思维链蒸馏，对标 OpenAI o1。Kimi K2 Thinking（2025-11）把推理与 agentic 融合，提出交错式思考：在工具调用之间穿插推理步骤，支持 200–300 次连续工具调用。</p>
+
+  <h3>Agentic 与开源策略转向（K2 是分水岭）</h3>
+  <p>K2（2025-07）明确定位为 agentic 模型（面向工具使用、推理、自主问题求解），后训练采用大规模 agentic 数据合成流水线 + 联合 RL。沿 K2 → K2-Instruct-0905（编码增强）→ K2 Thinking（长程工具调用）→ K2.5（Agent Swarm 多智能体协同）逐步强化。开源上：2023–2024 产品期闭源 → 2025-01 起技术报告公开、陆续开源 Kimi-VL/Kimi-Dev → K2（2025-07）以修改版 MIT 许可开放权重，此后 K2 Thinking、K2.5、K3 延续开放权重路线。</p>
+
+  <h2>数据 / 规模</h2>
+  <ul>
+    <li><strong>初代 Kimi Chat / 2024 扩容</strong>：底层模型参数量、训练数据官方均未公开；对外仅给上下文口径（20 万→200 万汉字）。</li>
+    <li><strong>Kimi k1.5（2025-01）</strong>：多模态数据配方 + RL，预训练 token 量、参数量官方未公开；已知 RL 上下文 128K。</li>
+    <li><strong>衍生开源模型</strong>：Kimi-VL 16B（3B 激活）；Kimi-Dev 72B。</li>
+    <li><strong>Kimi K2（2025-07）</strong>：总参 1.04T、激活 32B；384 专家选 8 + 1 共享专家、61 层、词表 16 万、MLA；预训练 <strong>15.5T tokens（零 loss spike）</strong>。</li>
+    <li><strong>K2-Instruct-0905（2025-09）</strong>：架构同 K2，上下文 128K→256K；增量训练数据量官方未公开。</li>
+    <li><strong>Kimi K2.5（2026-01）</strong>：1.04T/32B，384 专家选 8，MLA+SwiGLU；续训约 15T 图文混合 tokens（二手口径）。</li>
+    <li><strong>Kimi K3（2026-07）</strong>：总参 2.8T、激活 104B、896 专家选 16、93 层（69 KDA + 24 Gated MLA）、词表 16 万、MoonViT-V2 视觉编码器（401M）；训练 token 总量官方 README 未列。</li>
+  </ul>
+  <div class="note p">
+    <div class="t">规模走势</div>
+    参数：产品期未公开 → K2 首次给出精确规模（1.04T/32B）→ K3 放大到 2.8T/104B。上下文：128K → 256K → 1M。
+  </div>
+
+  <h2>代表指标</h2>
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th>版本</th><th>模式</th><th>代表指标</th><th>口径来源</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Kimi k1.5</td>
+          <td>long-CoT（对标 o1）</td>
+          <td>AIME 77.5 · MATH500 96.2 · Codeforces 94 分位 · MathVista 74.9<br>（short-CoT：AIME 60.8 · MATH500 94.6 · LiveCodeBench 47.3）</td>
+          <td>一手 · arXiv 2501.12599</td>
+        </tr>
+        <tr>
+          <td>Kimi K2</td>
+          <td>非思考模式</td>
+          <td>SWE-bench Verified <strong>65.8</strong> · SWE-bench Multilingual 47.3 · Tau2-Bench 66.1 · ACEBench(En) 76.5 · LiveCodeBench v6 53.7 · AIME2025 49.5 · GPQA-Diamond 75.1 · OJBench 27.1</td>
+          <td>一手 · arXiv 2507.20534</td>
+        </tr>
+        <tr>
+          <td>Kimi K2 Thinking</td>
+          <td>思考 + 工具</td>
+          <td>HLE(带工具) 44.9 · BrowseComp 60.2 · SWE-bench Verified <strong>71.3</strong></td>
+          <td>二手 · Turing Post</td>
+        </tr>
+        <tr>
+          <td>Kimi K2.5</td>
+          <td>Agent Swarm</td>
+          <td>HLE 50.2</td>
+          <td>二手 · 官方页/宣传</td>
+        </tr>
+        <tr>
+          <td>Kimi K2.6</td>
+          <td>—</td>
+          <td>SWE-bench Verified <strong>80.2</strong> · LiveCodeBench v6 89.6</td>
+          <td>二手 · BenchLM</td>
+        </tr>
+        <tr>
+          <td>Kimi K3</td>
+          <td>官方 README</td>
+          <td>GPQA-Diamond 93.5 · BrowseComp 91.2 · DeepSWE 67.5 · Video-MME 90.0 · MathVision 94.3（97.8 带工具）</td>
+          <td>README 口径</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note r">
+    <div class="t">对比须谨慎</div>
+    编码 agentic 指标（SWE-bench Verified）从 K2 的 65.8 → K2 Thinking 71.3 → K2.6 约 80.2 稳步上行；知识/检索类（GPQA、BrowseComp）在 K3 大幅拉高。但跨代基准的版本、是否"带工具/思考模式"不同，纵向数字<strong>不宜直接相减比较</strong>。K2 Thinking 之后的指标多为二手口径。
+  </div>
+
+  <h2>不确定与空白（诚实标注）</h2>
+  <ul>
+    <li><strong>初代上下文口径</strong>："20 万汉字"是官方营销口径，维基折算约 128K tokens，两者非同一单位；底层模型参数量/训练数据官方从未公开。</li>
+    <li><strong>k1.5 规模未公开</strong>：只公开 RL/多模态方法与基准，未公开参数量、预训练 token 总量。</li>
+    <li><strong>K2 参数写法</strong>：技术报告为 1.04T 总参 / 32B 激活；部分材料简写为"1T"，指同一模型（HuggingFace 卡片写"1T"）。</li>
+    <li><strong>K2 Thinking 上下文</strong>：多数二手来源写 256K，但未见一手技术报告明确该数值，存在口径不一风险。</li>
+    <li><strong>K2.5 / K2.6 / K2.7 属知识截止后（2026）</strong>：K2.5 有官方页与 arXiv 2602.02276，但"Agent Swarm""HLE 50.2"等来自二手/宣传，未逐条一手复核；K2.6 / K2.7 仅二手来源，发布月份与指标待一手核实。</li>
+    <li><strong>Kimi K3 细节需谨慎</strong>：发布日期口径冲突（维基 2026-07-16，多家媒体 07-26/27，本文取 2026-07）；架构新术语（KDA、Gated MLA、SiTU-GLU、Stable LatentMoE、MoonViT-V2、MXFP4/MXFP8）来自 README 抓取，属知识截止后新术语，无法用既有知识交叉验证；参数 2.8T/104B、896 专家选 16、100 万上下文在维基与多家媒体间一致性较高；训练 token 总量与数据构成 README 未列。</li>
+    <li><strong>竞品对比慎用</strong>：部分二手来源出现的竞品名与排名，本文未采信为事实。</li>
+  </ul>
+
+  <h2>一手来源</h2>
+  <div class="reflist">
+    <ol>
+      <li>维基百科 Kimi (chatbot)：<a href="https://en.wikipedia.org/wiki/Kimi_(chatbot)" target="_blank" rel="noopener">en.wikipedia.org/wiki/Kimi_(chatbot)</a></li>
+      <li>Kimi k1.5 技术报告《Kimi k1.5: Scaling Reinforcement Learning with LLMs》（arXiv 2501.12599）：<a href="https://arxiv.org/abs/2501.12599" target="_blank" rel="noopener">arxiv.org/abs/2501.12599</a></li>
+      <li>Kimi K2 技术报告《Kimi K2: Open Agentic Intelligence》（arXiv 2507.20534）：<a href="https://arxiv.org/abs/2507.20534" target="_blank" rel="noopener">arxiv.org/abs/2507.20534</a></li>
+      <li>官方 GitHub 组织 MoonshotAI：<a href="https://github.com/MoonshotAI" target="_blank" rel="noopener">github.com/MoonshotAI</a></li>
+      <li>HuggingFace 模型卡 moonshotai/Kimi-K2-Instruct（修改版 MIT 许可、384 专家选 8、61 层、128K、词表 16 万）：<a href="https://huggingface.co/moonshotai/Kimi-K2-Instruct" target="_blank" rel="noopener">huggingface.co/moonshotai/Kimi-K2-Instruct</a></li>
+      <li>SCMP：更新版 Kimi 扩上下文 / 增强编码（K2-Instruct-0905）：<a href="https://www.scmp.com/tech/big-tech" target="_blank" rel="noopener">scmp.com/tech</a></li>
+      <li>Turing Post：Kimi K2 Thinking 深度解析：<a href="https://www.turingpost.com/p/kimik2thinking" target="_blank" rel="noopener">turingpost.com/p/kimik2thinking</a></li>
+      <li>Moonshot 官方 Kimi K2.5 页面：<a href="https://www.kimi.com/ai-models/kimi-k2-5" target="_blank" rel="noopener">kimi.com/ai-models/kimi-k2-5</a>（二手口径，2026 知识截止后）</li>
+      <li>BenchLM：Kimi K2.6 基准（二手口径）：<a href="https://benchlm.com" target="_blank" rel="noopener">benchlm.com</a></li>
+      <li>AIToolsReview：Kimi K2.7 Code（二手口径）：<a href="https://aitoolsreview.com" target="_blank" rel="noopener">aitoolsreview.com</a></li>
+      <li>官方仓库 MoonshotAI/Kimi-K3 README（K3 参数/指标 README 口径）：<a href="https://github.com/MoonshotAI/Kimi-K3" target="_blank" rel="noopener">github.com/MoonshotAI/Kimi-K3</a></li>
+      <li>Muon 优化器论文《Muon is Scalable for LLM Training》（arXiv 2502.16982，Moonshot）：<a href="https://arxiv.org/abs/2502.16982" target="_blank" rel="noopener">arxiv.org/abs/2502.16982</a></li>
+    </ol>
+  </div>
+
+  <div class="pagenav">
+    <a class="prev" href="06-deepseek.html">
+      <div class="lbl">← 上一家</div>
+      <div class="ttl">DeepSeek</div>
+    </a>
+    <a class="next" href="08-bytedance-doubao.html">
+      <div class="lbl">下一家 →</div>
+      <div class="ttl">字节 豆包</div>
+    </a>
+  </div>
+
+</div>
+
+</body>
+</html>

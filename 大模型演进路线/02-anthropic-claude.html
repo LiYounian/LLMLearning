@@ -1,0 +1,125 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Anthropic Claude 发展脉络 | 大模型演进路线</title>
+<link rel="stylesheet" href="assets/style.css"></head><body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型演进路线 <span class="dot">·</span> 8家调研</span>
+  <nav>
+    <a href="index.html">目录</a><a href="timeline.html">跨家时间线</a>
+    <a href="tech.html">技术脉络</a><a href="metrics.html">指标脉络</a>
+    <a href="data.html">数据规模</a><a href="references.html">来源</a>
+  </nav>
+</div></div>
+<div class="wrap page" style="--bar:#d97757">
+  <div class="breadcrumb"><a href="index.html">目录</a> / Anthropic Claude</div>
+  <h1>Anthropic Claude <span class="badge closed">闭源</span></h1>
+  <p class="lead">Anthropic 的旗舰大模型家族，2023 年 3 月首发。核心特征是"安全优先"的训练范式——Constitutional AI（宪法式 AI）+ RLAIF（基于 AI 反馈的强化学习），目标是 helpful, honest, harmless（有用、诚实、无害）。从长上下文到多模态视觉、计算机操作、扩展思考与 agentic 工具栈，Claude 一路把"能干活的助手"推向"能自主完成长时程任务的 agent"。</p>
+
+  <div class="note o"><div class="t">阅读前须知：参数量与训练数据一律"官方未公开"</div>
+  Anthropic 从未公开任何一代 Claude 的参数量与训练数据 token 量，本页所有此类字段一律如实标注"官方未公开"，绝不臆造。基准分数中，官方 model card 公布的与第三方评测/聚合站点的分数会分别注明——同名基准跨来源常有 1–5 个百分点差异（评测子集/脚手架不同），引用时务必点明口径。调研截止 2026-08-03。</div>
+
+  <div class="statgrid">
+    <div class="stat"><div class="k">首发</div><div class="v">2023-03</div><div class="s">Claude 1 / Instant</div></div>
+    <div class="stat"><div class="k">上下文窗口</div><div class="v">9K → 1M</div><div class="s">2026 顶配标配 1M</div></div>
+    <div class="stat"><div class="k">参数量</div><div class="v">未公开</div><div class="s">全系列从不披露</div></div>
+    <div class="stat"><div class="k">能力分档</div><div class="v">4 档</div><div class="s">Haiku·Sonnet·Opus·Fable/Mythos</div></div>
+    <div class="stat"><div class="k">SWE-bench Verified</div><div class="v">33% → 95%+</div><div class="s">3.5 Sonnet → Fable 5</div></div>
+  </div>
+
+  <h2>发展时间线</h2>
+  <p>演进主线（命名与时间已联网核实）：Claude 1/2 奠基 → Claude 3 首次三档分级 + 视觉 → 3.5 加 Artifacts 与计算机操作 → 3.7 引入扩展思考/混合推理 → Claude 4 系列铺开 agentic 工具与 1M 上下文 → 2026 的 Claude 5 家族（Sonnet 5 / Opus 5 / Fable 5 / Mythos 5）。注意"Claude 5"是家族称谓而非单一模型；Opus 仍有 4.x 与 5 并存，Haiku 停在 4.5 档。</p>
+  <div class="timeline">
+    <div class="tl-item"><div class="yr">2023-03-14</div><h4>Claude 1 / Claude Instant</h4><p>仅文本 Transformer（GPT 式）。首发即落地 Constitutional AI + RLAIF。早期上下文约 9K（该数字来源可靠性一般，属细节存疑项）。参数量·训练数据：官方未公开。</p></div>
+    <div class="tl-item"><div class="yr">2023-07-11</div><h4>Claude 2</h4><p>公开上线 claude.ai，编码/数学提升。上下文扩到 <strong>100K</strong>，长文档一次性阅读成为卖点。</p></div>
+    <div class="tl-item"><div class="yr">2023-11-21</div><h4>Claude 2.1</h4><p>上下文提升到 <strong>200K</strong>；引入 tool use；官方称幻觉较 2.0 减半。200K 此后成为 Claude 3/4 的主流窗口。</p></div>
+    <div class="tl-item"><div class="yr">2024-03-04 / 03-13</div><h4>Claude 3（Opus / Sonnet / Haiku）</h4><p>首次把家族拆成三档并加入<strong>视觉输入</strong>（多模态文+图）。Opus 官方 model card：MMLU 86.8%、GPQA 50.4%、GSM8K 95.0%。上下文 200K。（Opus/Sonnet 3-04 发布，Haiku 3-13）</p></div>
+    <div class="tl-item"><div class="yr">2024-06-20</div><h4>Claude 3.5 Sonnet</h4><p>推出 <strong>Artifacts</strong>（对话旁生成可交互工件）；中档模型即超越上一代 Opus。第三方汇总：SWE-bench Verified 33.4%、GPQA Diamond 59.4%、HumanEval 92.0%。</p></div>
+    <div class="tl-item"><div class="yr">2024-10-22</div><h4>Claude 3.5 Sonnet（升级版）+ 3.5 Haiku</h4><p>首个前沿模型公测 <strong>computer use 计算机操作</strong>——像人一样看屏幕、移动光标、点击、输入，为 agentic 工作流铺路。SWE-bench Verified 升至 49.0%（第三方汇总）。</p></div>
+    <div class="tl-item"><div class="yr">2025-02-24</div><h4>Claude 3.7 Sonnet</h4><p>首个<strong>混合推理</strong>模型：同一模型可"近即时回答"或"先产出扩展思考（extended thinking）再作答"，思考步数可控。同时发布 Claude Code。SWE-bench Verified ~62.3%（官方口径）。</p></div>
+    <div class="tl-item"><div class="yr">2025-05-22</div><h4>Claude Opus 4 / Sonnet 4</h4><p>铺开 agentic 工具栈：<strong>code execution 沙箱、MCP 连接器、Files API</strong>。Sonnet 4 后提供 1M 上下文 beta；Opus 4 首次触发 <strong>ASL-3</strong> 安全等级。官方：Opus 4 SWE-bench 72.5% / Sonnet 4 72.7%。</p></div>
+    <div class="tl-item"><div class="yr">2025-08-05</div><h4>Claude Opus 4.1</h4><p>编码 / agent 能力增量提升。上下文 200K。</p></div>
+    <div class="tl-item"><div class="yr">2025-09-29</div><h4>Claude Sonnet 4.5</h4><p>主打长时程 agent，发布时为最强编码 Sonnet；上下文 200K / 1M。官方称"the best coding model in the world"，SWE-bench Verified 领先同档。</p></div>
+    <div class="tl-item"><div class="yr">2025-10-15</div><h4>Claude Haiku 4.5</h4><p>低成本小模型，性能接近上一代前沿。上下文仍 200K（最大输出 64K）。此后 Haiku 停留在 4.5 档。</p></div>
+    <div class="tl-item"><div class="yr">2025-11-24</div><h4>Claude Opus 4.5</h4><p>引入 <strong>effort 参数</strong>与 Infinite Chats。定价 $5/$25 每百万 token。第三方汇总：SWE-bench Verified 80.9%、GPQA Diamond 87.0%、MMLU 90.8%、Terminal-bench 59.3%。</p></div>
+    <div class="tl-item"><div class="yr">2026-02-05 / 02-17</div><h4>Claude Opus 4.6 / Sonnet 4.6</h4><p><strong>adaptive thinking 自适应思考</strong>（模型自行决定思考深度）、effort GA、agent teams。<strong>1M 上下文成为标配起点</strong>。Sonnet 4.6 SWE-bench Pro ~58.1%。</p></div>
+    <div class="tl-item"><div class="yr">2026-04-16</div><h4>Claude Opus 4.7</h4><p>换用<strong>新分词器</strong>；引入<strong>高分辨率视觉</strong>（长边 2576px）与 task budgets（任务级 token 预算）。SWE-bench Pro ~64.3%（第三方汇总）。</p></div>
+    <div class="tl-item"><div class="yr">2026-05-28</div><h4>Claude Opus 4.8</h4><p>支持会话中途注入 system 消息、fast mode。官方称领先当时多数榜单：SWE-bench Verified 88.6%、SWE-bench Pro 69.2%、Online-Mind2Web 84%、HLE 49.8%（无工具）/ 57.9%（带工具）。</p></div>
+    <div class="tl-item"><div class="yr">2026-06-09</div><h4>Claude Fable 5 / Mythos 5（Mythos-class 顶配）</h4><p><strong>思考常开（always-on），原始思考链永不返回</strong>。内置更强网络/生物安全分类器：命中以 HTTP 200 + <code>stop_reason:"refusal"</code> 返回，可配置<strong>服务端 fallback</strong> 降级到 Opus 4.8 作答。Fable 5 SWE-bench Verified ~95%、SWE-bench Pro 80.3%（第三方汇总）。曾因出口管制于 2026-06-12 短暂下线、07-01 恢复。Mythos 5 仅限 Project Glasswing 受邀访问。</p></div>
+    <div class="tl-item"><div class="yr">2026-06-30</div><h4>Claude Sonnet 5</h4><p>默认自适应思考；新分词器。SWE-bench Pro ~63.2%（第三方汇总）。</p></div>
+    <div class="tl-item"><div class="yr">2026-07-24</div><h4>Claude Opus 5</h4><p>思考默认开启；定价 25/百万 token 档，512-token 缓存下限。第三方博客称 SWE-bench Verified ~97%、GPQA Diamond ~94.1（<strong>未见官方 model card，谨慎引用</strong>）。</p></div>
+  </div>
+
+  <h2>核心技术标签</h2>
+
+  <h3>Constitutional AI + RLAIF <span class="tag o">奠基技术</span></h3>
+  <p>源自 Anthropic 论文《Constitutional AI: Harmlessness from AI Feedback》（2022-12-15）。核心：用一份"宪法"（一组原则/准则）让模型对自身输出做<strong>自我批评与修订</strong>，再用 <strong>AI 反馈替代大量人工标注</strong>做强化学习（即 RLAIF），在不依赖昂贵人工的情况下让模型更无害。解决的是"可扩展对齐"——降低对人工偏好标注的依赖，同时提升诚实/无害性。宪法本身持续扩充：2023 年约 2,700 字 / 75 条准则 → 2026 年约 23,000 字。此技术自 Claude 1/2 起贯穿至今。</p>
+
+  <h3>长上下文 <span class="tag b">规模代理</span></h3>
+  <p>Claude 2 = 100K，Claude 2.1 = 200K，解决法律/金融/科研长文档一次性阅读问题。200K 一直是 Claude 3/4 主流窗口，直到 2026 年 Opus 4.6+ / Sonnet 5 / Fable 5 / Opus 5 把 <strong>1M 定为标配</strong>（Haiku 4.5 仍 200K）。由于参数量从不公开，上下文窗口是唯一可确证的"规模"信息。</p>
+
+  <h3>多模态视觉与三档分级 <span class="tag p">Claude 3</span></h3>
+  <p>2024.03 首次支持图像输入，并首次把家族拆成 <strong>Haiku（快/省）/ Sonnet（均衡）/ Opus（最强）</strong>。Opus 4.7 起进一步引入高分辨率视觉（长边 2576px）。分档即规模代理：Anthropic 用能力/价格分层间接反映规模差异，但不给绝对数字。</p>
+
+  <h3>Artifacts 与 Computer use <span class="tag g">产品化能力</span></h3>
+  <p><strong>Artifacts</strong>（3.5 Sonnet，2024.06）：在对话旁生成可交互的代码/文档工件。<strong>Computer use 计算机操作</strong>（升级版 3.5 Sonnet，2024.10）：首个前沿模型公测"像人一样看屏幕、移动光标、点击、输入"，为 agentic 工作流奠基。</p>
+
+  <h3>扩展思考 → 自适应思考 <span class="tag o">推理范式</span></h3>
+  <p><strong>Extended thinking / 混合推理</strong>（3.7 Sonnet，2025.02）：同一模型可"近即时回答"或"先产出推理 token 再作答"。此后演进为 <strong>adaptive thinking 自适应思考</strong>（4.6 起）——模型自行决定思考深度，并用 <strong>effort 参数</strong>（low/medium/high/xhigh/max）控制"思考+行动"的总开销；固定 <code>budget_tokens</code> 预算被弃用。Fable 5 更是"思考常开且原始思考链永不返回"。</p>
+
+  <h3>Agentic 工具栈与安全机制 <span class="tag b">Claude 4+</span></h3>
+  <p>Claude 4（2025.05）起铺开 <strong>code execution 服务端沙箱、MCP（Model Context Protocol）连接器、Files API</strong>，配合长时程 agent 能力；4.7/4.8 又加 task budgets、fast mode、会话中途注入 system 消息。2026 顶配 Mythos-class 模型内置更强的网络/生物安全<strong>分类器</strong>，命中会以 <code>stop_reason:"refusal"</code> 返回拒答，并可配置<strong>服务端 fallback</strong> 自动改由 Opus 4.8 等模型作答。</p>
+
+  <h2>数据 / 规模</h2>
+  <div class="note r"><div class="t">参数量：全系列官方未公开</div>
+  Claude 从未公开任何一代的参数量。外界仅有非官方推测，本页不采信也不臆造。任何声称具体参数量的第三方均为推测。</div>
+  <div class="note r"><div class="t">训练数据量：官方未公开</div>
+  token 数 / 语料构成同样从未公开。官方仅泛泛描述为"在大规模文本（Claude 3 起含图像）上预训练的生成式预训练 Transformer，再经 RLHF + Constitutional AI 微调"。</div>
+  <div class="note g"><div class="t">唯一可确证的"规模"信息：上下文窗口</div>
+  9K（早期）→ 100K（Claude 2）→ 200K（Claude 2.1 至 Claude 4 主流）→ 1M（2026 Opus 4.6/4.7/4.8、Sonnet 5、Fable 5、Opus 5；Haiku 4.5 仍 200K）。最大输出：Claude 4+ 多为 128K（Haiku 4.5 为 64K）。</div>
+  <p><strong>分档即规模代理：</strong>Haiku &lt; Sonnet &lt; Opus &lt; Fable/Mythos（Mythos-class 顶配）。Anthropic 用能力/价格分层间接反映规模差异，但始终不给绝对数字。</p>
+
+  <h2>代表指标</h2>
+  <p>SWE-bench（Verified，编码 agent 能力）最能体现代际跃迁；MMLU 已趋饱和，2025 年后官方逐渐改推 GPQA / HLE 等更难基准。下表标注官方口径（官方 model card）与第三方汇总的区别。</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>版本</th><th>SWE-bench Verified</th><th>MMLU</th><th>GPQA Diamond</th><th>其它</th><th>口径</th></tr></thead>
+    <tbody>
+      <tr><td>Claude 3 Opus</td><td>—</td><td>86.8%</td><td>50.4%</td><td>GSM8K 95.0%</td><td>官方 model card</td></tr>
+      <tr><td>Claude 3.5 Sonnet</td><td>33.4%</td><td>—</td><td>59.4%</td><td>HumanEval 92.0%</td><td>第三方汇总</td></tr>
+      <tr><td>3.5 Sonnet（升级）</td><td>49.0%</td><td>—</td><td>—</td><td>首推 computer use</td><td>第三方汇总</td></tr>
+      <tr><td>Claude 3.7 Sonnet</td><td>~62.3%</td><td>—</td><td>—</td><td>首个混合推理</td><td>官方口径</td></tr>
+      <tr><td>Opus 4 / Sonnet 4</td><td>72.5% / 72.7%</td><td>—</td><td>—</td><td>ASL-3</td><td>官方</td></tr>
+      <tr><td>Claude Opus 4.5</td><td>80.9%</td><td>90.8%</td><td>87.0%</td><td>Terminal-bench 59.3%</td><td>第三方汇总</td></tr>
+      <tr><td>Claude Opus 4.8</td><td>88.6%</td><td>—</td><td>—</td><td>SWE-bench Pro 69.2%；Online-Mind2Web 84%；HLE 49.8%(无工具)/57.9%(带工具)</td><td>官方 / the-decoder</td></tr>
+      <tr><td>Claude Fable 5</td><td>~95%</td><td>—</td><td>—</td><td>SWE-bench Pro 80.3%</td><td>第三方汇总</td></tr>
+      <tr><td>Claude Sonnet 5</td><td>—</td><td>—</td><td>—</td><td>SWE-bench Pro ~63.2%</td><td>第三方汇总</td></tr>
+      <tr><td>Claude Opus 5</td><td>~97% <span class="cite">存疑</span></td><td>—</td><td>~94.1 <span class="cite">存疑</span></td><td>思考默认开</td><td>第三方博客，未见官方 card</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note o"><div class="t">口径与存疑提示</div>
+  跨来源同名基准常差 1–5 个百分点（评测子集/脚手架不同）。Opus 5 / Fable 5 的前沿分数多来自第三方博客、口径不一且偏乐观，未逐一核对官方 model card——正式引用前建议以 Anthropic 官方 news / model card 复核。此外，不同第三方对 Opus 4.8 发布日给出 2026-02 / 2026-05 等不同说法，本页采用 Wikipedia 的 2026-05-28。</div>
+
+  <h2>一手来源</h2>
+  <div class="reflist"><ol>
+    <li>Anthropic — Introducing the next generation of Claude（Claude 3 家族）：<a href="https://www.anthropic.com/news/claude-3-family" target="_blank" rel="noopener">anthropic.com/news/claude-3-family</a>（含 Claude 3 Model Card PDF）</li>
+    <li>Anthropic — Introducing Claude 3.5 Sonnet：<a href="https://www.anthropic.com/news/claude-3-5-sonnet" target="_blank" rel="noopener">anthropic.com/news/claude-3-5-sonnet</a></li>
+    <li>Anthropic — computer use + 3.5 Sonnet 升级 + 3.5 Haiku：<a href="https://www.anthropic.com/news/3-5-models-and-computer-use" target="_blank" rel="noopener">anthropic.com/news/3-5-models-and-computer-use</a></li>
+    <li>Anthropic — Claude 3.7 Sonnet and Claude Code：<a href="https://www.anthropic.com/news/claude-3-7-sonnet" target="_blank" rel="noopener">anthropic.com/news/claude-3-7-sonnet</a>；扩展思考细节：<a href="https://www.anthropic.com/news/visible-extended-thinking" target="_blank" rel="noopener">/news/visible-extended-thinking</a></li>
+    <li>Anthropic — Introducing Claude 4（Opus 4 / Sonnet 4）：<a href="https://www.anthropic.com/news/claude-4" target="_blank" rel="noopener">anthropic.com/news/claude-4</a></li>
+    <li>Anthropic — Introducing Claude Sonnet 4.5：<a href="https://www.anthropic.com/news/claude-sonnet-4-5" target="_blank" rel="noopener">anthropic.com/news/claude-sonnet-4-5</a></li>
+    <li>Anthropic — Introducing Claude Opus 4.5：<a href="https://www.anthropic.com/news/claude-opus-4-5" target="_blank" rel="noopener">anthropic.com/news/claude-opus-4-5</a></li>
+    <li>Anthropic — Introducing Claude Sonnet 4.6：<a href="https://www.anthropic.com/news/claude-sonnet-4-6" target="_blank" rel="noopener">anthropic.com/news/claude-sonnet-4-6</a></li>
+    <li>Anthropic — Introducing Claude Opus 4.6：<a href="https://www.anthropic.com/news/claude-opus-4-6" target="_blank" rel="noopener">anthropic.com/news/claude-opus-4-6</a></li>
+    <li>Anthropic — Introducing Claude Opus 4.7：<a href="https://www.anthropic.com/news/claude-opus-4-7" target="_blank" rel="noopener">anthropic.com/news/claude-opus-4-7</a></li>
+    <li>Anthropic — Introducing Claude Opus 4.8：<a href="https://www.anthropic.com/news/claude-opus-4-8" target="_blank" rel="noopener">anthropic.com/news/claude-opus-4-8</a></li>
+    <li>论文 — Constitutional AI: Harmlessness from AI Feedback（2022-12）：<a href="https://arxiv.org/abs/2212.08073" target="_blank" rel="noopener">arxiv.org/abs/2212.08073</a></li>
+    <li>论文 — Training a Helpful and Harmless Assistant with RLHF（HH-RLHF，2022-04）：<a href="https://arxiv.org/abs/2204.05862" target="_blank" rel="noopener">arxiv.org/abs/2204.05862</a></li>
+    <li>Wikipedia — Claude (language model)（时间线主依据）：<a href="https://en.wikipedia.org/wiki/Claude_(language_model)" target="_blank" rel="noopener">en.wikipedia.org/wiki/Claude_(language_model)</a></li>
+    <li>第三方基准（口径需谨慎）— Vellum: Claude Opus 4.8 Benchmarks Explained：<a href="https://www.vellum.ai/blog/claude-opus-4-8-benchmarks-explained" target="_blank" rel="noopener">vellum.ai/blog/claude-opus-4-8-benchmarks-explained</a>；morphllm Claude benchmarks：<a href="https://www.morphllm.com/claude-benchmarks" target="_blank" rel="noopener">morphllm.com/claude-benchmarks</a></li>
+    <li>其它报道/汇总（谨慎引用）：DeepLearning.AI（3.7 混合推理）、the-decoder（Opus 4.8）、DataCamp（Sonnet 5）、Caylent（Haiku 4.5）、coursiv / codersera（Opus 5）</li>
+  </ol></div>
+
+  <div class="pagenav">
+    <a href="01-openai-gpt.html"><div class="lbl">← 上一家</div><div class="ttl">OpenAI GPT</div></a>
+    <a class="next" href="03-google-gemini.html"><div class="lbl">下一家 →</div><div class="ttl">Google Gemini</div></a>
+  </div>
+</div></body></html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeepSeek 发展脉络 | 大模型演进路线</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="inner">
+    <span class="brand">大模型演进路线<span class="dot">·</span></span>
+    <nav>
+      <a href="index.html">目录</a>
+      <a href="timeline.html">时间线</a>
+      <a href="tech.html">技术</a>
+      <a href="metrics.html">指标</a>
+      <a href="data.html">数据</a>
+      <a href="references.html">参考</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap page" style="--bar:#4d6bfe">
+
+  <div class="breadcrumb"><a href="index.html">目录</a> / DeepSeek</div>
+
+  <h1>DeepSeek <span class="badge open">开放权重</span></h1>
+  <p class="lead">杭州幻方量化旗下深度求索（2023 成立）。以「开源权重 + 技术报告透明公开训练细节 + 极致工程降本」三板斧著称：MLA 把 KV cache 压 93.3%、DeepSeekMoE 降推理成本、GRPO 首创、FP8 训练把 V3 正式预训练成本压到约 550 万美元、纯 RL 推理登上 Nature、DSA 稀疏注意力把长文注意力复杂度从 O(L²) 降到 O(L·k)。</p>
+
+  <div class="note g">
+    <div class="t">一句话定位</div>
+    在开源阵营里透明度最高：不仅放权重，还在技术报告里公布训练 token 量（2T→8.1T→14.8T）与 GPU 时（V3 = 2.788M H800 GPU 时）。用架构创新（MLA / DeepSeekMoE）+ 工程创新（FP8 / MTP / DSA）+ 算法创新（GRPO / 纯 RL）三条腿走出一条低成本高性能路线。
+  </div>
+
+  <div class="statgrid">
+    <div class="stat"><div class="k">成立</div><div class="v">2023</div><div class="s">幻方量化旗下</div></div>
+    <div class="stat"><div class="k">旗舰参数（V3/R1）</div><div class="v">671B / 37B</div><div class="s">MoE 总参 / 每 token 激活</div></div>
+    <div class="stat"><div class="k">V3 预训练</div><div class="v">14.8T</div><div class="s">tokens</div></div>
+    <div class="stat"><div class="k">V3 训练成本</div><div class="v">≈$550万</div><div class="s">仅正式预训练 GPU 时折算</div></div>
+    <div class="stat"><div class="k">R1 AIME 2024</div><div class="v">79.8%</div><div class="s">Pass@1，略超 o1-1217</div></div>
+    <div class="stat"><div class="k">最新旗舰（V4-Pro）</div><div class="v">1.6T / 49B</div><div class="s">1M 上下文，2026-04</div></div>
+  </div>
+
+  <h2>发展时间线</h2>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="yr">2024-01（论文）</div>
+      <h4>DeepSeek LLM 7B / 67B — 奠基</h4>
+      <p>稠密 Transformer，4K 上下文，2T tokens 自建语料。以 scaling law 实证 + SFT+DPO 对齐，确立「scaling law 指导 + 开源」路线；67B 在 MATH / GSM8K / HumanEval / BBH 及中文基准全面超 LLaMA2-70B。<span class="cite" title="arXiv 2401.02954">[1]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024-01（论文）</div>
+      <h4>DeepSeek-Coder 1.3B–33B — 代码</h4>
+      <p>稠密，16K 上下文，2T tokens（87% 代码 + 13% 自然语言）。项目级代码语料 + FIM 填空目标，开源代码模型 SOTA，超 Codex、GPT-3.5。<span class="cite" title="arXiv 2401.14196">[2]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024-02（论文）</div>
+      <h4>DeepSeekMath 7B — 首创 GRPO</h4>
+      <p>在 Coder-v1.5 基础上 +120B 数学 token 持续预训练。<strong>首次提出 GRPO</strong>（组相对策略优化）；MATH 51.7%（无外部工具、无投票），逼近 GPT-4 / Gemini-Ultra。<span class="cite" title="arXiv 2402.03300">[3]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024-05</div>
+      <h4>DeepSeek-V2 — MLA + DeepSeekMoE</h4>
+      <p>MoE 236B / 21B，128K 上下文，8.1T tokens。引入 <strong>MLA</strong>（多头潜在注意力）+ <strong>DeepSeekMoE</strong>：相比 67B 省 42.5% 训练成本、KV cache 降 93.3%、吞吐提升 5.76×。<span class="cite" title="arXiv 2405.04434">[4]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024-06</div>
+      <h4>DeepSeek-Coder-V2 — MoE 用于代码</h4>
+      <p>MoE 16B/2.4B 与 236B/21B 两档，128K。从 V2 中间检查点 +6T tokens，语言覆盖 86→338 种；代码 / 数学基准超 GPT4-Turbo、Claude 3 Opus、Gemini 1.5 Pro。<span class="cite" title="arXiv 2406.11931">[5]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024-12</div>
+      <h4>DeepSeek-V3 — 671B / FP8 / MTP，约 550 万美元</h4>
+      <p>MoE 671B / 37B，128K，14.8T tokens。<strong>FP8 混合精度训练 + MTP 多 token 预测 + 无辅助损失负载均衡</strong>；训练仅 2.788M H800 GPU 时（约 550 万美元），MMLU 88.5，对标 GPT-4o / Claude-3.5-Sonnet，震动业界。<span class="cite" title="arXiv 2412.19437">[6]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-01</div>
+      <h4>DeepSeek-R1 / R1-Zero — 纯 RL 推理登 Nature</h4>
+      <p>基于 V3-Base 的 MoE 671B / 37B，128K。<strong>纯 RL（GRPO）激发推理</strong>；R1-Zero 无 SFT 冷启动、直接 RL，自发涌现自我验证、反思、「aha moment」。AIME 2024 79.8%、MATH-500 97.3%、Codeforces 2029 Elo（对标 o1-1217）。该工作发表于 <strong>Nature</strong>。<span class="cite" title="arXiv 2501.12948 / Nature 2025">[7][8]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-03 / 2025-05</div>
+      <h4>V3-0324 / R1-0528 — 增量升级</h4>
+      <p>架构同前，后训练增强。V3-0324：MMLU-Pro 75.9→81.2、AIME 39.6→59.4、LiveCodeBench 39.2→49.2；R1-0528（思考 token 近翻倍）：AIME 2025 70.0→87.5、GPQA 71.5→81.0、Aider 57.0→71.6。（增量训练量官方未公开）<span class="cite" title="Hugging Face 模型卡 / API 更新日志">[11][12]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-08</div>
+      <h4>DeepSeek-V3.1 — 混合推理</h4>
+      <p>MoE 671B / 37B。<strong>混合推理（thinking / non-thinking 可切换）</strong>，统一对话与推理；适配国产加速器。增量数据量官方未公开。<span class="cite" title="API 更新日志">[12]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-09</div>
+      <h4>DeepSeek-V3.2-Exp — DSA 首发（实验版）</h4>
+      <p>在 V3.1-Terminus 上继续训练，首发 <strong>DeepSeek Sparse Attention（DSA）</strong>。性能与 V3.1-Terminus 持平，API 降价 50%+，同步开源权重与 TileLang / CUDA 内核。<span class="cite" title="官方公告 250929">[9]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-12</div>
+      <h4>DeepSeek-V3.2（正式）/ -Speciale — DSA 正式化</h4>
+      <p>DSA 正式化：注意力复杂度 O(L²)→O(L·k)。标准版对标 GPT-5；-Speciale 版在 2025 IMO 与 IOI 均获金牌级成绩。配套 arXiv 论文 2512.02556。<span class="cite" title="arXiv 2512.02556">[10]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2026-04</div>
+      <h4>DeepSeek-V4-Pro / V4-Flash — 1M 上下文</h4>
+      <p>Pro 1.6T / 49B、Flash 284B / 13B，<strong>1M 上下文默认</strong>。Token-wise 压缩 + DSA 混合注意力。Pro 世界知识对标 Gemini-3.1-Pro、agentic 编码强化；Flash 逼近 Pro。训练 token / 成本 / 具体基准分数官方公告未列。<span class="cite" title="官方公告 260424">[13]</span></p>
+    </div>
+
+  </div>
+
+  <div class="note r">
+    <div class="t">R2 至今未发布</div>
+    截至 2026-08，<strong>DeepSeek-R2 不存在</strong>，官方多次辟谣 3 月、8 月发布传闻。网传「R2 为 32B 稠密、AIME 2025 92.7%」等规格均为泄露 / 猜测，不可信；「CEO 因性能不满意暂缓、Ascend 训练受阻转回 Nvidia」属媒体报道 / 传闻，非官方确认。
+  </div>
+
+  <h2>核心技术标签</h2>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:14px 0">
+    <span class="tag b">MLA 多头潜在注意力</span>
+    <span class="tag b">DeepSeekMoE</span>
+    <span class="tag g">GRPO 首创</span>
+    <span class="tag o">FP8 混合精度训练</span>
+    <span class="tag o">MTP 多 token 预测</span>
+    <span class="tag g">纯 RL 推理</span>
+    <span class="tag p">DSA 稀疏注意力</span>
+    <span class="tag p">无辅助损失负载均衡</span>
+  </div>
+
+  <h3>技术演进主线</h3>
+  <ul>
+    <li><strong>MLA（Multi-head Latent Attention）</strong> — V2（2024-05）引入。把 KV cache 压缩成低维潜在向量，推理时 KV cache 降 93.3%，是长文本 + 低推理成本的核心，此后 V2/V3/R1/V3.x/V4 全线沿用。<span class="cite" title="arXiv 2405.04434">[4]</span></li>
+    <li><strong>DeepSeekMoE</strong> — V2（2024-05）引入。细粒度专家切分 + 共享专家隔离；V3 进一步用无辅助损失（auxiliary-loss-free）负载均衡替代传统辅助损失，避免负载均衡损失损害性能。<span class="cite" title="arXiv 2405.04434 / 2412.19437">[4][6]</span></li>
+    <li><strong>GRPO（Group Relative Policy Optimization）</strong> — DeepSeekMath（2024-02）首创。PPO 变体，用组内多采样的相对优势估计替代 critic 网络，省显存又稳，后成为 R1 纯 RL 推理的核心算法。<span class="cite" title="arXiv 2402.03300">[3]</span></li>
+    <li><strong>FP8 混合精度训练</strong> — V3（2024-12）大规模落地。E4M3 格式 + tile/block-wise 分块量化抑制离群值，是 V3 训练成本仅约 550 万美元的关键工程手段之一。<span class="cite" title="arXiv 2412.19437">[6]</span></li>
+    <li><strong>MTP（Multi-Token Prediction）</strong> — V3（2024-12）引入。训练时增设多 token 预测目标，提升数据效率与性能，并可用于推理加速。<span class="cite" title="arXiv 2412.19437">[6]</span></li>
+    <li><strong>纯 RL 推理（R1-Zero）</strong> — R1（2025-01）。R1-Zero 在 V3-Base 上不经 SFT 冷启动、直接 RL，自发涌现推理行为；R1 加少量冷启动 CoT 数据改善可读性。发表于 Nature。<span class="cite" title="arXiv 2501.12948 / Nature">[7][8]</span></li>
+    <li><strong>混合推理（Hybrid thinking）</strong> — V3.1（2025-08）。同一模型可在思考 / 非思考模式间切换，统一对话与推理。<span class="cite" title="API 更新日志">[12]</span></li>
+    <li><strong>DSA（DeepSeek Sparse Attention）</strong> — V3.2-Exp（2025-09）首发、V3.2 正式化、V4 沿用。细粒度稀疏注意力把注意力复杂度从 O(L²) 降到 O(L·k)，长文本大幅提速降内存而基本不损质量，是 V4 默认 1M 上下文的基础。<span class="cite" title="官方公告 250929 / arXiv 2512.02556">[9][10]</span></li>
+  </ul>
+
+  <h2>数据 / 规模</h2>
+  <p>DeepSeek 是开源阵营里预训练规模披露最透明的团队：预训练 token 量沿 2T → 8.1T → 14.8T 递进，V3 更罕见地公布了 GPU 时（2.788M H800 GPU 时）。</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>版本</th><th>预训练 token 量</th><th>训练成本</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>DeepSeek LLM 67B</td><td class="mono">2T</td><td>官方未公开美元成本</td><td class="mono">[1]</td></tr>
+        <tr><td>DeepSeek-Coder</td><td class="mono">2T（87% 代码）</td><td>官方未公开</td><td class="mono">[2]</td></tr>
+        <tr><td>DeepSeekMath 7B</td><td class="mono">Coder-v1.5 + 120B 数学</td><td>官方未公开</td><td class="mono">[3]</td></tr>
+        <tr><td>DeepSeek-V2</td><td class="mono">8.1T</td><td>相比 67B 省 42.5%（相对值）</td><td class="mono">[4]</td></tr>
+        <tr><td>DeepSeek-Coder-V2</td><td class="mono">V2 检查点 + 6T</td><td>官方未公开</td><td class="mono">[5]</td></tr>
+        <tr><td>DeepSeek-V3</td><td class="mono">14.8T</td><td>2.788M H800 GPU 时 ≈ 557 万美元*</td><td class="mono">[6]</td></tr>
+        <tr><td>DeepSeek-R1</td><td class="mono">RL + 少量冷启动 CoT</td><td>绝对 token 量与成本官方未公开</td><td class="mono">[7]</td></tr>
+        <tr><td>V3-0324 / R1-0528 / V3.1 / V3.2 / V4</td><td class="mono">增量 / 继续训练量多未公开</td><td>官方未公开</td><td class="mono">[11][12][13]</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note o">
+    <div class="t">* V3 成本口径务必注明</div>
+    「约 550–600 万美元」<strong>仅指最终一次预训练的 GPU 租用折算</strong>（按 $2/GPU 时估算），不含研究探索、数据、消融、后训练成本。媒体常把它误当作「复刻 GPT-4 只要 600 万美元」，属误读。
+  </div>
+
+  <h2>代表指标</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>模型（时间）</th><th>基准</th><th>成绩</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>DeepSeek 67B（2024-01）</td><td>MATH / GSM8K / HumanEval / BBH / 中文</td><td>全面超 LLaMA2-70B</td><td>稠密开源</td></tr>
+        <tr><td>DeepSeekMath 7B（2024-02）</td><td>MATH</td><td class="mono">51.7%</td><td>无工具无投票；自一致性 64 采样 60.9%</td></tr>
+        <tr><td>DeepSeek-V3（2024-12）</td><td>MMLU</td><td class="mono">88.5</td><td>对标 GPT-4o / Claude-3.5-Sonnet</td></tr>
+        <tr><td rowspan="3">DeepSeek-R1（2025-01）</td><td>AIME 2024（Pass@1）</td><td class="mono">79.8%</td><td>略超 o1-1217</td></tr>
+        <tr><td>MATH-500</td><td class="mono">97.3%</td><td>与 o1-1217 持平</td></tr>
+        <tr><td>Codeforces Elo</td><td class="mono">2029</td><td>超 96.3% 人类选手</td></tr>
+        <tr><td>V3-0324（2025-03，vs V3）</td><td>MMLU-Pro / GPQA / AIME / LiveCodeBench</td><td class="mono">81.2 / 68.4 / 59.4 / 49.2</td><td>后训练增强</td></tr>
+        <tr><td>R1-0528（2025-05，vs R1）</td><td>AIME 2025 / GPQA / LiveCodeBench v6 / Aider</td><td class="mono">87.5 / 81.0 / 73.3 / 71.6</td><td>思考 token 近翻倍</td></tr>
+        <tr><td>DeepSeek-V3.2（2025-12）</td><td>综合 / IMO·IOI</td><td>对标 GPT-5</td><td>-Speciale 版 2025 IMO/IOI 金牌级</td></tr>
+        <tr><td>DeepSeek-V4（2026-04）</td><td>世界知识 / agentic 编码</td><td>Pro 对标 Gemini-3.1-Pro</td><td>官方公告仅图示对比，未给具体分数</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>一手来源</h2>
+  <div class="reflist">
+    <ol>
+      <li>DeepSeek LLM（scaling law + 开源路线）：<a href="https://arxiv.org/abs/2401.02954" target="_blank" rel="noopener">arXiv 2401.02954</a></li>
+      <li>DeepSeek-Coder：<a href="https://arxiv.org/abs/2401.14196" target="_blank" rel="noopener">arXiv 2401.14196</a></li>
+      <li>DeepSeekMath（首创 GRPO）：<a href="https://arxiv.org/abs/2402.03300" target="_blank" rel="noopener">arXiv 2402.03300</a></li>
+      <li>DeepSeek-V2（MLA + DeepSeekMoE）：<a href="https://arxiv.org/abs/2405.04434" target="_blank" rel="noopener">arXiv 2405.04434</a></li>
+      <li>DeepSeek-Coder-V2：<a href="https://arxiv.org/abs/2406.11931" target="_blank" rel="noopener">arXiv 2406.11931</a></li>
+      <li>DeepSeek-V3（FP8 / MTP / 671B）：<a href="https://arxiv.org/abs/2412.19437" target="_blank" rel="noopener">arXiv 2412.19437</a></li>
+      <li>DeepSeek-R1（纯 RL 推理，arXiv）：<a href="https://arxiv.org/abs/2501.12948" target="_blank" rel="noopener">arXiv 2501.12948</a></li>
+      <li>DeepSeek-R1（Nature 2025）：<a href="https://www.nature.com/articles/s41586-025-09422-z" target="_blank" rel="noopener">Nature s41586-025-09422-z</a></li>
+      <li>DeepSeek-V3.2-Exp 官方公告（DSA 首发）：<a href="https://api-docs.deepseek.com/news/news250929/" target="_blank" rel="noopener">api-docs.deepseek.com/news/news250929</a></li>
+      <li>DeepSeek-V3.2（DSA 正式化，arXiv）：<a href="https://arxiv.org/abs/2512.02556" target="_blank" rel="noopener">arXiv 2512.02556</a></li>
+      <li>官方 Transparency Center（透明度中心）：<a href="https://www.deepseek.com/en/transparency/" target="_blank" rel="noopener">deepseek.com/en/transparency</a></li>
+      <li>DeepSeek API 更新日志（V3-0324 / R1-0528 / V3.1）：<a href="https://api-docs.deepseek.com/updates/" target="_blank" rel="noopener">api-docs.deepseek.com/updates</a></li>
+      <li>DeepSeek-V4 官方公告：<a href="https://api-docs.deepseek.com/news/news260424/" target="_blank" rel="noopener">api-docs.deepseek.com/news/news260424</a></li>
+      <li>技术综述（Martin Fowler）：<a href="https://martinfowler.com/articles/deepseek-papers.html" target="_blank" rel="noopener">martinfowler.com/articles/deepseek-papers</a></li>
+      <li>Sebastian Raschka（V3→V3.2 技术导览）：<a href="https://magazine.sebastianraschka.com/p/technical-deepseek" target="_blank" rel="noopener">magazine.sebastianraschka.com/p/technical-deepseek</a></li>
+    </ol>
+    <p class="src">调研截止 2026-08。参数量后带「/」为 MoE 总参数 / 每 token 激活参数；未公开项均标注「官方未公开」，官方数据与传闻严格区分。</p>
+  </div>
+
+  <div class="pagenav">
+    <a class="prev" href="05-alibaba-qwen.html">
+      <div class="lbl">← 上一篇</div>
+      <div class="ttl">阿里 Qwen</div>
+    </a>
+    <a class="next" href="07-moonshot-kimi.html">
+      <div class="lbl">下一篇 →</div>
+      <div class="ttl">月之暗面 Kimi</div>
+    </a>
+  </div>
+
+</div>
+
+</body>
+</html>

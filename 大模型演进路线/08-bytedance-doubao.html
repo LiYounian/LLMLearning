@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>字节 豆包(Seed) 发展脉络 | 大模型演进路线</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="inner">
+    <span class="brand">大模型演进路线<span class="dot">.</span></span>
+    <nav>
+      <a href="index.html">目录</a>
+      <a href="timeline.html">总时间线</a>
+      <a href="tech.html">技术脉络</a>
+      <a href="metrics.html">指标对比</a>
+      <a href="data.html">数据规模</a>
+      <a href="references.html">参考文献</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap page" style="--bar:#3ec6f0">
+
+  <div class="breadcrumb"><a href="index.html">目录</a> / 字节 豆包</div>
+
+  <h1>字节 豆包 (Seed) <span class="badge closed">产品化·极少公开</span></h1>
+
+  <p class="lead">字节跳动的大模型走了一条与众不同的路：极度产品化、以价格战和调用量叙事切入市场，而纯技术细节（参数量、训练 token、数据构成）几乎从不公开。本文如实标注留白，这也是本系列 8 家里技术透明度最低的一家。</p>
+
+  <div class="note o">
+    <div class="t">阅读前必读：命名两条线</div>
+    <p><strong>豆包（Doubao）</strong>是面向 C 端 App / B 端火山引擎 API 的<strong>产品名</strong>；<strong>Seed</strong>（ByteDance Seed，<code>seed.bytedance.com</code>）是大模型团队的<strong>技术/研究名</strong>。2025 年起两者合流，火山引擎上的模型 ID 统一为 <code>Doubao-Seed-x.x-*</code>。凡本文出现的第三方推测数字均已注明「存疑」。数据统计截至 2026-08。</p>
+  </div>
+
+  <div class="statgrid">
+    <div class="stat"><div class="k">首发</div><div class="v">2024-05</div><div class="s">火山引擎 Force 大会，主打降价 99.3%</div></div>
+    <div class="stat"><div class="k">主线参数量</div><div class="v">未公开</div><div class="s">除推理模型外全系官方留白</div></div>
+    <div class="stat"><div class="k">唯一官方数字</div><div class="v">200B / 20B</div><div class="s">Seed1.5-Thinking 总/激活参数</div></div>
+    <div class="stat"><div class="k">上下文</div><div class="v">256K</div><div class="s">Doubao 1.6 官方明确</div></div>
+    <div class="stat"><div class="k">规模叙事</div><div class="v">180万亿</div><div class="s">2026 FORCE 称日均 token 调用量</div></div>
+    <div class="stat"><div class="k">技术报告</div><div class="v">极少</div><div class="s">仅 Seed1.5-Thinking/VL、UI-TARS 有</div></div>
+  </div>
+
+  <h2>发展时间线</h2>
+
+  <div class="note">
+    <div class="t">主线一句话</div>
+    <p>豆包(2024) → Doubao 1.5 Pro（稀疏 MoE + 训推一体、高性价比）→ Doubao-1.5-thinking-pro / Seed1.5-Thinking（RL 深度推理）→ Doubao 1.6（256K + AdaCoT + 原生全模态）→ Doubao-Seed-2.0（Agent 化）→ Doubao-Seed-2.1-Pro（生产级 Agent）。独立研究线：UI-TARS（GUI Agent）、Seedream/Seedance（生成矩阵）。</p>
+  </div>
+
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="yr">2024-05-15</div>
+      <h4>豆包大模型首发（通用 Pro/Lite + 垂类）</h4>
+      <p>火山引擎「Force 原动力大会」发布，含通用 Pro/Lite 及多个垂直领域模型。以 Pro-32k 输入 0.0008 元/千 tokens、号称比行业低 <strong>99.3%</strong> 打响国产大模型价格战。前身为抖音/字节内部「云雀」模型的品牌化。发布日日均处理 1200 亿 tokens、生成 3000 万张图。无公开 benchmark，以价格/规模为卖点。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-01-22</div>
+      <h4>豆包大模型 1.5（doubao-1.5-pro / -lite / -vision-pro）</h4>
+      <p>确立技术底座：<strong>大规模稀疏 MoE + 训练-推理一体化</strong>设计。官方称用更小激活参数达到「7 倍激活参数 Dense 模型」的性能（MoE 效率杠杆约 7×，高于行业约 3×）。强调数据自建、<strong>不蒸馏其他模型</strong>。官方自评综合分超 GPT-4o、Claude 3.5 Sonnet（未给逐项分）。参数量官方未公开。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-04（约 4/17）</div>
+      <h4>Doubao-1.5-thinking-pro = Seed1.5-Thinking（深度思考）</h4>
+      <p>引入大规模 RL 训练的深度思考能力。<strong>MoE 总 200B / 激活 20B</strong>——这是主线里罕见的官方公开数字（技术报告 arXiv 2504.13914）。训练框架 HybridFlow + Ray，20ms 级低延迟。AIME 2024 <strong>86.7</strong>、Codeforces 55.0、GPQA <strong>77.3</strong>；总体超 DeepSeek-R1(671B)，非推理任务胜率高约 8%。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-05-13</div>
+      <h4>Seed1.5-VL（= doubao-1-5-thinking-vision-pro-250428）</h4>
+      <p>多模态理解模型：<strong>视觉编码器 532M + MoE LLM 激活 20B</strong>（LLM 总参数未公开）。60 个公开多模态基准中 <strong>38 项 SOTA</strong>；GUI/游戏智能体任务优于 OpenAI CUA、Claude 3.7。技术报告 arXiv 2505.07062，代码开源。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-06-11</div>
+      <h4>豆包大模型 1.6（Doubao-Seed-1.6 / -thinking / -flash）</h4>
+      <p>稀疏 MoE、原生全模态。<strong>256K</strong> 上下文（官方称国内首个达此规模的旗舰）。引入 <strong>AdaCoT 自适应思维链</strong>：模型自行判断该不该展开长推理，兼顾质量与成本；视觉-语言原生统一进主模型。较 1.5 降价约 63%，最低 2.60 元/百万 tokens。第三方(oreateai)称约 230B 总 / 23B 激活——<strong>未获官方确认，存疑</strong>。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2026-02-14</div>
+      <h4>Doubao-Seed-2.0 系列（Pro / Lite / Mini + Code）</h4>
+      <p>定位从「聊天助手」转向<strong>「通用 Agent 模型」</strong>：深度推理、长链任务、面向大规模生产。Pro 256K 上下文。官方称在 IMO / CMO / ICPC 等竞赛级任务有能力展示（官方口径，未给可复核成绩）。参数量官方未公开。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2026-05-06</div>
+      <h4>Doubao-Seed-2.0-lite 升级（家族首款全模态理解）+ 新增 -mini</h4>
+      <p>视频/图像/音频/文本<strong>原生统一理解</strong>；音频 19 语种转写、中英+14 语种互译；Agent 多轮反思 + 多智能体协同；Coding 支持前端/3D/游戏；GUI 操作。官方称在 HiPhO、MedXpertQA、细粒度感知、具身理解等超 Gemini-3.1-Pro（官方口径，未给具体分）。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2026-06-23</div>
+      <h4>Doubao-Seed-2.1-Pro（夏季 FORCE 大会）</h4>
+      <p>主打<strong>「生产级 Agent」</strong>：代码交付、长程 Agent 任务、多模态理解、企业级稳定运行四维「生产级突破」。官方称整体性能对标 GPT-5.5、Claude Opus 4.7、Gemini 3.1 Pro（<strong>纯官方自评，无第三方复核</strong>）。同期补齐 Seedream 5.0 Pro / Seedance 2.5 / Seed-Audio 1.0。</p>
+    </div>
+
+  </div>
+
+  <h3>并行的多模态 / Agent 独立线（非主 LLM 版本号，多有技术报告/开源）</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>时间</th><th>模型</th><th>类型</th><th>要点</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">2025-01</td><td>UI-TARS（原论文）</td><td>GUI Agent</td><td>原生 GUI 智能体方案奠基（arXiv 2501.12326）</td></tr>
+        <tr><td class="mono">2025-04-16</td><td>UI-TARS-1.5（含 7B 开源）</td><td>GUI Agent</td><td>7 个 GUI 基准 SOTA；Apache-2.0 开源</td></tr>
+        <tr><td class="mono">2025-04</td><td>Seedream 3.0</td><td>文生图</td><td>中英双语、2K 分辨率</td></tr>
+        <tr><td class="mono">2025-08-21</td><td>Seed-OSS-36B</td><td>开源 dense LLM</td><td>长上下文/推理/Agent；字节少见的开源 dense</td></tr>
+        <tr><td class="mono">2025-09-04</td><td>UI-TARS-2</td><td>GUI Agent</td><td>多轮 RL、数据飞轮；游戏达约 60% 人类水平（arXiv 2509.02544）</td></tr>
+        <tr><td class="mono">2025-09</td><td>Seedream 4.0</td><td>文生图</td><td>较 3.0 提速约 10×，秒级出 2K</td></tr>
+        <tr><td class="mono">2026-02</td><td>Seedream 5.0 / Seedance 2.0</td><td>图 / 视频</td><td>支持实时联网检索图 + 精准编辑</td></tr>
+        <tr><td class="mono">2026-06/07</td><td>Seedream 5.0 Pro / Seedance 2.5 / Seed-Audio 1.0</td><td>图/视频/音频</td><td>随 Seed-2.1-Pro 发布，补齐全生成矩阵</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>核心技术标签</h2>
+
+  <p>
+    <span class="tag b">大规模稀疏 MoE</span>
+    <span class="tag b">训练-推理一体化</span>
+    <span class="tag g">性价比 ~7× 激活效率杠杆</span>
+    <span class="tag o">价格战 / 高并发</span>
+    <span class="tag p">RL 深度推理（Seed1.5-Thinking）</span>
+    <span class="tag p">AdaCoT 自适应思维链</span>
+    <span class="tag g">原生视觉-语言 → 全模态统一</span>
+    <span class="tag b">UI-TARS GUI Agent</span>
+    <span class="tag o">Seedream/Seedance 生成矩阵</span>
+    <span class="tag g">不蒸馏、数据自建</span>
+  </p>
+
+  <h3>五条技术主线</h3>
+  <p><strong>A · MoE + 高性价比（贯穿全程的产品逻辑）：</strong>2024 首发即以「降价 99.3%」切入，把「低价 + 高并发」而非刷榜作为核心竞争力。Doubao 1.5 Pro 确立大规模稀疏 MoE + 训推一体底座（约 7× 激活效率杠杆）；1.6 再降价 63% 把 token 价压到 2.6 元/百万。价格战是字节大模型贯穿始终的主线。</p>
+  <p><strong>B · 深度思考 / RL 推理（2025-04 引入）：</strong>Doubao-1.5-thinking-pro（= Seed1.5-Thinking）用 MoE 总 200B / 激活 20B、远小于 DeepSeek-R1(671B) 的规模取得可比甚至更优的推理成绩。到 1.6 演进为 AdaCoT，模型自行决定是否展开长推理。</p>
+  <p><strong>C · 多模态 → 全模态统一理解：</strong>Seed1.5-VL（532M 视觉 + 20B 激活）打通视觉-语言（60 基准 38 SOTA）→ Doubao 1.6 首次原生统一进主模型 → Doubao-Seed-2.0-lite 成为家族首款「全模态理解」（视频/图像/音频/文本，音频 19 语种）。</p>
+  <p><strong>D · GUI Agent 与 Agent 化：</strong>UI-TARS 独立线（2025-01 原论文 → 1.5 开源 → 2.0 游戏达约 60% 人类水平）是字节 computer-use 方向的旗舰研究。主模型自 Doubao-Seed-2.0 起转向「通用 Agent」，2.1-Pro 主打「生产级 Agent」，2026 主线明确转向 Coding 与 Agent。</p>
+  <p><strong>E · 生成模型矩阵：</strong>与 LLM 平行演进——Seedream 图（3.0→4.0→5.0 Pro）、Seedance 视频（1.0→2.5）、2026-06 补齐 Seed-Audio 1.0，形成「文/图/视频/音频」全生成矩阵。</p>
+
+  <h2>数据 / 规模</h2>
+
+  <div class="note r">
+    <div class="t">这是全系列透明度最低的一家</div>
+    <p>主 LLM 线（豆包首发 / 1.5-pro / 1.6 / 2.0 / 2.1-Pro）的<strong>总参数、激活参数、训练 token 量、训练数据构成官方一律未公开</strong>。字节对新旗舰「重发布、轻技术报告」的风格加剧了这一空白。凡本文出现的数字，要么来自技术报告（可信），要么已注明第三方存疑。</p>
+  </div>
+
+  <ul>
+    <li><strong>参数量：</strong>唯一有官方数字的是推理模型 Doubao-1.5-thinking-pro / Seed1.5-Thinking = <strong>总 200B / 激活 20B</strong>。Seed1.5-VL 公开了视觉编码器 532M + LLM 激活 20B，但 LLM 总参数未公开。Doubao 1.6 的「230B 总 / 23B 激活」<strong>仅见于第三方(oreateai)，未获官方确认，本文不采信为事实</strong>。</li>
+    <li><strong>训练 token 量 / 数据构成：</strong>全系官方未公开。Doubao 1.5 官方仅定性强调「不走捷径、不蒸馏其他模型、数据自建」；Seed1.5-VL 技术报告称预训练用「数万亿多模态 token」。</li>
+    <li><strong>上下文长度：</strong>仅 Doubao 1.6 官方明确 256K（称国内首个达此规模的旗舰）；2.0-Pro「256K」来自第三方转述；早期仅知有「Pro-32k」版本。</li>
+    <li><strong>可对外量化的只有「使用量 / 价格」：</strong>2024-05 发布日日均处理 1200 亿 tokens、生成 3000 万张图；月活曾达约 2600 万；到 2026 FORCE 大会官方称日均 token 调用突破 <strong>180 万亿</strong>。字节的「规模叙事」始终落在调用量与价格，而非模型参数。</li>
+  </ul>
+
+  <h2>代表指标</h2>
+
+  <div class="note o">
+    <div class="t">⚠️ 指标可信度分层</div>
+    <p>豆包主 LLM 线（1.5-pro / 1.6 / 2.0 / 2.1-Pro）对外几乎只给「官方自评/对标」结论，极少给逐项基准分、且缺独立第三方复核。<strong>只有 Seed1.5-Thinking / Seed1.5-VL / UI-TARS 这几个有技术报告的模型有可信具体分数。</strong>下表已按可信度分区。</p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>模型</th><th>指标</th><th>可信度</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>Seed1.5-Thinking（= 1.5-thinking-pro）</td><td>AIME 2024 <strong>86.7</strong>、Codeforces 55.0、GPQA <strong>77.3</strong>；总体超 DeepSeek-R1，非推理任务胜率高约 8%</td><td>高（技术报告）</td><td>arXiv 2504.13914</td></tr>
+        <tr><td>Seed1.5-VL</td><td>60 个公开多模态基准中 <strong>38 项 SOTA</strong>；Agent 任务优于 OpenAI CUA、Claude 3.7</td><td>高（技术报告）</td><td>arXiv 2505.07062</td></tr>
+        <tr><td>UI-TARS-1.5 / -2</td><td>1.5：7 个 GUI 基准 SOTA；2：游戏环境约 60% 人类水平</td><td>高（技术报告）</td><td>arXiv 2501.12326 / 2509.02544</td></tr>
+        <tr><td>Doubao 1.5-pro</td><td>官方称综合分超 GPT-4o、Claude 3.5 Sonnet（无逐项分）</td><td>低（官方自评）</td><td>Seed 官方 / 知乎</td></tr>
+        <tr><td>Doubao-Seed-2.0</td><td>官方称有 IMO/CMO/ICPC 竞赛级能力展示（未给可复核成绩）</td><td>低（官方口径）</td><td>FORCE 总结</td></tr>
+        <tr><td>Doubao-Seed-2.0-lite</td><td>官方称在 HiPhO、MedXpertQA、细粒度感知、具身理解等超 Gemini-3.1-Pro（未给分）</td><td>低（官方自评）</td><td>火山引擎社区 / IT之家</td></tr>
+        <tr><td>Doubao-Seed-2.1-Pro</td><td>官方称整体对标 GPT-5.5、Claude Opus 4.7、Gemini 3.1 Pro（无第三方复核）</td><td>低（纯自评）</td><td>FORCE / segmentfault</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note p">
+    <div class="t">诚实提醒</div>
+    <p>主 LLM 线均未公开逐项 benchmark 分数表，<strong>无法做代际定量对比</strong>。2026 年的对标对象（GPT-5.5 / Claude Opus 4.7 / Gemini 3.1 Pro）部分处于本文知识边界，无法交叉验证，仅作「官方宣称」记录。本页 2025-06 之后条目主要依赖联网检索（助手训练知识截至 2026-01）。</p>
+  </div>
+
+  <h2>一手来源</h2>
+  <div class="reflist">
+    <ol>
+      <li>Seed1.5-Thinking: Advancing Superb Reasoning Models with Reinforcement Learning（技术报告，200B/20B、AIME/GPQA 分数）— <a href="https://arxiv.org/abs/2504.13914" target="_blank" rel="noopener">arXiv:2504.13914</a></li>
+      <li>Seed1.5-VL Technical Report（视觉 532M + LLM 激活 20B、38/60 SOTA）— <a href="https://arxiv.org/abs/2505.07062" target="_blank" rel="noopener">arXiv:2505.07062</a> ｜ <a href="https://github.com/ByteDance-Seed/Seed1.5-VL" target="_blank" rel="noopener">GitHub</a></li>
+      <li>UI-TARS: Pioneering Automated GUI Interaction with Native Agents（原论文）— <a href="https://arxiv.org/abs/2501.12326" target="_blank" rel="noopener">arXiv:2501.12326</a></li>
+      <li>UI-TARS-2 Technical Report（多轮 RL、游戏约 60% 人类水平）— <a href="https://arxiv.org/abs/2509.02544" target="_blank" rel="noopener">arXiv:2509.02544</a> ｜ <a href="https://github.com/bytedance/ui-tars" target="_blank" rel="noopener">GitHub: bytedance/ui-tars</a></li>
+      <li>ByteDance Seed 团队官网（Seed1.5-Thinking / VL / UI-TARS / Seedream / Doubao 1.5 Pro 专题）— <a href="https://seed.bytedance.com/" target="_blank" rel="noopener">seed.bytedance.com</a></li>
+      <li>ByteDance-Seed GitHub 组织（开源代码与模型）— <a href="https://github.com/ByteDance-Seed" target="_blank" rel="noopener">github.com/ByteDance-Seed</a></li>
+      <li>火山引擎开发者社区 / 模型平台（Doubao-Seed 系列发布、价格与上下文）— <a href="https://developer.volcengine.com/" target="_blank" rel="noopener">developer.volcengine.com</a> ｜ <a href="https://www.volcengine.com/product/doubao" target="_blank" rel="noopener">火山引擎豆包大模型</a></li>
+      <li>媒体/第三方（时间线与价格，可信度中）：每经网、36氪、第一财经 Yicai、IT之家、知乎、segmentfault、百度百科。</li>
+      <li>存疑/聚合站（未采信其独家数字）：oreateai（1.6「230B/23B」说法）、presenc.ai（「Seed 1.6 2025-10 四模式」等表述）、howaiworks.ai / evolink.ai / aiwiki.ai。</li>
+    </ol>
+    <p class="src">说明：本页对参数量/训练规模保持「官方未公开则留白」原则；所有第三方推测均已在正文注明「存疑」。字节是本系列 8 家中技术透明度最低的一家。</p>
+  </div>
+
+  <div class="pagenav">
+    <a href="07-moonshot-kimi.html" class="prev">
+      <div class="lbl">← 上一篇</div>
+      <div class="ttl">月之暗面 Kimi</div>
+    </a>
+    <a href="index.html" class="next">
+      <div class="lbl">下一篇 →</div>
+      <div class="ttl">课程目录</div>
+    </a>
+  </div>
+
+</div>
+
+</body>
+</html>

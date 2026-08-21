@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Gemini 发展脉络 | 大模型演进路线</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="inner">
+    <span class="brand">大模型演进路线<span class="dot">.</span></span>
+    <nav>
+      <a href="index.html">目录</a>
+      <a href="timeline.html">时间线</a>
+      <a href="tech.html">技术</a>
+      <a href="metrics.html">指标</a>
+      <a href="data.html">数据规模</a>
+      <a href="references.html">参考文献</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap page" style="--bar:#4285f4">
+
+  <div class="breadcrumb"><a href="index.html">目录</a> / Google Gemini</div>
+
+  <h1>Google Gemini <span class="badge closed">闭源</span></h1>
+  <p class="lead">从 PaLM 到 Gemini 3——Google DeepMind 的旗舰谱系：原生多模态、稀疏 MoE、百万级长上下文、Agentic 智能体、Deep Think 显式推理五条技术主线的接力演进。</p>
+
+  <div class="note o">
+    <div class="t">阅读须知 · 关于"未公开"</div>
+    调研截止 <strong>2026-08</strong>。本谱系中<strong>唯一官方公开完整参数量 + 训练 token 的旗舰模型是 PaLM（540B / 780B tokens）</strong>；Gemini 全系旗舰档（Ultra / Pro / Flash）的参数量、训练 token、训练算力 Google <strong>一律未公开</strong>，仅端侧 Nano（1.8B / 3.25B）有官方数字。凡传闻/媒体报道的数字均已在下文明确标注，请勿当作官方口径。
+  </div>
+
+  <div class="statgrid">
+    <div class="stat"><div class="k">起点</div><div class="v">PaLM 540B</div><div class="s">2022-04，稠密 · 780B tokens</div></div>
+    <div class="stat"><div class="k">当前旗舰</div><div class="v">Gemini 3 Pro</div><div class="s">2025-11，推理优先 MoE</div></div>
+    <div class="stat"><div class="k">最长上下文</div><div class="v">1M tokens</div><div class="s">1.5 起常态，研究测至 10M</div></div>
+    <div class="stat"><div class="k">主导团队</div><div class="v">Google DeepMind</div><div class="s">2023 Brain + DeepMind 合并</div></div>
+    <div class="stat"><div class="k">开放程度</div><div class="v">闭源 API</div><div class="s">仅 Nano 端侧档公开参数</div></div>
+    <div class="stat"><div class="k">代表基准</div><div class="v">MMLU 90.0%</div><div class="s">Gemini 1.0 Ultra 首越人类阈值</div></div>
+  </div>
+
+  <h2>发展时间线</h2>
+
+  <p>命名规律：每代通常含 <strong>Ultra / Pro / Flash / Flash-Lite / Nano</strong> 等档位——Ultra 最强、Nano 端侧、Flash 系列主打高性价比 / 低延迟。下方时间线聚焦每一代的架构转折与标志技术。</p>
+
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="yr">2022-04 · 前身阶段</div>
+      <h4>PaLM (540B)<span class="cite">[1][2]</span></h4>
+      <p>稠密 decoder-only Transformer，Google Research 用 Pathways 系统在 <strong>6144 块 TPU v4</strong> 上训练。<strong>540B 参数、780B tokens</strong>（网页/书籍/维基/新闻/代码/对话），另有 8B/62B 档。引入 SwiGLU、并行层、多查询注意力。上下文 2,048 token。29 项 NLP 任务中 28 项超越同期模型，验证了大规模稠密模型的 few-shot 与 BIG-bench 突破性能力。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2023-05 · 前身阶段</div>
+      <h4>PaLM 2 (Gecko / Otter / Bison / Unicorn)<span class="cite">[3][4]</span></h4>
+      <p>稠密 Transformer，混合训练目标。转向<strong>"计算最优缩放"</strong>（数据∶模型 ≈ 1:1）、更高比例多语种数据。官方<strong>刻意不再披露</strong>参数量与训练量；CNBC 援引内部文件<em>传闻</em> PaLM 2-L 约 340B 参数、约 3.6T tokens（<span class="src">媒体报道，未经 Google 官方确认</span>）。是 Bard 早期及 Med-PaLM 2、Codey 等衍生模型的底座。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2023-12 · Gemini 阶段开启</div>
+      <h4>Gemini 1.0 (Ultra / Pro / Nano)<span class="cite">[6][7]</span></h4>
+      <p>Google DeepMind 主导。<strong>首个从预训练第一步就原生多模态</strong>（文本+图像+音频+视频联合训练，而非后期拼接）的旗舰。TPU v4/v5e 训练，上下文 32,768 token。<strong>Nano-1 = 1.8B、Nano-2 = 3.25B</strong>（端侧、蒸馏+4bit 量化，官方唯一公开数字）；Ultra/Pro 参数未公开。Ultra 在 32 项基准中 30 项 SOTA，<strong>MMLU 90.0%（CoT@32）——首个越过"人类专家 ~89.8%"阈值</strong>。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024-02 · 架构转折</div>
+      <h4>Gemini 1.5 Pro<span class="cite">[8][9]</span></h4>
+      <p><strong>引入稀疏 MoE</strong>（每次推理仅激活部分专家，总参数可增大而单次算力近似恒定）+ <strong>超长上下文</strong>：标准 128K、面向部分用户 100 万、研究中验证到 <strong>1000 万 token</strong>。跨百万 token 多模态检索近乎完美（1M 时 <strong>99.7% recall</strong>，10M 时 99.2%）。参数官方未公开。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024-05</div>
+      <h4>Gemini 1.5 Flash<span class="cite">[9]</span></h4>
+      <p>蒸馏自 1.5 Pro 的轻量 MoE，面向高频 / 低延迟场景。保留 100 万 token 长上下文能力，速度大幅提升。参数未公开。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024-12 · Agentic 时代</div>
+      <h4>Gemini 2.0 (Flash 实验版 → Flash / Flash-Lite / Pro)<span class="cite">[10][11]</span></h4>
+      <p>原生多模态 MoE，定位<strong>"智能体（Agentic）时代"</strong>：原生工具调用（Google 搜索、代码执行、地图、第三方函数），并能在一次 API 调用中生成<strong>文本+图像+音频混合输出</strong>。2.0 Flash 速度约为 1.5 Pro 两倍且性能更强。上下文 100 万 token（Flash）。参数未公开。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-06 · 显式推理</div>
+      <h4>Gemini 2.5 Pro / Flash (GA)<span class="cite">[12][13][14]</span></h4>
+      <p>原生多模态 MoE 内置 <strong>"thinking" 显式推理</strong>。旗舰 <strong>2.5 Pro Deep Think 采用"并行思考"</strong>（同时生成并互相批判多个假设再作答，研究版达 <strong>2025 IMO 金牌水平</strong>）。GPQA Diamond 84.0%（Pro）；Deep Think MMLU-Pro 89.8%、GPQA 82.4%。上下文 100 万（规划扩到 200 万）。参数未公开。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-07</div>
+      <h4>Gemini 2.5 Flash-Lite<span class="cite">[15]</span></h4>
+      <p>轻量 MoE，最低成本 / 最低延迟档，面向大规模低成本部署。上下文 100 万 token。参数未公开。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-11 · 推理优先</div>
+      <h4>Gemini 3 Pro (+ 3 Deep Think)<span class="cite">[16][17][18]</span></h4>
+      <p><strong>推理优先设计的原生多模态 MoE</strong>；新增像素级指向的零样本视觉检测，Deep Think 强化多步推理。Humanity's Last Exam 37.5%（无工具）；GPQA Diamond 91.9%；AIME 2025 95%；ARC-AGI-2 31.1%；<strong>LMArena 榜首 1501 Elo</strong>。上下文 100 万 token。参数未公开。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2026-02</div>
+      <h4>Gemini 3.1 Pro (Preview)<span class="cite">[15][19]</span></h4>
+      <p>Gemini 3 家族最新旗舰迭代，<code>gemini-3-pro-preview</code> 端点已指向 3.1。榜单排名领先（详见 DeepMind 模型卡）。上下文预计 ≥100 万，官方未逐一明确。参数未公开。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2026-02~03</div>
+      <h4>Gemini 3.1 Flash Image (Nano Banana 2) / 3.1 Flash-Lite<span class="cite">[15]</span></h4>
+      <p>图像生成档（Nano Banana 2）与低延迟轻量档。上下文 / 参数官方未公开。</p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2026-07</div>
+      <h4>Gemini 3.6 Flash / 3.5 Flash-Lite / 3.5 Flash Cyber (GA)<span class="cite">[20][21]</span></h4>
+      <p>MoE Flash 系列：<strong>3.6 Flash</strong> 为主力"工作马"（token 效率↑、编码/智能体规划↑，token 用量最多降约 <strong>17%</strong>）；3.5 Flash-Lite 最省成本；3.5 Flash Cyber 面向网安（仅政府/可信伙伴）。参数未公开。</p>
+    </div>
+
+  </div>
+
+  <div class="note r">
+    <div class="t">命名混乱 & 未决</div>
+    截至 2026-07，<strong>Gemini 3.5 Pro 尚未正式发布</strong>（Bloomberg 报道因未达性能基准而延迟）；实际节奏为 3 Pro(2025-11) → 3.1 Pro(2026-02) → 3.6 Flash / 3.5 Flash-Lite(2026-07)，出现 "3.1 Pro 与 3.6 Flash 并存"（Pro 线与 Flash 线号段不同步）。<strong>Gemini 4</strong> 已确认启动预训练（"迄今最雄心的预训练"），但无规格、无发布时间表。<span class="src">[20][21]</span>
+  </div>
+
+  <h2>核心技术标签</h2>
+
+  <div style="margin:16px 0">
+    <span class="tag b">原生多模态</span>
+    <span class="tag p">稀疏 MoE</span>
+    <span class="tag g">百万级长上下文</span>
+    <span class="tag o">Agentic 工具调用</span>
+    <span class="tag b">多模态输出</span>
+    <span class="tag p">Deep Think 并行思考</span>
+    <span class="tag g">Pathways 分布式训练</span>
+    <span class="tag o">TPU v4/v5</span>
+  </div>
+
+  <h3>① 原生多模态（Gemini 1.0，2023-12 引入）</h3>
+  <p>在 Gemini 之前，多模态多为"文本模型 + 视觉编码器"的后期拼接。Gemini 1.0 <strong>从预训练第一步</strong>就在文本、代码、图像、音频、视频上联合训练，实现跨模态信息的真正融合，在 20 项多模态基准上全面刷新 SOTA。<span class="cite">[6]</span></p>
+
+  <h3>② MoE 稀疏专家（Gemini 1.5，2024-02 引入）</h3>
+  <p>1.5 Pro 改为稀疏 Mixture-of-Experts：每次推理只激活一部分专家，做到<strong>"总参数可增大而激活参数（单次算力）近似恒定"</strong>。此后 2.0 / 2.5 / 3.x 均沿用 MoE 骨干。<span class="cite">[8]</span></p>
+
+  <h3>③ 超长上下文（Gemini 1.5，2024-02 引入并成为标志）</h3>
+  <p>1.5 Pro 把上下文从 1.0 的 32K 一举推到标准 128K、面向部分用户 100 万，研究中验证到 1000 万 token，且在百万级 token 上保持近乎完美检索（1M 时 99.7% recall）。此后 <strong>100 万 token 成为家族默认能力</strong>，2.5 规划扩到 200 万。<span class="cite">[8][9]</span></p>
+
+  <h3>④ Agentic / 原生工具调用与多模态输出（Gemini 2.0，2024-12 引入）</h3>
+  <p>2.0 定位"智能体时代"：可原生调用 Google 搜索、代码执行、地图、第三方函数，并能在一次 API 调用中生成文本+图像+音频的混合输出。<span class="cite">[10]</span></p>
+
+  <h3>⑤ thinking / Deep Think 显式推理（Gemini 2.5，2025-06 引入）</h3>
+  <p>2.5 系列内置 "thinking"，旗舰 2.5 Pro Deep Think 采用<strong>"并行思考"</strong>：同时生成并互相批判多个假设再给出答案（研究版达 2025 IMO 金牌水平）。3.x 延续 Deep Think 并进一步强化"推理优先"设计。<span class="cite">[12][14]</span></p>
+
+  <h2>数据 / 规模</h2>
+
+  <div class="note">
+    <div class="t">一句话总结</div>
+    架构从<strong>稠密</strong>（PaLM / PaLM2 / Gemini 1.0）转向<strong>稀疏 MoE</strong>（1.5 起）；上下文 <strong>2K</strong>(PaLM) → <strong>32K</strong>(Gemini 1.0) → <strong>128K / 1M</strong>(1.5) → <strong>1M 常态</strong>(2.0/2.5/3)。参数量则从 PaLM 时代的完全透明，转为 Gemini 时代的整体封闭。
+  </div>
+
+  <ul>
+    <li><strong>PaLM (2022)</strong>：官方明确 540B 参数、780B tokens、6144 块 TPU v4。<strong>本谱系中唯一官方公开完整参数量 + 训练 token 的旗舰模型。</strong><span class="cite">[1][2]</span></li>
+    <li><strong>PaLM 2 (2023)</strong>：Google 官方刻意不再披露参数量与训练量，只强调"计算最优缩放"。CNBC 援引内部文件报道 PaLM 2-L 约 <strong>340B 参数、约 3.6T tokens</strong>——<span class="src">此为媒体报道，未经 Google 官方确认</span>。<span class="cite">[3][4]</span></li>
+    <li><strong>Gemini 全系（1.0 起）</strong>：对旗舰档（Ultra / Pro / Flash）的参数量、训练 token、训练算力<strong>一律不公开</strong>。唯一公开的具体参数是 Gemini 1.0 <strong>Nano-1 = 1.8B、Nano-2 = 3.25B</strong>（端侧、蒸馏 + 4bit 量化）。<span class="cite">[6]</span></li>
+  </ul>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th>模型</th><th>架构</th><th class="mono">参数量</th><th class="mono">上下文</th><th class="mono">训练数据/算力</th><th>公开性</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PaLM</td><td>稠密 Transformer</td><td class="mono">540B（另 8B/62B）</td><td class="mono">2,048</td><td class="mono">780B tokens · 6144×TPU v4</td><td><span class="badge open">官方完整公开</span></td></tr>
+        <tr><td>PaLM 2</td><td>稠密 Transformer</td><td class="mono">未公开（传闻 ~340B）</td><td class="mono">~8K（Bison 对外）</td><td class="mono">未披露（传闻 ~3.6T）</td><td><span class="badge closed">官方未公开</span></td></tr>
+        <tr><td>Gemini 1.0 Nano</td><td>蒸馏 + 4bit 量化</td><td class="mono">1.8B / 3.25B</td><td class="mono">32,768</td><td class="mono">未披露</td><td><span class="badge open">Nano 参数公开</span></td></tr>
+        <tr><td>Gemini 1.0 Ultra/Pro</td><td>原生多模态稠密</td><td class="mono">未公开</td><td class="mono">32,768</td><td class="mono">未披露</td><td><span class="badge closed">官方未公开</span></td></tr>
+        <tr><td>Gemini 1.5 Pro</td><td>稀疏 MoE</td><td class="mono">未公开（激活≪总参）</td><td class="mono">128K–1M（研究 10M）</td><td class="mono">未披露</td><td><span class="badge closed">官方未公开</span></td></tr>
+        <tr><td>Gemini 2.0 / 2.5 / 3.x</td><td>原生多模态 MoE (+thinking)</td><td class="mono">未公开</td><td class="mono">1M（2.5 规划 2M）</td><td class="mono">未披露</td><td><span class="badge closed">官方未公开</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>代表指标</h2>
+
+  <p>下表按基准梳理跨代分数量级趋势。<strong>提醒：</strong>不同代际、不同来源的评测设置（是否用工具、是否 CoT、shot 数）不完全可比，分数主要用于展示<em>量级趋势</em>而非精确横比。</p>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th>基准</th><th>能力维度</th><th class="mono">跨代表现</th><th>来源</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>MMLU</td><td>综合知识</td><td class="mono">Gemini 1.0 Ultra 90.0%（CoT@32，首越人类专家 ~89.8% 阈值）</td><td class="src">[6]</td></tr>
+        <tr><td>GPQA Diamond</td><td>研究生级科学推理</td><td class="mono">2.5 Pro Deep Think 82.4% → 2.5 Pro 84.0% → 3 Pro 91.9%（Deep Think 93.8%）</td><td class="src">[12][18]</td></tr>
+        <tr><td>AIME 2025</td><td>竞赛数学</td><td class="mono">2.5 Pro ~88% → 3 Pro 95%（无工具）/ 100%（带代码执行）</td><td class="src">[16][18]</td></tr>
+        <tr><td>ARC-AGI-2</td><td>抽象推理</td><td class="mono">2.5 Pro ~4.9% → 3 Pro 31.1%（Deep Think 45.1%）</td><td class="src">[16][18]</td></tr>
+        <tr><td>MathArena Apex</td><td>高难数学</td><td class="mono">2.5 Pro 0.5% → 3 Pro 23.4%</td><td class="src">[16][18]</td></tr>
+        <tr><td>Humanity's Last Exam</td><td>超难综合</td><td class="mono">3 Pro 37.5%（无工具）/ Deep Think 41.0%</td><td class="src">[16][18]</td></tr>
+        <tr><td>MMMU / Video-MMMU</td><td>多模态理解</td><td class="mono">2.5 Deep Think MMMU 84.0%；3 Pro MMMU-Pro 81%、Video-MMMU 87.6%</td><td class="src">[14][18]</td></tr>
+        <tr><td>SWE-bench Verified</td><td>编码 / 智能体</td><td class="mono">3 Pro 76.2%（Terminal-Bench 2.0 54.2%、WebDev Arena 1487 Elo）</td><td class="src">[18]</td></tr>
+        <tr><td>长上下文检索</td><td>百万 token recall</td><td class="mono">1.5 Pro 1M 时 99.7% recall、10M 时 99.2%</td><td class="src">[8]</td></tr>
+        <tr><td>LMArena</td><td>人类偏好总榜</td><td class="mono">3 Pro 1501 Elo（发布时登顶）</td><td class="src">[18]</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note p">
+    <div class="t">趋势读法</div>
+    最能体现"推理优先"跨代跃升的是 <strong>ARC-AGI-2（~4.9% → 31.1%）</strong> 与 <strong>MathArena Apex（0.5% → 23.4%）</strong>——从 2.5 到 3 的量级跳变，远大于传统知识类基准（MMLU 早在 1.0 就已接近饱和）。这说明近两代的进步主线已从"知识覆盖"转向"复杂推理 / 智能体执行"。
+  </div>
+
+  <h2>一手来源</h2>
+  <div class="reflist">
+    <ol>
+      <li>Google Research 官方博客，<em>PaLM: Scaling to 540 Billion Parameters for Breakthrough Performance</em> — <a href="https://research.google/blog/pathways-language-model-palm-scaling-to-540-billion-parameters-for-breakthrough-performance/" target="_blank" rel="noopener">research.google</a></li>
+      <li>PaLM 技术报告 — <a href="https://arxiv.org/abs/2204.02311" target="_blank" rel="noopener">arXiv:2204.02311</a></li>
+      <li>PaLM 2 技术报告 — <a href="https://arxiv.org/abs/2305.10403" target="_blank" rel="noopener">arXiv:2305.10403</a></li>
+      <li>CNBC，<em>Google's PaLM 2 uses nearly five times more text data than predecessor</em>（媒体报道，非官方）— <a href="https://www.cnbc.com/2023/05/16/googles-palm-2-uses-nearly-five-times-more-text-data-than-predecessor.html" target="_blank" rel="noopener">cnbc.com</a></li>
+      <li>Gemini 1.0 技术报告《Gemini: A Family of Highly Capable Multimodal Models》— <a href="https://arxiv.org/abs/2312.11805" target="_blank" rel="noopener">arXiv:2312.11805</a></li>
+      <li>Google 官方博客，<em>Introducing Gemini</em>（2023-12-06）— <a href="https://blog.google/technology/ai/google-gemini-ai/" target="_blank" rel="noopener">blog.google</a></li>
+      <li>Gemini 1.5 技术报告《Unlocking multimodal understanding across millions of tokens of context》— <a href="https://arxiv.org/abs/2403.05530" target="_blank" rel="noopener">arXiv:2403.05530</a></li>
+      <li>Google 官方博客，<em>Introducing Gemini 1.5</em>（2024-02）— <a href="https://blog.google/technology/ai/google-gemini-next-generation-model-february-2024/" target="_blank" rel="noopener">blog.google</a></li>
+      <li>Google 官方博客，<em>Introducing Gemini 2.0: our new AI model for the agentic era</em>（2024-12）— <a href="https://blog.google/technology/google-deepmind/google-gemini-ai-update-december-2024/" target="_blank" rel="noopener">blog.google</a></li>
+      <li>Gemini 2.5 技术报告《Pushing the Frontier with Advanced Reasoning, Multimodality, Long Context, and Next Generation Agentic Capabilities》— <a href="https://arxiv.org/abs/2507.06261" target="_blank" rel="noopener">arXiv:2507.06261</a></li>
+      <li>Google 官方博客，<em>Gemini 2.5 updates at I/O 2025</em> — <a href="https://blog.google/technology/google-deepmind/google-gemini-updates-io-2025/" target="_blank" rel="noopener">blog.google</a></li>
+      <li>Google DeepMind，Gemini 2.5 Deep Think 模型卡 — <a href="https://deepmind.google/models/gemini/" target="_blank" rel="noopener">deepmind.google</a></li>
+      <li>Google 官方博客，<em>A new era of intelligence with Gemini 3</em>（2025-11-18）— <a href="https://blog.google/products/gemini/gemini-3/" target="_blank" rel="noopener">blog.google</a></li>
+      <li>Wikipedia，<em>Gemini 3 (AI)</em> — <a href="https://en.wikipedia.org/wiki/Gemini_3_(AI)" target="_blank" rel="noopener">en.wikipedia.org</a></li>
+      <li>Gemini API 官方 Release notes / changelog — <a href="https://ai.google.dev/gemini-api/docs/changelog" target="_blank" rel="noopener">ai.google.dev</a></li>
+      <li>Google DeepMind，Gemini 3.1 Pro 模型卡 — <a href="https://deepmind.google/models/model-cards/gemini-3-1-pro/" target="_blank" rel="noopener">deepmind.google</a></li>
+      <li>TechCrunch，<em>Google releases three new Gemini models — but no 3.5 Pro</em>（2026-07-21）— <a href="https://techcrunch.com/" target="_blank" rel="noopener">techcrunch.com</a></li>
+      <li>Wikipedia，<em>Gemini (language model)</em> 综述 — <a href="https://en.wikipedia.org/wiki/Gemini_(language_model)" target="_blank" rel="noopener">en.wikipedia.org</a></li>
+      <li>Vaswani et al.，<em>Attention Is All You Need</em>（Transformer 原始论文，谱系技术基石）— <a href="https://arxiv.org/abs/1706.03762" target="_blank" rel="noopener">arXiv:1706.03762</a></li>
+    </ol>
+    <p class="src">注：来源 [4] 为媒体报道，[14][17] 部分内容随官方页面更新可能变动。凡"传闻 / 未经官方确认"字样处，均未采用为事实性断言。</p>
+  </div>
+
+  <div class="pagenav">
+    <a class="prev" href="02-anthropic-claude.html">
+      <div class="lbl">← 上一家</div>
+      <div class="ttl">Anthropic Claude</div>
+    </a>
+    <a class="next" href="04-meta-llama.html">
+      <div class="lbl">下一家 →</div>
+      <div class="ttl">Meta Llama</div>
+    </a>
+  </div>
+
+</div>
+
+</body>
+</html>

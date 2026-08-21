@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meta Llama 发展脉络 | 大模型演进路线</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="inner">
+    <span class="brand">大模型演进路线<span class="dot">.</span></span>
+    <nav>
+      <a href="index.html">目录</a>
+      <a href="timeline.html">时间线</a>
+      <a href="tech.html">技术</a>
+      <a href="metrics.html">指标</a>
+      <a href="data.html">数据</a>
+      <a href="references.html">参考</a>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap page" style="--bar:#7b6ef6">
+
+  <div class="breadcrumb"><a href="index.html">目录</a> / Meta Llama</div>
+
+  <h1>Meta Llama <span class="badge open">开放权重</span></h1>
+  <p class="lead">当今影响力最大的开放权重大模型家族：从 LLaMA 1 奠定 decoder-only Transformer 的「标准配方」（RMSNorm + RoPE + SwiGLU），到 Llama 4 首次转向 MoE 与原生多模态，Llama 系列既是技术风向标，也孕育了 llama.cpp / Ollama / Alpaca / Vicuna 等庞大生态。</p>
+
+  <p>Meta（AI at Meta，前身 FAIR）的 Llama（Large Language Model Meta AI）自 2023.02 初代起就以放出权重为核心策略：LLaMA 1 采用研究许可，Llama 2 起转为商用友好许可。它奠定了当代主流架构范式——Pre-normalization + RMSNorm、RoPE 旋转位置编码、SwiGLU 激活，后续加入 GQA 分组查询注意力，被业界广泛沿用。</p>
+
+  <div class="statgrid">
+    <div class="stat"><div class="k">首发</div><div class="v">2023.02</div><div class="s">LLaMA 1（研究许可）</div></div>
+    <div class="stat"><div class="k">参数跨度</div><div class="v">7B → 400B</div><div class="s">dense 7B 到 MoE 400B total</div></div>
+    <div class="stat"><div class="k">训练 token</div><div class="v">1.0T → ~40T</div><div class="s">LLaMA1 1.0-1.4T 到 Llama4 22-40T</div></div>
+    <div class="stat"><div class="k">上下文</div><div class="v">2K → 10M*</div><div class="s">*Scout 官方宣称，存疑</div></div>
+    <div class="stat"><div class="k">许可</div><div class="v">开放权重</div><div class="s">Llama 2 起商用友好</div></div>
+    <div class="stat"><div class="k">架构切换</div><div class="v">Dense → MoE</div><div class="s">Llama 4 起引入混合专家</div></div>
+  </div>
+
+  <div class="note p">
+    <div class="t">编写口径与诚实性</div>
+    编写时间 2026-08。事实性断言尽量附一手来源（Meta 官方博客 / arXiv 技术报告）。凡「官方未公开」处均如实标注，未臆造。Llama 4 至今<strong>未发布正式 arXiv 技术报告</strong>，其参数、专家数、训练 token 均来自官方博客与模型卡口径，第三方复现可能与官方宣称有出入。
+  </div>
+
+  <h2>发展时间线</h2>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="yr">2023.02 · Dense</div>
+      <h4>LLaMA 1 — 7B / 13B / 33B / 65B</h4>
+      <p>纯研究许可。定型「标准配方」：Pre-norm + RMSNorm、RoPE、SwiGLU，仅用公开数据训练。小模型 1.0T、33B/65B 1.4T tokens；上下文 2048。论文称 LLaMA-13B 多数基准超 GPT-3(175B)，65B 与 Chinchilla-70B / PaLM-540B 竞争。<span class="cite" title="arXiv:2302.13971">[1]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2023.07 · Dense</div>
+      <h4>Llama 2 — 7B / 13B / (34B*) / 70B</h4>
+      <p>转商用友好许可，生态爆发。34B/70B 首次引入 GQA；上下文扩到 4096；2.0T tokens 预训练。Chat 版首次系统化 RLHF：SFT → 奖励模型 → 拒绝采样 + PPO，并单独训练安全奖励模型。34B 因安全对齐未达标未公开放出权重。<span class="cite" title="arXiv:2307.09288">[2]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024.04 · Dense</div>
+      <h4>Llama 3 — 8B / 70B</h4>
+      <p>换用 128K 词表 tokenizer，全尺寸（含 8B）都用 GQA；更强数据清洗，&gt;15T tokens；上下文 8192。同尺寸大幅超 Llama 2，达开源 SOTA 级。<span class="cite" title="Meta blog: meta-llama-3">[6]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024.07 · Dense</div>
+      <h4>Llama 3.1 — 8B / 70B / 405B</h4>
+      <p>首个 405B dense 旗舰；上下文扩到 128K；强化多语言与工具调用。405B 训练于约 15.6T 文本 token。后训练转向 SFT + 拒绝采样 + DPO 路线。官方与论文称在众多任务上「比肩 GPT-4」，为当时最强开放权重模型。<span class="cite" title="arXiv:2407.21783 / Meta blog">[3]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024.09 · Dense（视觉+文本）</div>
+      <h4>Llama 3.2 — 视觉 11B/90B + 端侧 1B/3B</h4>
+      <p>首次多模态视觉：11B/90B 通过视觉编码器 + 交叉注意力接入图像理解。1B/3B 面向手机/边缘，day-one 支持 Arm、高通、联发科，128K 上下文。基于 3.1 蒸馏/继续训练（官方未给独立 token 总量）。11B/90B 图像理解超 Claude 3 Haiku 等。<span class="cite" title="Meta blog: llama-3-2">[8]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024.12 · Dense</div>
+      <h4>Llama 3.3 — 70B（仅一款）</h4>
+      <p>纯靠后训练强化，让 70B 追平 3.1 405B 性能、成本大降，体现「后训练红利」。上下文 128K；继承 Llama 3 数据（官方未单列）。IFEval 达 92.1（官方称超 405B），MATH、MGSM 相对 3.1 70B 显著提升。<span class="cite" title="Meta Llama 3.3 模型卡">[7]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025.04 · MoE（原生多模态）</div>
+      <h4>Llama 4 Scout — 17B active / 109B total / 16 experts</h4>
+      <p>首次 MoE + 原生多模态（early fusion 混合文本+图像+视频 token）；采用 iRoPE（交错局部/全局注意力、部分层无显式位置编码）。宣称 10M tokens 上下文（存疑，见下）；预训练约 40T tokens。Int4 量化下可单卡 H100 部署。官方称同类最佳多模态，超 Gemma 3 / Gemini 2.0 Flash-Lite / Mistral 3.1。<span class="cite" title="Meta Llama 4 blog">[4]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025.04 · MoE（原生多模态）</div>
+      <h4>Llama 4 Maverick — 17B active / 400B total / 128 experts</h4>
+      <p>同代 MoE 多模态，面向通用助手，交替 dense/MoE 层；宣称 1M tokens；预训练约 22T tokens。官方称超 GPT-4o、Gemini 2.0 Flash，接近 DeepSeek v3；但 LMArena 上榜为「对话优化实验版」而非公开权重版，存在榜单争议。<span class="cite" title="Meta Llama 4 blog">[4]</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025 · MoE（预览，未发布）</div>
+      <h4>Llama 4 Behemoth — 288B active / ~2T total / 16 experts</h4>
+      <p>定位教师模型（用于蒸馏 Scout/Maverick），仍在训练。官方 2025.04 预览称 STEM 基准超 GPT-4.5 / Claude Sonnet 3.7 / Gemini 2.0 Pro。此后多次推迟，媒体报道称因 2T 规模下 MoE 训练问题，Meta <strong>至今未公开发布，也未正式宣布取消</strong>。<span class="cite" title="Meta blog / SiliconANGLE 2025.05">[5]</span></p>
+    </div>
+
+  </div>
+
+  <h2>核心技术标签</h2>
+  <p>
+    <span class="tag p">开放权重</span>
+    <span class="tag b">RMSNorm</span>
+    <span class="tag b">RoPE</span>
+    <span class="tag b">SwiGLU</span>
+    <span class="tag b">GQA 分组查询注意力</span>
+    <span class="tag g">RLHF（拒绝采样+PPO）</span>
+    <span class="tag g">DPO</span>
+    <span class="tag o">iRoPE</span>
+    <span class="tag o">MoE 混合专家</span>
+    <span class="tag o">原生多模态 early fusion</span>
+    <span class="tag p">端侧 / 小模型</span>
+    <span class="tag p">128K→10M* 长上下文</span>
+  </p>
+
+  <h3>标准配方（LLaMA 1 定型）</h3>
+  <ul>
+    <li><strong>Pre-normalization + RMSNorm</strong>：归一化放在子层输入端，用 <code>RMSNorm</code> 替代 LayerNorm，训练更稳。</li>
+    <li><strong>RoPE 旋转位置编码</strong>：相对位置注入，利于长度外推，成为后续所有版本基础。<span class="cite" title="RoPE 见 LLaMA 论文引用">[1]</span></li>
+    <li><strong>SwiGLU 激活</strong>：门控前馈替代 ReLU/GeLU，提升表达力。</li>
+    <li>以上三件套自 LLaMA 1 起贯穿全系列，被业界广泛沿用。</li>
+  </ul>
+
+  <h3>GQA 分组查询注意力</h3>
+  <p>Llama 2 的 34B/70B 首次引入，用「多于 1、少于 query 头数」的 KV 头数，在多头注意力质量与多查询注意力速度间取平衡，减少 KV cache 显存、加速长序列推理。Llama 3 起全尺寸（含 8B）都用 GQA。<span class="cite" title="GQA: arXiv:2305.13245">[9]</span></p>
+
+  <h3>对齐 / 后训练演进</h3>
+  <ul>
+    <li>Llama 2-Chat 首次系统化 <strong>RLHF</strong>：SFT → 奖励模型 → 拒绝采样 + PPO 迭代，并单独训练安全奖励模型。</li>
+    <li>Llama 3/3.1 转向更工程化的 <strong>SFT + 拒绝采样 + DPO</strong>，强化多语言、代码、推理、工具调用。<span class="cite" title="DPO: arXiv:2305.18290">[10]</span></li>
+    <li>Llama 3.3 主要靠后训练把 70B 拉到接近 3.1 405B 的水平，体现「后训练红利」。</li>
+  </ul>
+
+  <h3>架构范式切换（Dense → MoE）与多模态</h3>
+  <ul>
+    <li><strong>MoE</strong>：Llama 4 首次采用，每 token 只激活部分专家（Scout 17B active/109B total；Maverick 17B active/400B total），从 dense 转向 sparse。</li>
+    <li><strong>原生多模态</strong>：Llama 3.2 首次加视觉（视觉编码器 + 交叉注意力）；Llama 4 升级为 early fusion，预训练即混合文本+图像+视频 token。</li>
+    <li><strong>iRoPE</strong>：Llama 4 用交错局部/全局注意力、部分层无显式位置编码，支撑超长上下文。</li>
+    <li><strong>长上下文演进</strong>：2048（LLaMA 1）→ 4096（Llama 2）→ 8192（Llama 3）→ 128K（3.1/3.2/3.3）→ Scout 宣称 10M。</li>
+  </ul>
+
+  <h2>数据 / 规模</h2>
+  <p>Llama 系列的显著特征是训练 token 量远超 Chinchilla 最优（「过度训练」以换取推理期高效的小模型）。规模级差：LLaMA 1 的 1.0–1.4T → Llama 2 翻倍到 2T → Llama 3 一跃约 8 倍至 15T+ → Llama 4 扩到 30–40T 量级并混入多模态数据。</p>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>版本</th><th class="mono">预训练 token 量</th><th>说明</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>LLaMA 1（7B/13B）</td><td class="mono">1.0T</td><td>仅公开数据</td><td class="mono">2302.13971</td></tr>
+        <tr><td>LLaMA 1（33B/65B）</td><td class="mono">1.4T</td><td>同上</td><td class="mono">2302.13971</td></tr>
+        <tr><td>Llama 2（全系）</td><td class="mono">2.0T</td><td>预训练</td><td class="mono">2307.09288</td></tr>
+        <tr><td>Llama 3 / 3.1</td><td class="mono">&gt;15T（405B 报 15.6T 文本 token）</td><td>数据清洗强化</td><td class="mono">2407.21783</td></tr>
+        <tr><td>Llama 3.2 / 3.3</td><td class="mono">官方未单列</td><td>普遍理解为在 3.1 基础上继续训练/蒸馏</td><td class="mono">Meta blog</td></tr>
+        <tr><td>Llama 4 Scout</td><td class="mono">约 40T</td><td>含多模态数据</td><td class="mono">Meta blog</td></tr>
+        <tr><td>Llama 4 Maverick</td><td class="mono">约 22T</td><td>含多模态数据</td><td class="mono">Meta blog</td></tr>
+        <tr><td>Llama 4 总体（官方口径）</td><td class="mono">&gt;30T</td><td>200+ 种语言，含文本/图像/视频</td><td class="mono">Meta blog</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><strong>参数规模：</strong>7B → 65B（LLaMA 1 dense）→ 405B（Llama 3.1 dense 旗舰）→ MoE 时代 Scout 109B total / Maverick 400B total / Behemoth ~2T total（激活参数 17B–288B）。</p>
+
+  <h2>代表指标</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>版本</th><th>代表指标 / 口径</th><th>来源</th></tr></thead>
+      <tbody>
+        <tr><td>LLaMA 1（2023）</td><td>LLaMA-13B 多数基准超 GPT-3(175B)；65B 与 Chinchilla-70B、PaLM-540B 竞争</td><td class="mono">2302.13971</td></tr>
+        <tr><td>Llama 2（2023）</td><td>开源基座在同期公开模型中领先；Chat 版有用性/安全性人评接近部分闭源模型</td><td class="mono">2307.09288</td></tr>
+        <tr><td>Llama 3.1 405B（2024）</td><td>官方与论文称多任务「可比肩 GPT-4」，当时最强开放权重模型</td><td class="mono">2407.21783</td></tr>
+        <tr><td>Llama 3.3 70B（2024.12）</td><td>IFEval 92.1（官方称超 3.1 405B）；MATH、MGSM 相对 3.1 70B 显著提升</td><td class="mono">Meta 模型卡</td></tr>
+        <tr><td>Llama 4 Maverick（2025.04）</td><td>官方口径超 GPT-4o、Gemini 2.0 Flash，接近 DeepSeek v3（有 LMArena 争议）</td><td class="mono">Meta blog</td></tr>
+        <tr><td>Llama 4 Scout（2025.04）</td><td>官方称同类最佳多模态，超 Gemma 3、Gemini 2.0 Flash-Lite、Mistral 3.1</td><td class="mono">Meta blog</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note r">
+    <div class="t">指标引用须谨慎</div>
+    Llama 4 的对比分数均为 Meta 官方发布口径，且存在 LMArena「实验版本」争议——上榜的可能是为对话优化的实验版而非公开权重版，第三方复现结果可能低于官方宣称。各代逐项 benchmark 精确分数应以对应官方模型卡（MODEL_CARD.md）为准。
+  </div>
+
+  <div class="note o">
+    <div class="t">不确定与空白（诚实标注）</div>
+    <ul style="margin:6px 0 0">
+      <li>Llama 4 <strong>无正式 arXiv 技术报告</strong>（截至 2026-08），参数/专家数/训练 token 均为官方博客口径。</li>
+      <li>Scout <strong>10M 上下文存疑</strong>：为官方宣称的理论上下文，实际有效利用与部署可行性有争议。</li>
+      <li>Behemoth <strong>从未公开发布</strong>：~2T total / 288B active，2025.04 仅「预览」后多次推迟。</li>
+      <li>Llama 3.2/3.3 的独立训练 token 量官方未单列，普遍理解为在 3.1 基础上继续训练/蒸馏。</li>
+      <li>2026 后续传闻（如闭源 "Muse Spark"、下一代 "Llama 5" 等）无 Meta 官方确认，本文不作为事实采信。</li>
+    </ul>
+  </div>
+
+  <div class="reflist">
+    <strong>一手来源</strong>
+    <ol>
+      <li><a href="https://arxiv.org/abs/2302.13971" target="_blank" rel="noopener">LLaMA: Open and Efficient Foundation Language Models — arXiv:2302.13971</a>（LLaMA 1 技术报告）</li>
+      <li><a href="https://arxiv.org/abs/2307.09288" target="_blank" rel="noopener">Llama 2: Open Foundation and Fine-Tuned Chat Models — arXiv:2307.09288</a>（Llama 2 技术报告）</li>
+      <li><a href="https://arxiv.org/abs/2407.21783" target="_blank" rel="noopener">The Llama 3 Herd of Models — arXiv:2407.21783</a>（Llama 3 / 3.1 技术报告）</li>
+      <li><a href="https://ai.meta.com/blog/llama-4-multimodal-intelligence/" target="_blank" rel="noopener">The Llama 4 herd — Meta 官方博客</a>（Scout / Maverick / Behemoth）</li>
+      <li><a href="https://siliconangle.com/2025/05/15/meta-postpone-release-llama-4-behemoth-model-report-claims/" target="_blank" rel="noopener">Meta 推迟发布 Llama 4 Behemoth — SiliconANGLE 2025.05</a>（Behemoth 状态，二手）</li>
+      <li><a href="https://ai.meta.com/blog/meta-llama-3/" target="_blank" rel="noopener">Introducing Meta Llama 3 — Meta 官方博客</a></li>
+      <li><a href="https://ai.meta.com/blog/llama-3-3/" target="_blank" rel="noopener">Llama 3.3 — Meta 官方（模型卡 / 博客）</a></li>
+      <li><a href="https://ai.meta.com/blog/llama-3-2-connect-2024-vision-edge-mobile-devices/" target="_blank" rel="noopener">Llama 3.2: 视觉与端侧 — Meta 官方博客</a></li>
+      <li><a href="https://arxiv.org/abs/2305.13245" target="_blank" rel="noopener">GQA: Training Generalized Multi-Query Transformer Models — arXiv:2305.13245</a></li>
+      <li><a href="https://arxiv.org/abs/2305.18290" target="_blank" rel="noopener">Direct Preference Optimization (DPO) — arXiv:2305.18290</a></li>
+      <li><a href="https://en.wikipedia.org/wiki/Llama_(language_model)" target="_blank" rel="noopener">Llama (language model) — Wikipedia</a>（辅助时间线核对）</li>
+    </ol>
+  </div>
+
+  <nav class="pagenav">
+    <a class="prev" href="03-google-gemini.html">
+      <div class="lbl">上一篇</div>
+      <div class="ttl">← Google Gemini</div>
+    </a>
+    <a class="next" href="05-alibaba-qwen.html">
+      <div class="lbl">下一篇</div>
+      <div class="ttl">阿里 Qwen →</div>
+    </a>
+  </nav>
+
+</div>
+
+</body>
+</html>

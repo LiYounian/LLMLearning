@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>阿里 Qwen 发展脉络 | 大模型演进路线</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="inner">
+    <span class="brand">大模型演进路线<span class="dot">.</span></span>
+    <nav>
+      <a href="index.html">目录</a>
+      <a href="timeline.html">时间线</a>
+      <a href="tech.html">技术</a>
+      <a href="metrics.html">指标</a>
+      <a href="data.html">数据</a>
+      <a href="references.html">参考文献</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap page" style="--bar:#a855f7">
+
+  <div class="breadcrumb"><a href="index.html">目录</a> / 阿里 Qwen</div>
+
+  <h1>阿里 Qwen <span class="badge open">开放权重为主</span></h1>
+
+  <p class="lead">通义千问（Qwen）——目前开源社区影响力最大的中文系大模型家族。从"追赶开源基线"到"全尺寸覆盖 + 长上下文"，再到"thinking/非-thinking 统一 + thinking budget"，最后走向"能自主干活的 Agent"。</p>
+
+  <p>Qwen 由阿里巴巴（阿里云 / 通义实验室）自 2023 年起推出，涵盖语言模型主线、旗舰闭源 Max 线、多模态视觉线（VL）与全模态线（Omni）四条并行脉络。其显著特征是<strong>几乎全尺寸开放权重</strong>（0.5B 到 235B），叠加详实的 arXiv 技术报告，使其成为学术界与开发者复现、微调、二次开发的首选中文基座之一。</p>
+
+  <div class="note p">
+    <div class="t">阅读须知：一手 vs 二手</div>
+    Qwen 语言主线（Qwen1 → Qwen3）与多模态线（VL / Omni）均有独立 arXiv 技术报告，属一手可复现来源。<strong>2026 年的 Max 系列（3.5 / 3.7 / 3.8-Max）没有独立技术报告</strong>，仅有官方博客 / 发布公告；其参数、训练数据、跑分多为官方自评 + 自建内部基准，横向可比性存疑，本页对这部分统一按"厂商发布材料"打折看待，并显式标注"官方未公开"。
+  </div>
+
+  <div class="statgrid">
+    <div class="stat"><div class="k">起始年份</div><div class="v">2023</div><div class="s">初代 Qwen（arXiv 2309.16609）</div></div>
+    <div class="stat"><div class="k">预训练数据</div><div class="v">3T → 36T</div><div class="s">tokens，约 2 年增长约 12 倍</div></div>
+    <div class="stat"><div class="k">参数跨度</div><div class="v">0.5B → 2.4T</div><div class="s">dense 到 MoE（95B-active）</div></div>
+    <div class="stat"><div class="k">最长上下文</div><div class="v">1M</div><div class="s">Qwen2.5-1M 首次 / Max 线沿用</div></div>
+    <div class="stat"><div class="k">授权策略</div><div class="v">Apache-2.0</div><div class="s">多数尺寸开放权重</div></div>
+    <div class="stat"><div class="k">技术报告</div><div class="v">11 篇</div><div class="s">arXiv 一手（语言 + VL + Omni）</div></div>
+  </div>
+
+  <h2>发展时间线</h2>
+
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="yr">2023-08 · Qwen-VL</div>
+      <h4>多模态视觉线开端</h4>
+      <p>基于 Qwen-7B 的视觉-语言模型，主打图文理解、定位（grounding）、文字识别，当期多项 VL benchmark 达 SOTA。<span class="cite">arXiv 2308.12966</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2023-09 · Qwen（初代）</div>
+      <h4>语言主线起点：标准配方</h4>
+      <p>Dense 架构 1.8B / 7B / 14B / 72B，采用当期主流配置 RoPE + SwiGLU + RMSNorm + QKV bias；约 3T tokens 多语言（中英为主）；SFT + RLHF 出 Qwen-Chat，衍生 Code-Qwen / Math-Qwen。72B 对标 LLaMA2-70B，位列同尺寸开源第一梯队。<span class="cite">arXiv 2309.16609</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024-02 · Qwen1.5</div>
+      <h4>全系 32K + 首次上 MoE</h4>
+      <p>0.5B~110B 全尺寸统一 32K 上下文，对齐与多语言增强；首次推出 MoE（A2.7B 激活）作为试水。72B / 110B 对标当期开源旗舰。<span class="cite">Qwen1.5 官方博客</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024-06 · Qwen2</div>
+      <h4>GQA + 长上下文外推 + MoE upcycling</h4>
+      <p>Dense（0.5B/1.5B/7B/72B）+ MoE（57B-A14B）。引入 GQA 降低推理显存；长上下文用 YARN + Dual Chunk Attention 外推到 128K；MoE 走 upcycling（从 dense 权重回收再训 +4.5T tokens）。Dense >7T tokens（0.5B 用 12T）。72B-Instruct 多榜领先同期开源。<span class="cite">arXiv 2407.10671</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024-08 · Qwen2-VL</div>
+      <h4>任意分辨率 + M-RoPE</h4>
+      <p>2B / 7B / 72B。Naive Dynamic Resolution 支持任意分辨率图像映射为可变数量视觉 token；M-RoPE 统一处理文本/图像/视频的位置。图文与视频理解当期 SOTA。<span class="cite">arXiv 2409.12191</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2024-09 · Qwen2.5</div>
+      <h4>数据大扩容到 18T，旗舰开源标杆</h4>
+      <p>0.5B~72B，另有 Coder / Math 专项。预训练数据从 Qwen2 的 7T 扩容到 <strong>18T tokens</strong>；后训练用约 100 万样本做 SFT + DPO + GRPO。最高 128K 上下文、输出 8K。72B-Instruct 以更小参数逼近当期部分闭源旗舰。<span class="cite">arXiv 2412.15115</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-01 · Qwen2.5-1M / Qwen2.5-Max / Qwen2.5-VL</div>
+      <h4>首次 1M 上下文 + Max 线开端</h4>
+      <p><strong>Qwen2.5-1M</strong>（7B/14B）：长上下文训练 + 长度外推 + 推理加速，首次到 1M，长文检索（passkey 等）领先。<span class="cite">arXiv 2501.15383</span><br>
+      <strong>Qwen2.5-Max</strong>（MoE）：大规模 MoE 旗舰，>20T tokens + SFT/RLHF，官方称对标并部分超越 DeepSeek-V3；总参/激活参数官方未公开（网传 325B 未证实，不采信）。<span class="cite">Qwen2.5-Max 博客</span><br>
+      <strong>Qwen2.5-VL</strong>（3B/7B/72B）：动态分辨率 + 绝对时间编码，文档解析 / Agent 视觉，文档与视频 grounding 当期 SOTA。<span class="cite">arXiv 2502.13923</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-03 · Qwen2.5-Omni</div>
+      <h4>全模态 Thinker-Talker</h4>
+      <p>7B 全模态模型，统一文本/图像/音频/视频输入，Thinker-Talker 架构实现实时语音生成。全模态 benchmark 当期 SOTA。<span class="cite">arXiv 2503.20215</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-04 · Qwen3</div>
+      <h4>thinking/非-thinking 统一 + thinking budget</h4>
+      <p>标志性一代。Dense（0.6B~32B）+ MoE（30B-A3B / 235B-A22B）。把"深度推理（thinking）"与"快速响应（非-thinking）"<strong>统一进同一个模型</strong>，用户可切换，并引入 <strong>thinking budget</strong>（按任务难度动态分配推理 token 数）；强弱模型间知识蒸馏。<strong>36T tokens、119 种语言</strong>，三阶段预训练。235B-A22B 对标当期顶尖开源 / 部分闭源。<span class="cite">arXiv 2505.09388</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-09 · Qwen3-Max / Qwen3-Omni</div>
+      <h4>Max 破万亿 + 全模态 MoE 低延迟</h4>
+      <p><strong>Qwen3-Max</strong>（MoE）：官方称"超万亿"参数（>1T），约 36T tokens，超越 Qwen3-235B-A22B-2507；无独立技术报告。<span class="cite">Qwen 官方 X / Wikipedia</span><br>
+      <strong>Qwen3-Omni</strong>（Thinker-Talker MoE）：全模态无损统一 + 显式 Thinking 推理，端到端首包延迟低至 234ms；36 项音频/音视频基准中 32 项开源 SOTA。<span class="cite">arXiv 2509.17765</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2025-11 · Qwen3-VL</div>
+      <h4>原生 256K + 纯文本能力反超</h4>
+      <p>Dense（2B~32B）+ MoE（30B-A3B / 235B-A22B），原生 256K 上下文。interleaved-MRoPE、DeepStack、文本时间对齐；纯文本能力反超同级文本模型。MMMU / 视觉数学等领先。<span class="cite">arXiv 2511.21631</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2026-02 · Qwen3.5 / Qwen3.5-Plus</div>
+      <h4>新一代架构基座（开权重）</h4>
+      <p>MoE 新架构基座，Qwen3.8-Max 即基于此架构；Qwen3.5 开权重。Wikipedia 称约 397B-A17B（二手，未见官方报告确认）；无独立 arXiv 技术报告。<span class="cite">Wikipedia</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2026-05 · Qwen3.7-Max</div>
+      <h4>Agent 长程执行（闭源）</h4>
+      <p>MoE 闭源，1M 上下文；主打 Agent 长程执行（宣称 30 小时+持续有效推进）。参数与训练数据官方未公开。<span class="cite">Wikipedia / Yotta Labs（二手）</span></p>
+    </div>
+
+    <div class="tl-item">
+      <div class="yr">2026-08 · Qwen3.8-Max</div>
+      <h4>首个开权重的 Max：2.4T / 95B-active</h4>
+      <p>基于 Qwen3.5 架构的 MoE，2.4T 总参 / 95B 激活，1M 上下文。引入 <strong>reasoning_effort 三档（xhigh / medium / low）</strong>作为并发场景的"成本旋钮"，原生多模态，是<strong>首个开权重的 Max</strong>。官方自评：Terminal Bench 86.6 / PaperBench 93.0；E-Commerce Bench 4.16× 回报。精确 token 量官方未公开。<span class="cite">Qwen3.8 官方博客</span></p>
+    </div>
+
+  </div>
+
+  <h2>核心技术标签</h2>
+
+  <p>
+    <span class="tag b">标准配方 RoPE/SwiGLU/RMSNorm</span>
+    <span class="tag b">GQA 分组查询注意力</span>
+    <span class="tag b">YARN + DCA 长上下文外推</span>
+    <span class="tag g">MoE upcycling（dense 权重回收）</span>
+    <span class="tag g">MoE 主线化 235B-A22B</span>
+    <span class="tag p">thinking / 非-thinking 统一</span>
+    <span class="tag p">thinking budget 思考预算</span>
+    <span class="tag p">reasoning_effort 三档</span>
+    <span class="tag o">VL 动态分辨率</span>
+    <span class="tag o">M-RoPE / interleaved-MRoPE</span>
+    <span class="tag o">Omni Thinker-Talker</span>
+    <span class="tag o">原生长上下文训练 → 1M</span>
+  </p>
+
+  <h3>架构基线（Qwen1 → Qwen2）</h3>
+  <p>Qwen1 采用当期 Transformer 主流配置：RoPE、SwiGLU、RMSNorm、QKV bias。Qwen2 引入 <strong>GQA（分组查询注意力）</strong>降低推理显存占用；长上下文用 <strong>YARN + Dual Chunk Attention</strong> 外推到 128K。</p>
+
+  <h3>MoE 的引入与主线化</h3>
+  <p>首次 MoE 是 Qwen1.5-MoE（A2.7B 激活）的试水；Qwen2 出 57B-A14B，用 <strong>upcycling</strong>（从 dense 权重回收再训 +4.5T tokens）而非从零训练；Qwen3 把 MoE 做成主线旗舰（235B-A22B / 30B-A3B）；Max 线全部走 MoE 并把规模推到极致（Qwen3-Max >1T，Qwen3.8-Max 2.4T/95B-active）。核心动机：在可控推理成本下继续放大总参数以提升能力上限。</p>
+
+  <h3>thinking / 非-thinking 统一 + thinking budget（Qwen3 起）</h3>
+  <p>Qwen3 的标志性创新是把"深度推理"与"快速响应"统一进同一模型并允许切换，并引入 <strong>thinking budget</strong>——按任务难度动态分配推理 token 数。2026 Max 线把这一思路产品化为 <code>reasoning_effort</code> 三档（xhigh/medium/low）+ <code>preserve_thinking</code>，成为高并发场景下平衡质量与成本的"旋钮"。</p>
+
+  <h3>长上下文演进</h3>
+  <p>Qwen1 8K（部分 32K）→ Qwen1.5 全系 32K → Qwen2/2.5 到 128K → Qwen2.5-1M 首次 1M → Qwen3-VL 原生 256K → Max 线（3.7/3.8-Max）1M。方法上从 YARN / DCA 外推，逐步走向<strong>原生长上下文训练</strong>。</p>
+
+  <h3>多模态线</h3>
+  <p><strong>VL（视觉）</strong>：Qwen-VL → Qwen2-VL 的 Naive Dynamic Resolution + M-RoPE → Qwen2.5-VL 绝对时间编码 / 文档 Agent → Qwen3-VL 的 interleaved-MRoPE + DeepStack + 文本时间对齐。<br>
+  <strong>Omni（全模态）</strong>：Qwen2.5-Omni → Qwen3-Omni 的 Thinker-Talker MoE 架构，统一文本/图像/音频/视频且各模态不掉点，端到端首包延迟低至 234ms。</p>
+
+  <h3>从"答题"到"Agent 自主交付"（2026）</h3>
+  <p>2026 Max 系列训练重心转向 agentic RL：官方称用"环境数×算力联合扩展 + 统一奖励系统 + 在线数据均衡器"，主打数天级自主编程、办公、长程任务。<strong>方法层面官方仅给理念、无可复现细节。</strong></p>
+
+  <h2>数据 / 规模</h2>
+
+  <p>规模主线一句话：<strong>3T（2023）→ 7T（2024.06）→ 18T（2024.09）→ 20T+（Max）→ 36T（2025）</strong>，预训练数据量约 2 年增长约 12 倍；参数侧从 72B dense（2023）走到 2.4T / 95B-active MoE（2026）。</p>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th>版本</th><th class="mono">预训练 token 量</th><th>来源</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Qwen（初代）</td><td class="mono">约 3T</td><td>arXiv 2309.16609</td></tr>
+        <tr><td>Qwen1.5</td><td class="mono">官方未公开</td><td>Qwen1.5 博客</td></tr>
+        <tr><td>Qwen2</td><td class="mono">Dense &gt;7T（0.5B 用 12T）；MoE 额外 +4.5T</td><td>arXiv 2407.10671</td></tr>
+        <tr><td>Qwen2.5</td><td class="mono">18T</td><td>arXiv 2412.15115</td></tr>
+        <tr><td>Qwen2.5-Max</td><td class="mono">&gt;20T</td><td>Qwen2.5-Max 博客</td></tr>
+        <tr><td>Qwen3</td><td class="mono">36T，119 语言；三阶段</td><td>arXiv 2505.09388</td></tr>
+        <tr><td>Qwen3-Max</td><td class="mono">约 36T</td><td>Wikipedia / Qwen 官方 X</td></tr>
+        <tr><td>Qwen3.5 / 3.7-Max / 3.8-Max</td><td class="mono">官方未公开精确 token 量</td><td>Qwen3.8 博客 / Wikipedia</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note o">
+    <div class="t">规模口径提醒</div>
+    VL / Omni 与 Max 系列的精确预训练 token 量，官方多未在报告中单列。Qwen2.5-Max 的"325B"为第三方博客推测，官方博客未确认，本页不作事实采信。参数侧 Qwen3.5 的 397B-A17B 亦来自 Wikipedia 二手，未见官方确认。
+  </div>
+
+  <h2>代表指标</h2>
+
+  <p>说明：早期语言主线以公开 benchmark 对标同期开源为主，可信度高；<strong>2026 Max 系列多为官方自评 + 自建内部基准（QwenSWEBench 等），第三方独立评测缺位，横向可比性存疑，权重发布前不可独立复现。</strong></p>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th>版本</th><th>代表指标 / 表现</th><th>可信度</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Qwen（初代）</td><td>72B 在 MMLU / C-Eval 等对标 LLaMA2-70B 一档，当期最强开源之一</td><td>公开 benchmark</td></tr>
+        <tr><td>Qwen2</td><td>72B-Instruct 在 MMLU（84.2）、GPQA（37.9）、HumanEval（64.6）等多榜领先同期开源</td><td>公开 benchmark</td></tr>
+        <tr><td>Qwen2.5</td><td>72B-Instruct 以更小参数逼近 / 持平当期部分闭源旗舰；后训练约 100 万样本 SFT+DPO+GRPO</td><td>公开 benchmark</td></tr>
+        <tr><td>Qwen2.5-Max</td><td>官方称 Arena-Hard / MMLU-Pro / GPQA / LiveCodeBench 对标并部分超越 DeepSeek-V3</td><td>官方自评</td></tr>
+        <tr><td>Qwen3</td><td>235B-A22B 数学 / 代码 / 推理多榜位居当期开源前列；thinking 模式显著抬升推理分</td><td>公开 benchmark</td></tr>
+        <tr><td>Qwen3-Omni</td><td>36 项音频/音视频基准中 32 项开源 SOTA、22 项总体 SOTA</td><td>报告自评</td></tr>
+        <tr><td>Qwen3-VL</td><td>MMMU、视觉数学等基准领先</td><td>报告自评</td></tr>
+        <tr><td>Qwen3.8-Max</td><td>Terminal Bench 86.6 / PaperBench 93.0（全场最高）；GPQA Diamond 92.6 / IFBench 82.8 / HealthBench 60.2；但 HLE 43.6 / SWE-bench Pro 67.7 / DeepSWE 56.6 明显落后 Fable5；E-Commerce Bench 4.16× 回报（较 Qwen3.7-Max 提升 152%）</td><td>官方自评（打折看）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note r">
+    <div class="t">⚠️ 2026 Max 跑分谨慎解读</div>
+    Qwen3.8-Max 等 2026 Max 系列跑分大量来自 Qwen 自建内部基准 + 官方自测，横向可比性存疑；权重发布前不可独立复现。官方称 Qwen3.8-Max "下周开源"（截至 2026-08-03 抓取时未落地），实际参数 / license / 可复现性待权重发布后核验。请按"厂商发布材料"打折看待。
+  </div>
+
+  <h2>一手来源</h2>
+  <div class="reflist">
+    <ol>
+      <li>Qwen（初代）Technical Report — <a href="https://arxiv.org/abs/2309.16609" target="_blank" rel="noopener">arXiv:2309.16609</a></li>
+      <li>Qwen-VL: A Versatile Vision-Language Model — <a href="https://arxiv.org/abs/2308.12966" target="_blank" rel="noopener">arXiv:2308.12966</a></li>
+      <li>Qwen2 Technical Report — <a href="https://arxiv.org/abs/2407.10671" target="_blank" rel="noopener">arXiv:2407.10671</a></li>
+      <li>Qwen2-VL: Enhancing Perception at Any Resolution — <a href="https://arxiv.org/abs/2409.12191" target="_blank" rel="noopener">arXiv:2409.12191</a></li>
+      <li>Qwen2.5 Technical Report — <a href="https://arxiv.org/abs/2412.15115" target="_blank" rel="noopener">arXiv:2412.15115</a></li>
+      <li>Qwen2.5-1M Technical Report — <a href="https://arxiv.org/abs/2501.15383" target="_blank" rel="noopener">arXiv:2501.15383</a></li>
+      <li>Qwen2.5-VL Technical Report — <a href="https://arxiv.org/abs/2502.13923" target="_blank" rel="noopener">arXiv:2502.13923</a></li>
+      <li>Qwen2.5-Omni Technical Report — <a href="https://arxiv.org/abs/2503.20215" target="_blank" rel="noopener">arXiv:2503.20215</a></li>
+      <li>Qwen3 Technical Report — <a href="https://arxiv.org/abs/2505.09388" target="_blank" rel="noopener">arXiv:2505.09388</a></li>
+      <li>Qwen3-Omni Technical Report — <a href="https://arxiv.org/abs/2509.17765" target="_blank" rel="noopener">arXiv:2509.17765</a></li>
+      <li>Qwen3-VL Technical Report — <a href="https://arxiv.org/abs/2511.21631" target="_blank" rel="noopener">arXiv:2511.21631</a></li>
+      <li>官方博客 · Qwen1.5 — <a href="https://qwenlm.github.io/blog/qwen1.5/" target="_blank" rel="noopener">qwenlm.github.io/blog/qwen1.5</a></li>
+      <li>官方博客 · Qwen2 — <a href="https://qwenlm.github.io/blog/qwen2/" target="_blank" rel="noopener">qwenlm.github.io/blog/qwen2</a></li>
+      <li>官方博客 · Qwen2.5-Max — <a href="https://qwenlm.github.io/blog/qwen2.5-max/" target="_blank" rel="noopener">qwenlm.github.io/blog/qwen2.5-max</a></li>
+      <li>官方博客 · Qwen3.8-Max（无独立技术报告，仅发布公告） — <a href="https://qwen.ai/blog?id=qwen3.8" target="_blank" rel="noopener">qwen.ai/blog?id=qwen3.8</a></li>
+      <li>Qwen3-Max 发布（官方 X，二手性质） — <a href="https://x.com/Alibaba_Qwen/status/1963991502440562976" target="_blank" rel="noopener">x.com/Alibaba_Qwen</a></li>
+      <li>Wikipedia "Qwen"（聚合 / 二手，Qwen3.5 / 3.7-Max 规格来源） — <a href="https://en.wikipedia.org/wiki/Qwen" target="_blank" rel="noopener">en.wikipedia.org/wiki/Qwen</a></li>
+    </ol>
+    <p class="src">调研日期 2026-08-03。arXiv 一手报告与三条 qwenlm.github.io 官方博客均已逐一核实链接可解析；2026 Max 系列（3.5 / 3.7 / 3.8-Max）仅有官方博客 / 公告，参数、训练数据、跑分官方未完整公开，本页已就相应条目标注"官方未公开"或"二手"。</p>
+  </div>
+
+  <div class="pagenav">
+    <a href="04-meta-llama.html" class="prev">
+      <div class="lbl">← 上一篇</div>
+      <div class="ttl">Meta Llama</div>
+    </a>
+    <a href="06-deepseek.html" class="next">
+      <div class="lbl">下一篇 →</div>
+      <div class="ttl">DeepSeek</div>
+    </a>
+  </div>
+
+</div>
+
+</body>
+</html>
