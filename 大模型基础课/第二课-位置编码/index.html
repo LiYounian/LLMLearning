@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>第二课 · 位置编码的工作原理 | 大模型基础课</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第二课</span>
+  <nav>
+    <a href="index.html" class="active">目录</a>
+    <a href="p1-why.html">为什么要位置编码</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap wide">
+  <div class="hero">
+    <div class="kicker">Lesson 02 · Positional Encoding</div>
+    <h1>位置编码的工作原理</h1>
+    <p>自注意力天生"看不见顺序"——"猫追狗"和"狗追猫"在它眼里一样。位置编码就是把<b>顺序信息</b>注入模型的那一招。本课按<b>发布时间线</b>把历代位置编码方法逐个讲透，每个都能点进去看详解，并标注它<b>被哪些主流大模型使用</b>。</p>
+  </div>
+
+  <div class="note p" style="max-width:860px;margin:0 auto 6px">
+    <div class="t">🧭 一条主线</div>
+    <b>绝对位置（给每个位置编个号 / 一个向量）→ 相对位置（只关心 token 间距离）→ RoPE / ALiBi（把相对位置融进注意力，成今日主流）→ NoPE（反思：还需要吗）→ 长上下文外推（训练短、推理长怎么办）</b>。
+    每一步都在补上一步的短板。看懂这条线，就理解了从 2017 原始 Transformer 到今天 LLaMA / Qwen / DeepSeek 长文本模型的位置编码演化。
+  </div>
+
+  <!-- 三个入口 -->
+  <div class="grid" style="margin-top:30px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr))">
+    <a class="card" href="p1-why.html">
+      <div class="num">起点</div><h3>为什么需要位置编码？</h3>
+      <p>自注意力是"集合运算"，对顺序不敏感（置换等变）。不加位置信息，模型分不清词序。</p>
+    </a>
+    <a class="card" href="p6-rope.html">
+      <div class="num">重头戏</div><h3>RoPE 旋转位置编码</h3>
+      <p>今天开源大模型的绝对主流。用旋转把位置"乘"进 Q/K，内积天然只依赖相对距离。含旋转可视化。</p>
+    </a>
+    <a class="card" href="models.html">
+      <div class="num">速查</div><h3>模型 × 方法 矩阵</h3>
+      <p>LLaMA / Qwen / DeepSeek / BLOOM / T5 各用什么位置编码、支持多长上下文？一表看清。</p>
+    </a>
+  </div>
+
+  <!-- 方法时间线 -->
+  <h2 id="timeline" style="border:none;margin-top:56px;scroll-margin-top:70px">📜 方法时间线（点任一方法进入详解）</h2>
+  <p style="color:var(--fg-dim);margin-top:-4px">按"进入 NLP / 大模型视野"的年份排序；每个卡片标注了代表性使用模型。</p>
+
+  <div class="mtimeline">
+    <a class="mt-node" href="p1-why.html">
+      <div class="mt-head"><span class="mt-yr">2017</span><h3>背景：自注意力为何对顺序不敏感</h3><span class="algo">置换等变 · 可交互</span></div>
+      <p>Attention 把序列当成一个"集合"，打乱输入顺序、输出只会跟着打乱——它本身分不清谁前谁后。这就是一切位置编码的动机。<b>含置换演示</b>。</p>
+      <div class="usedby"><span class="lbl">关键词：</span><span class="mbadge dim">permutation equivariance</span><span class="mbadge dim">因果掩码</span></div>
+    </a>
+
+    <a class="mt-node" href="p2-sinusoidal.html">
+      <div class="mt-head"><span class="mt-yr">2017</span><h3>正弦/余弦绝对位置编码</h3><span class="algo">sin/cos 固定编码 · 可交互</span></div>
+      <p>原始 Transformer 的答案：用不同频率的正余弦给每个位置算一个固定向量，加到词向量上。无需训练、理论上可外推到更长。<b>含编码热力图</b>。</p>
+      <div class="usedby"><span class="lbl">代表：</span><span class="mbadge meta">原始 Transformer</span></div>
+    </a>
+
+    <a class="mt-node" href="p3-learned.html">
+      <div class="mt-head"><span class="mt-yr">2018–2020</span><h3>学习式绝对位置嵌入</h3><span class="algo">位置当 embedding 查表</span></div>
+      <p>更省事：位置也做成一张可学习的向量表，第 <code>i</code> 个位置查第 <code>i</code> 行。简单有效，但序列长度被死死钉在训练上限，超出就没有对应行。</p>
+      <div class="usedby"><span class="lbl">代表：</span><span class="mbadge google">BERT</span><span class="mbadge gpt">GPT-2/3</span><span class="mbadge dim">原始 ViT</span></div>
+    </a>
+
+    <a class="mt-node" href="p4-relative.html">
+      <div class="mt-head"><span class="mt-yr">2018–2019</span><h3>相对位置表示 Relative</h3><span class="algo">注意力里加相对距离</span></div>
+      <p>换个思路：语言更在意"两个词离多远"，而非"各自绝对第几号"。把相对距离作为可学习偏置/向量注入注意力打分。Transformer-XL、DeBERTa 由此发扬。</p>
+      <div class="usedby"><span class="lbl">代表：</span><span class="mbadge dim">Shaw 2018</span><span class="mbadge meta">Transformer-XL</span><span class="mbadge google">DeBERTa</span></div>
+    </a>
+
+    <a class="mt-node" href="p5-t5bias.html">
+      <div class="mt-head"><span class="mt-yr">2019–2020</span><h3>T5 相对位置偏置</h3><span class="algo">按距离分桶的标量偏置</span></div>
+      <p>相对位置的极简派：不加任何位置向量，只给注意力打分加一个"按相对距离分桶"的可学习标量，还跨层共享参数。干净、好用，成为 T5 家族标配。</p>
+      <div class="usedby"><span class="lbl">代表：</span><span class="mbadge google">T5 / mT5</span></div>
+    </a>
+
+    <a class="mt-node era" href="p6-rope.html">
+      <div class="mt-head"><span class="mt-yr">2021</span><h3>RoPE 旋转位置编码</h3><span class="algo">旋转 Q/K · 可交互</span></div>
+      <p>今日绝对主流。把位置变成一个旋转角，按角度旋转 Q、K 向量——两者内积就"自动"只依赖相对位置差。绝对形式、相对效果，且天然支持外推。<b>含旋转可视化</b>。</p>
+      <div class="usedby"><span class="lbl">代表：</span><span class="mbadge meta">LLaMA 全系</span><span class="mbadge qwen">Qwen</span><span class="mbadge ds">DeepSeek</span><span class="mbadge dim">ChatGLM · Mistral · Gemma</span></div>
+    </a>
+
+    <a class="mt-node era" href="p7-alibi.html">
+      <div class="mt-head"><span class="mt-yr">2021</span><h3>ALiBi 线性偏置注意力</h3><span class="algo">按距离线性罚分 · 可交互</span></div>
+      <p>更激进：不加任何位置向量，直接在注意力打分上按 token 距离做线性衰减惩罚——离得越远、罚得越狠。训练短、外推长的能力尤其突出。<b>含衰减斜率图</b>。</p>
+      <div class="usedby"><span class="lbl">代表：</span><span class="mbadge meta">BLOOM</span><span class="mbadge dim">MPT · Replit</span></div>
+    </a>
+
+    <a class="mt-node" href="p8-nope.html">
+      <div class="mt-head"><span class="mt-yr">2023</span><h3>NoPE 无位置编码</h3><span class="algo">研究性结论</span></div>
+      <p>反直觉的发现：decoder-only 模型有<b>因果掩码</b>，掩码本身就泄漏了"我能看到几个前文"，等于隐含了位置信息——于是不加任何显式位置编码，模型照样能学到顺序，长度泛化甚至更好。</p>
+      <div class="usedby"><span class="lbl">性质：</span><span class="mbadge dim">Kazemnejad 2023</span><span class="mbadge dim">研究前沿，非旗舰默认</span></div>
+    </a>
+
+    <a class="mt-node frontier" href="p9-extrapolation.html">
+      <div class="mt-head"><span class="mt-yr">2023–2024</span><h3>长上下文外推：PI · NTK · YaRN · LongRoPE</h3><span class="algo">把上下文"拉长" · 可交互</span></div>
+      <p>训练 4K、推理却要 128K 甚至 2M 怎么办？在 RoPE 的频率上做插值/缩放，几乎不重训就把上下文窗口撑大。这是当下最热的工程主线。<b>含外推行为对比</b>。</p>
+      <div class="usedby"><span class="lbl">代表：</span><span class="mbadge meta">LLaMA-2 Long</span><span class="mbadge qwen">Qwen 长文本</span><span class="mbadge dim">CodeLLaMA · Phi-3(LongRoPE)</span></div>
+    </a>
+  </div>
+
+  <div class="note o" style="margin-top:34px">
+    <div class="t">⚠️ 关于准确性</div>
+    每一条涉及具体模型 / 数字 / 公式的结论，都尽量对应到官方技术报告、论文或代码仓库，见<a href="references.html">参考文献</a>页；存疑处已显式标注（如 NTK-aware 起源于社区、非正式论文），不臆造。
+  </div>
+
+  <p style="text-align:center;margin-top:46px;color:var(--fg-faint);font-family:var(--mono);font-size:13px">大模型基础课 · 第二课 · 位置编码（时间线版）</p>
+</div>
+</body>
+</html>
