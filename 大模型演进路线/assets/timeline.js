@@ -1,4 +1,4 @@
-/* ===== 跨家族可交互时间线 ===== */
+/* ===== 跨家族可交互时间线（按年份视图 + 公司泳道视图）===== */
 const FAM = {
   industry:{n:"行业共性",c:"#7ee787"},
   openai:{n:"OpenAI",c:"#10a37f"},
@@ -59,7 +59,11 @@ const EVENTS = [
 function initTimeline(mountId){
   const root = document.getElementById(mountId);
   if(!root) return;
-  let active = "all";
+  let active = "all";   // 当前主题
+  let view = "year";    // year | swim
+
+  const isOn = e => active==="all" || e.g.includes(active);
+  const years = [...new Set(EVENTS.map(e=>e.y))].sort();
 
   const chips = Object.entries(THEMES).map(([k,v])=>
     `<button class="chip${k==='all'?' active':''}" data-th="${k}">${v}</button>`).join("");
@@ -68,29 +72,54 @@ function initTimeline(mountId){
     `<span style="display:inline-flex;align-items:center;gap:5px;margin-right:12px;font-size:12.5px;color:var(--fg-dim)">
       <span style="width:11px;height:11px;border-radius:3px;background:${v.c};display:inline-block"></span>${v.n}</span>`).join("");
 
-  function render(){
-    const years = [...new Set(EVENTS.map(e=>e.y))].sort();
+  /* —— 按年份视图（行=年份）—— */
+  function renderYear(){
     let html = "";
     for(const y of years){
-      const evs = EVENTS.filter(e=>e.y===y);
-      const cells = evs.map(e=>{
-        const on = active==="all" || e.g.includes(active);
+      const cells = EVENTS.filter(e=>e.y===y).map(e=>{
         const fam = FAM[e.f];
-        return `<div class="tl-ev" style="border-left:3px solid ${fam.c};opacity:${on?1:.13};transition:.25s">
+        return `<div class="tl-ev" style="border-left:3px solid ${fam.c};opacity:${isOn(e)?1:.13};transition:.25s">
           <div style="font-size:11px;font-family:var(--mono);color:${fam.c}">${fam.n}</div>
           <div style="font-weight:700;font-size:14.5px;margin:1px 0 2px">${e.t}</div>
           <div style="font-size:13px;color:var(--fg-dim);line-height:1.55">${e.d}</div>
         </div>`;
       }).join("");
-      html += `<div class="tl-year">
-        <div class="tl-y">${y}</div>
-        <div class="tl-cells">${cells}</div>
-      </div>`;
+      html += `<div class="tl-year"><div class="tl-y">${y}</div><div class="tl-cells">${cells}</div></div>`;
     }
-    root.querySelector("#tl-body").innerHTML = html;
+    return html;
+  }
+
+  /* —— 公司泳道视图（行=公司，列=年份）—— */
+  function renderSwim(){
+    const cols = `132px repeat(${years.length}, minmax(188px,1fr))`;
+    let g = `<div class="sw-corner">公司 ＼ 年份</div>`;
+    g += years.map(y=>`<div class="sw-yhd">${y}</div>`).join("");
+    for(const [fk,fam] of Object.entries(FAM)){
+      const hit = EVENTS.some(e=>e.f===fk && isOn(e));   // 该道在当前主题下是否有命中，用于整道淡出
+      g += `<div class="sw-lbl" style="opacity:${hit?1:.35}"><span class="sw-dot" style="background:${fam.c}"></span>${fam.n}</div>`;
+      g += years.map(y=>{
+        const inner = EVENTS.filter(e=>e.f===fk && e.y===y).map(e=>
+          `<div class="sw-ev" style="border-left:3px solid ${fam.c};opacity:${isOn(e)?1:.13};transition:.25s">
+            <div class="sw-ev-t">${e.t}</div>
+            <div class="sw-ev-d">${e.d}</div>
+          </div>`).join("");
+        return `<div class="sw-cell" style="background:${fam.c}10">${inner}</div>`;
+      }).join("");
+    }
+    return `<div class="swim-wrap"><div class="swim-grid" style="grid-template-columns:${cols}">${g}</div></div>
+      <p class="src" style="margin-top:10px">← → 横向滚动查看全部年份；公司名列会吸附在左侧。同一行即可纵向读出<b>某一家的完整演进节奏</b>，同一列可横向对比<b>同年各家在做什么</b>。</p>`;
+  }
+
+  function render(){
+    root.querySelector("#tl-body").innerHTML = view==="swim" ? renderSwim() : renderYear();
   }
 
   root.innerHTML = `
+    <div class="swim-controls" style="margin-bottom:10px;align-items:center">
+      <span style="font-size:12.5px;color:var(--fg-dim);margin-right:2px">视图</span>
+      <button class="chip vt active" data-view="year">按年份</button>
+      <button class="chip vt" data-view="swim">公司泳道</button>
+    </div>
     <div class="swim-controls">${chips}</div>
     <div style="margin:6px 0 18px">${legend}</div>
     <div id="tl-body"></div>
@@ -99,10 +128,28 @@ function initTimeline(mountId){
       .tl-y{font-family:var(--mono);font-size:20px;font-weight:800;color:var(--fg);position:sticky;top:60px;height:fit-content}
       .tl-cells{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:10px}
       .tl-ev{background:var(--bg-soft);border:1px solid var(--border-s);border-radius:9px;padding:9px 12px}
+      /* 泳道 */
+      .swim-wrap{overflow-x:auto;border:1px solid var(--border-s);border-radius:11px;background:var(--bg-soft)}
+      .swim-grid{display:grid;min-width:max-content}
+      .swim-grid>div{border-top:1px solid var(--border-s)}
+      .sw-corner{position:sticky;left:0;z-index:3;background:var(--bg);font-family:var(--mono);font-size:11.5px;color:var(--fg-dim);padding:10px;display:flex;align-items:flex-end;border-top:none}
+      .sw-yhd{font-family:var(--mono);font-weight:800;font-size:16px;text-align:center;padding:10px 8px;background:var(--bg);color:var(--fg);border-top:none;border-left:1px solid var(--border-s)}
+      .sw-lbl{position:sticky;left:0;z-index:2;background:var(--bg);padding:10px;font-weight:700;font-size:13px;display:flex;align-items:center;gap:7px;border-right:2px solid var(--border-s);transition:.25s}
+      .sw-dot{width:11px;height:11px;border-radius:3px;flex:none}
+      .sw-cell{border-left:1px solid var(--border-s);padding:7px;display:flex;flex-direction:column;gap:6px}
+      .sw-ev{background:var(--bg-soft);border:1px solid var(--border-s);border-radius:7px;padding:6px 8px}
+      .sw-ev-t{font-weight:700;font-size:12.5px;line-height:1.3;margin-bottom:2px}
+      .sw-ev-d{font-size:11.5px;color:var(--fg-dim);line-height:1.45}
     </style>`;
-  root.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{
+
+  root.querySelectorAll(".chip.vt").forEach(b=>b.onclick=()=>{
+    view=b.dataset.view;
+    root.querySelectorAll(".chip.vt").forEach(x=>x.classList.toggle("active",x===b));
+    render();
+  });
+  root.querySelectorAll(".chip[data-th]").forEach(c=>c.onclick=()=>{
     active=c.dataset.th;
-    root.querySelectorAll(".chip").forEach(x=>x.classList.toggle("active",x===c));
+    root.querySelectorAll(".chip[data-th]").forEach(x=>x.classList.toggle("active",x===c));
     render();
   });
   render();
