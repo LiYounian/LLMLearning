@@ -1,2 +1,5 @@
 .DS_Store
 **/.DS_Store
+
+# 服务器自动更新日志（展示端本地产物，不入库；也避免被 git clean 误删）
+deploy/logs/
