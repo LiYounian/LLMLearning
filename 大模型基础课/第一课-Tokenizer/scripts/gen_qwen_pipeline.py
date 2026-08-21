@@ -19,6 +19,7 @@ SAMPLES = [
     {"id": "mix",   "label": "中英数字混合",     "text": "GPT-4o 有 128k 上下文"},
     {"id": "zhp",   "label": "中文带标点",       "text": "你好，世界！"},
     {"id": "emoji", "label": "重音字母 + emoji", "text": "café 🚀"},
+    {"id": "kr",    "label": "韩语（跨字符边界实例）", "text": "토크나이저"},
 ]
 
 

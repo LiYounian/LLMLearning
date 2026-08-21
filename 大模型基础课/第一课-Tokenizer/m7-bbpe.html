@@ -79,6 +79,9 @@
     <div class="t">🔬 实测证据（Qwen2.5）</div>
     韩语 <code>토크나이저</code> 里，Qwen 产出一个 token，它的字节 = <b><code>토</code> 的最后一个字节 + <code>크</code> 的第一个字节</b>——不含任何一个完整字符，正是"前字尾 + 后字头"。印地语（天城文）里也大量出现。脚本见 <code>scripts/probe_crosschar.py</code>。
   </div>
+
+  <p style="margin-top:16px"><b>👇 眼见为实</b>：下面用真实 Qwen 分词器把 <code>토크나이저</code> 走一遍，<span style="color:var(--danger)">红框那个 token 就是「토 尾字节 + 크 头字节」</span>：</p>
+  <div class="demo"><div id="crosschar"></div></div>
   <p><b>为什么会</b>：BPE 合并纯按"字节对频次"驱动，<b>对字符边界毫无感知</b>；正则预切分只挡住"跨词/跨空格/跨标点"的合并，同一段同种文字内部，<b>跨字符边界的相邻字节对照样是合并候选</b>。只要它够高频就会被合并。</p>
   <p><b>为什么中文里几乎看不到</b>（<code>深度学习模型…</code> 实测 34 字全部边界对齐）：中文语料多，Qwen 先把每个汉字自己的 3 字节合成"整字 token"（字内字节对超高频），再合成词，于是都卡在字/词边界。而覆盖不足的文字（此处韩语/印地语）没学全整字合并，裸字节对就赢了 → 冒出跨界碎片 token。</p>
   <div class="note">
@@ -117,6 +120,8 @@
 
 <script src="assets/byte-demo.js"></script>
 <script src="assets/byte-bpe-zh.js"></script>
-<script>initByteDemo("byte-demo");initZhBpe("zhbpe");</script>
+<script src="assets/qwen_pipeline.js"></script>
+<script src="assets/crosschar-demo.js"></script>
+<script>initByteDemo("byte-demo");initZhBpe("zhbpe");initCrossChar("crosschar","kr");</script>
 </body>
 </html>
