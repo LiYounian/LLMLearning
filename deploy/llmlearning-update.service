@@ -1,5 +1,6 @@
-# 参考模板：拷到 /etc/systemd/system/llmlearning-update.service（按需改路径/用户）
+# 参考模板：拷到 /etc/systemd/system/llmlearning-update.service
 # 职责：跑一次 update.sh，让服务器仓库副本跟随 origin/main。
+# 本项目实际部署：用户 admin、clone 路径 /home/admin/LLMLearning。
 [Unit]
 Description=LLMLearning auto-update (git follow origin/main)
 After=network-online.target
@@ -7,8 +8,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-User=deploy
+User=admin
 # 关键：git 走 SSH deploy key 时必须有 HOME，否则找不到 ~/.ssh
-Environment=HOME=/home/deploy
-# clone 路径按实际替换（本手册用 /srv/llmlearning）
-ExecStart=/srv/llmlearning/deploy/update.sh
+Environment=HOME=/home/admin
+ExecStart=/home/admin/LLMLearning/deploy/update.sh
