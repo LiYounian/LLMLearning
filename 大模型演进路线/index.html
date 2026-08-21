@@ -32,7 +32,12 @@
     <b>规模</b>：拼参数/数据 → 拼推理算力(test-time) → 拼真实任务交付　·　<b>开放度</b>：早期开源 → GPT-4 起闭源潮 → 2025–26 开放权重强势回归
   </div>
 
-  <h2 style="border:none;margin-top:40px">① 按公司看</h2>
+  <h2 style="border:none;margin-top:44px">📈 一图看全局：发布时间 × 模型量级</h2>
+  <p class="src" style="margin:0 0 6px">横轴=发布时间，纵轴=总参数量（对数轴），颜色=公司。<b>MoE 模型</b>用竖线连接「激活参数↕总参数」，直观看出稀疏解耦；<b>实心</b>=开放权重、<b>空心</b>=权重闭源但参数已公开。闭源旗舰（Claude 全系 / GPT-4 及以后 / Gemini 旗舰 / 豆包）参数<b>官方从不公开</b>，本站不编数字，仅在顶部刻度带示其发布时间。悬停看详情，点击进该家详情页。</p>
+  <div id="scatter" style="margin:14px 0 6px"></div>
+  <p class="src">读图三条线索：① 2024 起 <b>MoE 棒棒糖</b>集中出现——总参冲上千亿~万亿、激活参数却压在几十亿；② <b>实心点</b>（开放权重）2024–26 一路爬到 2.8T（Kimi K3），开放阵营在拼规模；③ 顶部刻度带说明——旗舰竞争里很大一部分（闭源）根本无法用参数量衡量。</p>
+
+  <h2 style="border:none;margin-top:44px">① 按公司看</h2>
   <div class="grid">
     <a class="card" href="01-openai-gpt.html" style="--bar:#10a37f">
       <div class="num">闭源为主</div><h3>OpenAI GPT</h3>
@@ -110,7 +115,9 @@
     闭源旗舰的参数量与训练数据量普遍<b>官方未公开</b>（Claude 全系、GPT-4 及以后、Gemini 旗舰、豆包主线），任何具体数字（如 GPT-4 1.8T）均为传闻，本站一律标注不采信；2025–26 新旗舰多为"重发布轻报告"，跑分多含自评，口径差异大。详见<a href="references.html">来源与空白</a>。
   </div>
 
-  <p style="text-align:center;margin-top:44px;color:var(--fg-faint);font-family:var(--mono);font-size:13px">调研日期 2026-08 ｜ 由飞书文档转制 ｜ v1 草稿</p>
+  <p style="text-align:center;margin-top:44px;color:var(--fg-faint);font-family:var(--mono);font-size:13px">调研日期 2026-08 ｜ 由飞书文档转制 ｜ v2</p>
 </div>
+<script src="assets/models.js"></script>
+<script>renderScatter("scatter");</script>
 </body>
 </html>
