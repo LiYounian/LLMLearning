@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>跨家族时间线 | 大模型演进路线</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型演进路线 <span class="dot">·</span> 8家调研</span>
+  <nav>
+    <a href="index.html">目录</a><a href="timeline.html" class="active">跨家时间线</a>
+    <a href="tech.html">技术脉络</a><a href="metrics.html">指标脉络</a>
+    <a href="data.html">数据规模</a><a href="references.html">来源</a>
+  </nav>
+</div></div>
+
+<div class="wrap wide page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / 跨家族时间线</div>
+  <h1>跨家族时间线（里程碑对齐）</h1>
+  <p class="lead">2017→2026，把 8 家的关键节点按年份对齐。点上方标签筛选主题——直接看清"<b>谁先做了 MoE、谁先做推理模型、谁先做长上下文</b>"。</p>
+  <p class="src">"首创/标志"指在主流商用大模型里由该家率先大规模落地或以其为代表，非绝对学术首发。</p>
+
+  <div class="demo" style="background:transparent;border:none;padding:0">
+    <div id="tl"></div>
+  </div>
+
+  <div class="note g" style="margin-top:30px">
+    <div class="t">🎯 一句话趋势</div>
+    <b>架构</b> Dense → MoE 稀疏化 → 稀疏注意力；<b>能力</b> 答题 → 对齐对话 → 多模态 → 推理(RL) → Agentic 自主；<b>规模</b> 拼参数/数据 → 拼推理算力(test-time) → 拼真实任务交付；<b>开放度</b> 早期开源 → GPT-4 起闭源潮 → 2025-26 开放权重强势回归（DeepSeek/Qwen/Kimi/Llama）。
+  </div>
+
+  <div class="pagenav">
+    <a href="index.html"><div class="lbl">← 返回</div><div class="ttl">课程目录</div></a>
+    <a class="next" href="tech.html"><div class="lbl">下一节 →</div><div class="ttl">技术脉络 T1–T8</div></a>
+  </div>
+</div>
+<script src="assets/timeline.js"></script>
+<script>initTimeline("tl");</script>
+</body>
+</html>

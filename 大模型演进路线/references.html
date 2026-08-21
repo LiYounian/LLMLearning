@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>来源与空白 | 大模型演进路线</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型演进路线 <span class="dot">·</span> 8家调研</span>
+  <nav>
+    <a href="index.html">目录</a><a href="timeline.html">跨家时间线</a>
+    <a href="tech.html">技术脉络</a><a href="metrics.html">指标脉络</a>
+    <a href="data.html">数据规模</a><a href="references.html" class="active">来源</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / 来源与空白</div>
+  <h1>来源与空白</h1>
+  <p class="lead">每家详情页底部都列了该家的全部一手来源（arXiv + 官方博客），并经调研 agent 核对可解析。本页汇总关键论文入口，并诚实标注"哪些信息各家从不公开"。</p>
+
+  <h2>关键一手来源（按主题）</h2>
+  <div class="reflist"><ol>
+    <li><b>基座</b>：Transformer《Attention Is All You Need》<a href="https://arxiv.org/abs/1706.03762">arXiv:1706.03762</a></li>
+    <li><b>OpenAI</b>：GPT-3 <a href="https://arxiv.org/abs/2005.14165">2005.14165</a> · InstructGPT <a href="https://arxiv.org/abs/2203.02155">2203.02155</a>（详见 <a href="01-openai-gpt.html">GPT 详情页</a>）</li>
+    <li><b>Anthropic</b>：Constitutional AI <a href="https://arxiv.org/abs/2212.08073">2212.08073</a> · HH-RLHF <a href="https://arxiv.org/abs/2204.05862">2204.05862</a>（详见 <a href="02-anthropic-claude.html">Claude 详情页</a>）</li>
+    <li><b>Google</b>：PaLM <a href="https://arxiv.org/abs/2204.02311">2204.02311</a> · Gemini 1.0 <a href="https://arxiv.org/abs/2312.11805">2312.11805</a> · Gemini 1.5 <a href="https://arxiv.org/abs/2403.05530">2403.05530</a>（详见 <a href="03-google-gemini.html">Gemini 详情页</a>）</li>
+    <li><b>Meta</b>：LLaMA <a href="https://arxiv.org/abs/2302.13971">2302.13971</a> · Llama 2 <a href="https://arxiv.org/abs/2307.09288">2307.09288</a> · Llama 3 <a href="https://arxiv.org/abs/2407.21783">2407.21783</a> · GQA <a href="https://arxiv.org/abs/2305.13245">2305.13245</a> · DPO <a href="https://arxiv.org/abs/2305.18290">2305.18290</a>（详见 <a href="04-meta-llama.html">Llama 详情页</a>）</li>
+    <li><b>阿里 Qwen</b>：Qwen <a href="https://arxiv.org/abs/2309.16609">2309.16609</a> · Qwen2 <a href="https://arxiv.org/abs/2407.10671">2407.10671</a> · Qwen2.5 <a href="https://arxiv.org/abs/2412.15115">2412.15115</a> · Qwen3 <a href="https://arxiv.org/abs/2505.09388">2505.09388</a>（详见 <a href="05-alibaba-qwen.html">Qwen 详情页</a>）</li>
+    <li><b>DeepSeek</b>：V2 <a href="https://arxiv.org/abs/2405.04434">2405.04434</a> · V3 <a href="https://arxiv.org/abs/2412.19437">2412.19437</a> · R1 <a href="https://arxiv.org/abs/2501.12948">2501.12948</a>（Nature 2025）· GRPO/DeepSeekMath <a href="https://arxiv.org/abs/2402.03300">2402.03300</a>（详见 <a href="06-deepseek.html">DeepSeek 详情页</a>）</li>
+    <li><b>Kimi</b>：k1.5 <a href="https://arxiv.org/abs/2501.12599">2501.12599</a> · K2 <a href="https://arxiv.org/abs/2507.20534">2507.20534</a> · Muon is Scalable <a href="https://arxiv.org/abs/2502.16982">2502.16982</a>（详见 <a href="07-moonshot-kimi.html">Kimi 详情页</a>）</li>
+    <li><b>字节 Seed</b>：Seed1.5-Thinking <a href="https://arxiv.org/abs/2504.13914">2504.13914</a> · Seed1.5-VL <a href="https://arxiv.org/abs/2505.07062">2505.07062</a> · UI-TARS <a href="https://arxiv.org/abs/2501.12326">2501.12326</a>（详见 <a href="08-bytedance-doubao.html">豆包详情页</a>）</li>
+  </ol></div>
+  <p class="src">完整来源清单（每家 10–22 条，含官方博客/HF 模型卡/GitHub）见各公司详情页底部"一手来源"。以上 arXiv 均由调研 agent 核对可解析。</p>
+
+  <h2>七 · 空白与不确定（分享时的诚实边界）</h2>
+  <ol>
+    <li><b>闭源旗舰的参数量与训练数据量普遍未公开</b>：Claude 全系、GPT-4 及以后、Gemini 旗舰、豆包主线——均标"官方未公开"，任何具体数字（GPT-4 1.8T、Qwen2.5-Max 325B、豆包1.6 230B）均为传闻，不采信。</li>
+    <li><b>透明度分层</b>：DeepSeek / Llama / 早期 Qwen（公开 token 量与部分成本）&gt; Kimi（K2 起公开规模）&gt; OpenAI / Google / Anthropic / 豆包（旗舰基本保密）。</li>
+    <li><b>2026 版本多为"重发布轻报告"</b>：Qwen Max 系列、Llama 4、豆包 2.x、Kimi K2.5+ 等新旗舰无独立 arXiv 技术报告，只有官方博客；跑分多为自评。</li>
+    <li><b>命名与日期冲突</b>：Claude 5 家族命名、Kimi K3 发布日、豆包 Seed 版本线在不同来源有出入。</li>
+    <li><b>时效性</b>：2025-06 之后条目依赖联网检索（助手知识截止 2026-01），最新几代细节可靠性低于早期有 arXiv 报告的版本。</li>
+  </ol>
+
+  <div class="note p">
+    <div class="t">📌 关于本站</div>
+    内容由用户飞书文档《主流大模型发展脉络（8 家）》转制，事实可回溯各详情页的一手来源 URL；"趋势/判断"为解读观点。分享前如需精确到某条数字，请回读对应详情页与其一手来源。调研日期 2026-08。
+  </div>
+
+  <div class="pagenav">
+    <a href="data.html"><div class="lbl">← 上一节</div><div class="ttl">数据规模脉络</div></a>
+    <a class="next" href="index.html"><div class="lbl">返回 →</div><div class="ttl">课程目录</div></a>
+  </div>
+</div>
+</body>
+</html>

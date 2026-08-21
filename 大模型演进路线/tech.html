@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>技术脉络 T1–T8 | 大模型演进路线</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型演进路线 <span class="dot">·</span> 8家调研</span>
+  <nav>
+    <a href="index.html">目录</a><a href="timeline.html">跨家时间线</a>
+    <a href="tech.html" class="active">技术脉络</a><a href="metrics.html">指标脉络</a>
+    <a href="data.html">数据规模</a><a href="references.html">来源</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / 技术脉络</div>
+  <h1>技术脉络（横向专题 T1–T8）</h1>
+  <p class="lead">把 8 家的技术按主题横向串起来——这也是后续可逐点深挖的技术清单。每条都标注"谁首创/谁代表"。</p>
+
+  <h2 id="t1">T1 · 基座架构：从"标准配方"到"稀疏注意力"</h2>
+  <ul>
+    <li><b>Transformer decoder-only</b>（2017/2018）：全家共同起点。</li>
+    <li><b>标准配方组件</b>：Pre-norm + RMSNorm、RoPE 旋转位置编码、SwiGLU 激活——<a href="04-meta-llama.html">Llama 1</a>（2023）定型，Qwen/DeepSeek/Kimi 普遍沿用。</li>
+    <li><b>GQA 分组查询注意力</b>：Llama 2 / Qwen2 引入，降 KV cache、加速长序列。</li>
+    <li><b>MLA 多头潜在注意力</b>：<a href="06-deepseek.html">DeepSeek V2</a>（2024）首创，KV cache 降约 93%，是低成本长文本的关键。</li>
+    <li><b>稀疏注意力</b>：DeepSeek DSA（2025）把 O(L²)→O(L·k)；Llama 4 iRoPE；Kimi K3 KDA/Gated MLA——2025-26 长上下文提效的新前沿。</li>
+  </ul>
+
+  <h2 id="t2">T2 · 稀疏化 MoE：从 dense 到万亿总参</h2>
+  <ul>
+    <li><b>代表落地</b>：<a href="03-google-gemini.html">Gemini 1.5</a> 与 <a href="06-deepseek.html">DeepSeek V2</a>（均 2024）把 MoE 推成主流；随后 Qwen3、Llama 4、Kimi K2、豆包全线 MoE。</li>
+    <li><b>关键工程</b>：DeepSeek 无辅助损失负载均衡（V3）、Qwen upcycling（从 dense 回收）、豆包训推一体（性价比杠杆约 7×）。</li>
+    <li><b>规模</b>：激活参数与总参数解耦——DeepSeek V3 671B/37B、Kimi K2 1.04T/32B、Qwen3.8-Max 2.4T/95B、Kimi K3 2.8T/104B。</li>
+  </ul>
+
+  <h2 id="t3">T3 · 对齐 / 后训练：RLHF → RLAIF → DPO → GRPO</h2>
+  <ul>
+    <li><b>RLHF</b>（SFT+奖励模型+PPO）：<a href="01-openai-gpt.html">OpenAI InstructGPT</a>（2022）首次系统化，把语言模型变对话助手；Llama 2-Chat 开源复现。</li>
+    <li><b>Constitutional AI + RLAIF</b>：<a href="02-anthropic-claude.html">Anthropic</a>（2022）用"宪法"让 AI 自我批评、用 AI 反馈替代大量人工标注。</li>
+    <li><b>DPO</b>：Llama 3 等采用，简化偏好优化（去掉显式奖励模型与 PPO）。</li>
+    <li><b>GRPO</b>：<a href="06-deepseek.html">DeepSeek DeepSeekMath</a>（2024）首创，去 critic 的组相对优势估计，后成为 R1 纯 RL 推理的核心。</li>
+  </ul>
+
+  <h2 id="t4">T4 · 推理模型 / test-time compute（2024 起最大范式）</h2>
+  <ul>
+    <li><b>o1</b>（<a href="01-openai-gpt.html">OpenAI</a> 2024）：首个大规模推理模型——回答前用私有 CoT"思考"，把算力从训练转向推理期。</li>
+    <li><b>DeepSeek R1</b>（2025）：纯 RL（GRPO）激发推理，R1-Zero 不用 SFT 冷启动即涌现"aha moment"；开源开放，登 Nature，影响巨大。</li>
+    <li><b>thinking 显式化/可切换</b>：Claude 3.7 extended thinking → Gemini 2.5 Deep Think（并行思考）→ Qwen3 thinking/非-thinking 统一 + thinking budget → DeepSeek V3.1 混合推理。</li>
+    <li><b>档位化成本控制</b>：Claude effort 参数、Qwen/OpenAI reasoning_effort（xhigh/medium/low）——把"思考多深"变成可调旋钮。</li>
+  </ul>
+
+  <h2 id="t5">T5 · 长上下文：从 100K 到 1M+</h2>
+  <ul>
+    <li><b>产品先声</b>：<a href="07-moonshot-kimi.html">Kimi Chat</a>（2023）以 20 万→200 万汉字打差异化。</li>
+    <li><b>技术推进</b>：Claude 200K → Gemini 1.5（2024）1M~10M → Qwen2.5-1M → 2026 普遍 1M（Claude / DeepSeek V4 / Qwen Max / Kimi K3）。</li>
+    <li><b>方法演进</b>：RoPE 外推 / YARN / DCA → MLA / DSA 原生长上下文 + 稀疏注意力。</li>
+  </ul>
+
+  <h2 id="t6">T6 · 多模态 / 全模态</h2>
+  <ul>
+    <li><b>图像输入</b>：GPT-4（2023）→ Claude 3（2024）。</li>
+    <li><b>原生多模态</b>：<a href="03-google-gemini.html">Gemini 1.0</a>（2023）从预训练即联合多模态；GPT-4o（omni）；Llama 4 early fusion；Qwen-VL/Omni；豆包全模态。</li>
+    <li><b>全模态统一（文/图/音/视频）</b>：Qwen Omni（Thinker-Talker）、豆包 Seed-2.0-lite、GPT-4o。</li>
+    <li><b>视觉作为反馈回路</b>：2026 旗舰用"生成→观察→修正"把视觉纳入 agent 执行闭环。</li>
+  </ul>
+
+  <h2 id="t7">T7 · Agentic（2025-26 行业主线）</h2>
+  <ul>
+    <li><b>computer use / GUI Agent</b>：<a href="02-anthropic-claude.html">Claude</a>（2024-10）首个前沿模型公测；字节 UI-TARS 独立研究线。</li>
+    <li><b>工具调用 + 长程自主</b>：Kimi K2（agentic 数据合成 + 联合 RL）、K2 Thinking（200-300 次连续工具调用）；Qwen Max（数天级自主编程/办公）；Claude agent teams。</li>
+    <li><b>agentic RL 训练</b>：真实环境×算力联合扩展 + 统一奖励系统。</li>
+  </ul>
+
+  <h2 id="t8">T8 · 训练/推理效率工程</h2>
+  <ul>
+    <li><b>FP8 训练</b>：<a href="06-deepseek.html">DeepSeek V3</a>。</li>
+    <li><b>MuonClip 优化器</b>：<a href="07-moonshot-kimi.html">Kimi K2</a>（QK-Clip 稳定万亿 MoE 训练，零 loss spike）。</li>
+    <li><b>训推一体 + 极致降本</b>：豆包；DeepSeek 低成本训练。</li>
+    <li><b>token 效率</b>：GPT-5.6、Gemini 3.6 Flash（"用更少 token 达到更高智能"）。</li>
+  </ul>
+
+  <div class="note p">
+    <div class="t">🔍 建议的逐点深挖清单</div>
+    ① MLA vs GQA vs 稀疏注意力(DSA/iRoPE/KDA) 的原理与取舍；② GRPO 与 RLHF/PPO/DPO 对比、纯 RL 推理(R1-Zero) 复现；③ MoE 负载均衡（无辅助损失 vs 辅助损失）与 upcycling；④ thinking 三形态（extended/Deep Think/thinking-budget）与 reasoning_effort 成本曲线；⑤ 长上下文训练与外推（YARN/DCA vs 原生 1M）；⑥ FP8/MuonClip 训练稳定性与降本；⑦ Agentic RL 与 computer use/GUI Agent。
+  </div>
+
+  <div class="pagenav">
+    <a href="timeline.html"><div class="lbl">← 上一节</div><div class="ttl">跨家族时间线</div></a>
+    <a class="next" href="metrics.html"><div class="lbl">下一节 →</div><div class="ttl">指标脉络</div></a>
+  </div>
+</div>
+</body>
+</html>

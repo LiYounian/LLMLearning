@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>指标脉络 | 大模型演进路线</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型演进路线 <span class="dot">·</span> 8家调研</span>
+  <nav>
+    <a href="index.html">目录</a><a href="timeline.html">跨家时间线</a>
+    <a href="tech.html">技术脉络</a><a href="metrics.html" class="active">指标脉络</a>
+    <a href="data.html">数据规模</a><a href="references.html">来源</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / 指标脉络</div>
+  <h1>指标脉络：评测范式的三次迁移</h1>
+  <p class="lead">一个 benchmark 被刷到 90%+ 就换更难的——分数上升既反映真实进步，也反映"评测军备竞赛"。看懂这条线，才不会被单个跑分误导。</p>
+
+  <h2>① 评测范式的三次迁移</h2>
+  <div class="statgrid">
+    <div class="stat" style="--bar:#6ea8fe"><div class="k">2020–2024</div><div class="v" style="font-size:18px">知识 / 通识</div><div class="s">主榜 MMLU，饱和后淡出</div></div>
+    <div class="stat" style="--bar:#ffb454"><div class="k">2024–2025</div><div class="v" style="font-size:18px">科学 / 数学推理</div><div class="s">GPQA / AIME / ARC-AGI</div></div>
+    <div class="stat" style="--bar:#7ee787"><div class="k">2025–2026</div><div class="v" style="font-size:18px">真实任务 / Agentic</div><div class="s">SWE-bench / Terminal / HLE</div></div>
+  </div>
+  <ol>
+    <li><b>知识/通识时代（2020–2024）</b>：主榜 <b>MMLU</b>。GPT-3 43.9% → GPT-4 86% → Gemini 1.0 Ultra / Claude Opus 4.5 ~90%，趋于饱和后被淡出主推。</li>
+    <li><b>科学/数学推理时代（2024–2025）</b>：换用更难的 <b>GPQA Diamond</b>（研究生科学）、<b>AIME/MATH</b>（竞赛数学）、<b>ARC-AGI</b>（抽象推理）。GPQA Diamond 从 Claude 3 Opus 50% → 2026 前沿 92%+；AIME 从 <50% → 90%+；推理模型（o1/R1/Deep Think）是主要推手。</li>
+    <li><b>真实任务/Agentic 时代（2025–2026）</b>：换用 <b>SWE-bench (Verified/Pro)</b>（编码 agent）、<b>Terminal-Bench / OSWorld / RecreationBench</b>（长程/GUI/经营）、<b>HLE（Humanity's Last Exam）</b>（极难综合）。SWE-bench Verified 从 Claude 3.5 的 33% → 2026 的 95%+。</li>
+  </ol>
+
+  <h2>② 几个可跨家看趋势的锚点</h2>
+  <p class="src">⚠️ 注意口径差异：是否带工具、thinking 档位、shot 数不同，同名基准跨来源常差数个百分点，下表仅示意"量级爬升"，不可直接相减。</p>
+
+  <h3>MMLU（通识，已饱和）</h3>
+  <div id="bar-mmlu"></div>
+  <h3>GPQA Diamond（研究生科学）</h3>
+  <div id="bar-gpqa"></div>
+  <h3>SWE-bench Verified（编码 agent）</h3>
+  <div id="bar-swe"></div>
+
+  <div class="note o" style="margin-top:34px">
+    <div class="t">🚩 读指标的三条警惕（分享时务必提醒）</div>
+    <ul style="margin:6px 0">
+      <li><b>口径不一</b>：是否带工具、thinking 档位、shot 数、评测脚手架不同，跨来源同名基准常差数个百分点，不可直接相减。</li>
+      <li><b>自评与内部基准</b>：2026 各家发布材料含大量"官方自评 + 自建内部基准"（尤其闭源旗舰与豆包/Qwen Max），第三方独立复核常缺位。</li>
+      <li><b>饱和后换榜</b>：一个榜被刷到 90%+ 就换更难的——分数上升既反映真实进步，也反映评测军备竞赛。</li>
+    </ul>
+  </div>
+
+  <div class="pagenav">
+    <a href="tech.html"><div class="lbl">← 上一节</div><div class="ttl">技术脉络</div></a>
+    <a class="next" href="data.html"><div class="lbl">下一节 →</div><div class="ttl">数据规模脉络</div></a>
+  </div>
+</div>
+
+<script>
+function bars(mountId, data, unit){
+  const max = Math.max(...data.map(d=>d.v));
+  const rows = data.map(d=>{
+    const w = (d.v/max*100).toFixed(1);
+    return `<div style="display:grid;grid-template-columns:200px 1fr 56px;align-items:center;gap:10px;margin:7px 0">
+      <div style="font-size:13px;color:var(--fg-dim);text-align:right">${d.n}</div>
+      <div style="background:#0b0f18;border-radius:7px;overflow:hidden;height:24px;border:1px solid var(--border-s)">
+        <div style="width:${w}%;height:100%;background:linear-gradient(90deg,${d.c||'#6ea8fe'},${d.c||'#6ea8fe'}bb);border-radius:7px"></div>
+      </div>
+      <div style="font-family:var(--mono);font-size:13px;color:var(--fg)">${d.v}${unit}</div>
+    </div>`;
+  }).join("");
+  document.getElementById(mountId).innerHTML = rows;
+}
+bars("bar-mmlu",[
+  {n:"GPT-3 (2020)",v:43.9,c:"#10a37f"},
+  {n:"GPT-4 (2023)",v:86.4,c:"#10a37f"},
+  {n:"GPT-4o (2024)",v:88.7,c:"#10a37f"},
+  {n:"Gemini Ultra / Claude Opus 4.5",v:90.0,c:"#4285f4"},
+],"%");
+bars("bar-gpqa",[
+  {n:"Claude 3 Opus (2024)",v:50.4,c:"#d97757"},
+  {n:"Gemini 2.5 Pro (2025)",v:84.0,c:"#4285f4"},
+  {n:"Gemini 3 Pro (2026)",v:91.9,c:"#4285f4"},
+  {n:"Qwen3.8-Max (自评)",v:92.6,c:"#a855f7"},
+  {n:"GPT-5.6 / Opus 5 (~)",v:94.0,c:"#10a37f"},
+],"%");
+bars("bar-swe",[
+  {n:"Claude 3.5 Sonnet (2024)",v:33.4,c:"#d97757"},
+  {n:"Claude Opus 4 (2025)",v:72.5,c:"#d97757"},
+  {n:"GPT-5 (2025)",v:74.9,c:"#10a37f"},
+  {n:"Claude Opus 4.8 (2026)",v:88.6,c:"#d97757"},
+  {n:"Fable5 / Opus5 (~)",v:95.0,c:"#d97757"},
+],"%");
+</script>
+</body>
+</html>
