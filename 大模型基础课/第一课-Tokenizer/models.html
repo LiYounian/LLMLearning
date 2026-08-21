@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>模型 × 方法 矩阵 | 第一课 Tokenizer</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="why.html">为什么分词</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html" class="active">模型×方法</a>
+    <a href="compare.html">切词对比</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / 模型 × 方法 矩阵</div>
+  <h1>模型 × 方法：谁用了什么分词器</h1>
+  <p class="lead">直接回答那个最常见的问题：<b>GPT、Qwen、DeepSeek 今天基本都是同一套范式——字节级 BPE（byte-level BPE）。</b>差异主要在词表大小、正则预切分规则、和工程细节。也有例外（早期 LLaMA、Gemma 走 SentencePiece）。</p>
+
+  <h2>① 方法 → 模型（交叉索引）</h2>
+  <p>每个方法点进去看详解；这里快速看它"花落谁家"：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>方法</th><th>代表使用者</th><th>今天在生成式大模型里的地位</th></tr></thead>
+    <tbody>
+      <tr><td><a href="m1-word.html">词级</a></td><td class="mono">word2vec / GloVe / 早期 NMT</td><td>已淘汰</td></tr>
+      <tr><td><a href="m2-char.html">字符级</a></td><td class="mono">char-RNN / Character-Aware LM</td><td>仅存于研究/字节模型</td></tr>
+      <tr><td><a href="m3-bpe.html">BPE（经典/字符）</a></td><td class="mono">Sennrich NMT</td><td>其字节级变体成主流底座</td></tr>
+      <tr><td><a href="m4-wordpiece.html">WordPiece</a></td><td class="mono">BERT / DistilBERT / ELECTRA</td><td>编码器模型；生成式基本不用</td></tr>
+      <tr><td><a href="m5-unigram.html">Unigram</a></td><td class="mono">T5 / ALBERT / XLNet / mBART</td><td>多语言 & 编码器常用</td></tr>
+      <tr><td><a href="m6-sentencepiece.html">SentencePiece（框架）</a></td><td class="mono">LLaMA 1/2 · T5 · Gemma · XLM-R</td><td>多语言/开源早期标准</td></tr>
+      <tr><td><a href="m7-bbpe.html">字节级 BPE ⭐</a></td><td class="mono">GPT 全系 · Qwen · DeepSeek · LLaMA-3 · Kimi</td><td class="mono" style="color:var(--accent2)">当今绝对主流</td></tr>
+      <tr><td><a href="m8-tiktoken.html">tiktoken 大词表</a></td><td class="mono">GPT-3.5/4/4o · (风格被 Qwen/Llama3 采用)</td><td>大词表竞赛</td></tr>
+      <tr><td><a href="m9-frontier.html">前沿 tokenizer-free</a></td><td class="mono">BLT · MegaByte · ByT5 · H-Net</td><td>研究前沿，尚未进旗舰生产</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>② 模型 → 方法（主流生成式大模型总表）</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>模型</th><th>算法</th><th>字节级?</th><th>词表大小</th><th>实现库</th></tr></thead>
+    <tbody>
+      <tr><td>GPT-2</td><td>byte-level BPE</td><td class="mono" style="color:var(--accent2)">是</td><td class="mono">50,257</td><td>tiktoken</td></tr>
+      <tr><td>GPT-3</td><td>byte-level BPE</td><td class="mono" style="color:var(--accent2)">是</td><td class="mono">50,257 / 50,281</td><td>tiktoken</td></tr>
+      <tr><td>GPT-3.5 / GPT-4</td><td>byte-level BPE</td><td class="mono" style="color:var(--accent2)">是</td><td class="mono">~100k (cl100k_base)</td><td>tiktoken</td></tr>
+      <tr><td>GPT-4o / o 系列</td><td>byte-level BPE</td><td class="mono" style="color:var(--accent2)">是</td><td class="mono">~200k (o200k_base)</td><td>tiktoken</td></tr>
+      <tr><td><b>Qwen 1/2/2.5/3</b></td><td>byte-level BPE (tiktoken 风格)</td><td class="mono" style="color:var(--accent2)">是</td><td class="mono">151,643 <span style="color:var(--fg-faint)">(emb 151,936)</span></td><td>tiktoken / HF</td></tr>
+      <tr><td><b>DeepSeek-V2</b></td><td>byte-level BPE</td><td class="mono" style="color:var(--accent2)">是</td><td class="mono">100,000</td><td>HF tokenizers</td></tr>
+      <tr><td><b>DeepSeek-V3</b></td><td>byte-level BPE</td><td class="mono" style="color:var(--accent2)">是</td><td class="mono">128,000</td><td>HF tokenizers</td></tr>
+      <tr><td>LLaMA 1 / 2</td><td>SentencePiece-BPE + 字节兜底</td><td class="mono" style="color:var(--accent3)">否*</td><td class="mono">32,000</td><td>SentencePiece</td></tr>
+      <tr><td>LLaMA 3 / 3.1</td><td>byte-level BPE (tiktoken 风格)</td><td class="mono" style="color:var(--accent2)">是</td><td class="mono">128,256</td><td>tiktoken</td></tr>
+      <tr><td><b>Kimi K2</b></td><td>byte-level BPE (regex+BPE)</td><td class="mono" style="color:var(--accent2)">是</td><td class="mono">~160,000</td><td>HF tokenizers</td></tr>
+      <tr><td>Kimi k1 / k1.5</td><td class="mono" style="color:var(--fg-faint)">未公开</td><td class="mono" style="color:var(--fg-faint)">未确证</td><td class="mono" style="color:var(--fg-faint)">未公开</td><td class="mono" style="color:var(--fg-faint)">—</td></tr>
+      <tr><td>Mistral / Mixtral</td><td>SentencePiece-BPE → (Tekken) tiktoken</td><td class="mono" style="color:var(--accent3)">否 → 是</td><td class="mono">32,000 → ~131k</td><td>SP / tiktoken</td></tr>
+      <tr><td>Gemma / Gemini</td><td>SentencePiece</td><td class="mono" style="color:var(--accent3)">字节兜底</td><td class="mono">256,000</td><td>SentencePiece</td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:13px;color:var(--fg-faint)">* LLaMA 1/2 用 SentencePiece 的 <b>byte-fallback</b>：未知字符降级为字节表示，所以也没有真正的 <code>[UNK]</code>，但它不是"纯字节级 BPE"。</p>
+
+  <div class="note g">
+    <div class="t">✅ 一句话结论</div>
+    生成式大模型的分词器已经高度收敛到 <b>字节级 BPE</b> 这一条路线（GPT-2 开的头）。区别只在"词表多大、预切分怎么切"。想亲眼看差距，去 <a href="compare.html">切词对比页</a>。
+  </div>
+
+  <h2>③ 逐家要点</h2>
+  <h3>GPT（OpenAI）：一路 tiktoken，全程字节级</h3>
+  <ul>
+    <li><b>GPT-2/3</b>：<code>r50k_base</code>，5 万词表，不拆数字。</li>
+    <li><b>GPT-3.5/4</b>：<code>cl100k_base</code>，约 10 万，数字按 1~3 位分组（<code>\p{N}{1,3}</code>）。</li>
+    <li><b>GPT-4o / o 系列</b>：<code>o200k_base</code>，约 20 万，多语言尤其 CJK 压缩优化。</li>
+  </ul>
+  <h3>Qwen（阿里）：官方明说"在字节上跑 BPE、用 tiktoken"</h3>
+  <p>三个易混数字：<b>151,643</b>（BPE token 数）/ ~151,665（加特殊 token）/ <b>151,936</b>（embedding 行数，为对齐硬件 padding）。中文压缩到约 1 token/1.5–1.8 字。</p>
+  <h3>DeepSeek：V2 词表 10 万、V3 12.8 万</h3>
+  <p>V3 预切分把"标点+换行合并成一个 token"以提升多语言压缩，会带来 token 边界偏置，训练时随机拆开一定比例缓解。</p>
+  <h3>LLaMA：一次典型的"路线迁移"</h3>
+  <p>LLaMA 1/2 = SentencePiece-BPE（3.2 万、数字逐位拆、byte-fallback）；LLaMA 3 = tiktoken 风格字节级 BPE（12.8 万）。"SentencePiece 32K → tiktoken 128K"正是行业往"更大、字节级"收敛的缩影。</p>
+  <div class="note o">
+    <div class="t">⚠️ Kimi 的诚实标注</div>
+    <b>Kimi K2</b>（开源）用字节级 BPE，词表约 16 万，与主流一致。但 <b>k1 / k1.5 是闭源 API 模型，Moonshot 未公开分词器细节和词表</b>——只能推断沿用字节级 BPE，不能给准数字。
+  </div>
+
+  <h2>④ 一个大趋势：词表越做越大</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>词表规模</th><th>代表模型</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">~50k</td><td>GPT-2 / GPT-3</td></tr>
+      <tr><td class="mono">~100k</td><td>GPT-3.5 / GPT-4 (cl100k)</td></tr>
+      <tr><td class="mono">~128k</td><td>LLaMA 3 / DeepSeek-V3</td></tr>
+      <tr><td class="mono">~152k</td><td>Qwen</td></tr>
+      <tr><td class="mono">~160k</td><td>Kimi K2</td></tr>
+      <tr><td class="mono">~200k</td><td>GPT-4o</td></tr>
+      <tr><td class="mono">~256k</td><td>Gemma</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>为什么变大</b>：压缩率更好（更少 token → 省 O(n²) 算力、上下文更经用、API 更便宜），多语言/CJK/代码受益最大。<b>为什么不无限大</b>：embedding/输出层参数线性膨胀、稀有 token 训练不足（glitch token）、收益递减。当前主流落在 <b>128k–256k</b>。详见 <a href="m8-tiktoken.html">tiktoken 大词表页</a> 与 <a href="m9-frontier.html">前沿页</a>。</p>
+
+  <div class="pagenav">
+    <a href="m9-frontier.html"><div class="lbl">← 上一节</div><div class="ttl">前沿趋势</div></a>
+    <a class="next" href="compare.html"><div class="lbl">下一节 →</div><div class="ttl">切词对比（真实数据）</div></a>
+  </div>
+</div>
+</body>
+</html>

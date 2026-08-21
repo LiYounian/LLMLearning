@@ -10,15 +10,17 @@
 <div class="topbar"><div class="inner">
   <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
   <nav>
-    <a href="index.html">目录</a><a href="01-why.html" class="active">为什么分词</a>
-    <a href="02-history.html">历代方法</a><a href="03-bpe.html">BPE 详解</a>
-    <a href="04-wordpiece-unigram.html">WordPiece/Unigram</a><a href="05-byte-level.html">字节级</a>
-    <a href="06-models.html">主流模型</a><a href="07-frontier.html">前沿</a><a href="08-token-compare.html">切词对比</a><a href="references.html">参考文献</a>
+    <a href="index.html">目录</a>
+    <a href="why.html" class="active">为什么分词</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="compare.html">切词对比</a>
+    <a href="references.html">参考文献</a>
   </nav>
 </div></div>
 
 <div class="wrap page">
-  <div class="breadcrumb"><a href="index.html">目录</a> / 01 为什么需要分词</div>
+  <div class="breadcrumb"><a href="index.html">目录</a> / 为什么需要分词</div>
   <h1>为什么需要分词？</h1>
   <p class="lead">一句话：神经网络只会做数学，不认识文字。Tokenizer 是把「人类语言」翻译成「模型能吃的数字序列」的第一道、也是唯一一道确定性工序。</p>
 
@@ -55,7 +57,7 @@
 
   <div class="note g">
     <div class="t">🎯 subword / byte-level 为什么赢</div>
-    词片级和字节级正好落在这条光谱的"甜点区"：词表适中、序列不长、几乎/彻底消灭 OOV。常用词整体成一个 token（高效），罕见词自动拆成更小的已知片段（不丢信息）。这就是今天几乎所有大模型都用 subword / byte-level 的根本原因——后面几课会把它们一个个讲透。
+    词片级和字节级正好落在这条光谱的"甜点区"：词表适中、序列不长、几乎/彻底消灭 OOV。常用词整体成一个 token（高效），罕见词自动拆成更小的已知片段（不丢信息）。这就是今天几乎所有大模型都用 subword / byte-level 的根本原因——<a href="index.html#timeline">方法时间线</a>里会把它们一个个讲透。
   </div>
 
   <h2>③ 一个直觉例子</h2>
@@ -68,7 +70,7 @@
 
   <div class="pagenav">
     <a href="index.html"><div class="lbl">← 返回</div><div class="ttl">课程目录</div></a>
-    <a class="next" href="02-history.html"><div class="lbl">下一节 →</div><div class="ttl">历代方法总览</div></a>
+    <a class="next" href="m1-word.html"><div class="lbl">下一节 →</div><div class="ttl">词级分词（时间线起点）</div></a>
   </div>
 </div>
 </body>

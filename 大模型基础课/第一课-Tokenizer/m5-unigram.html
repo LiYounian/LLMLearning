@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unigram 语言模型分词 | 第一课 Tokenizer</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="why.html">为什么分词</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="compare.html">切词对比</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / Unigram</div>
+  <div class="method-head">
+    <span class="yr-badge">2018 · Kudo</span>
+    <h1>Unigram 语言模型分词</h1>
+    <p class="lead">和 BPE/WordPiece 反着来——先建一个大词表，再用 EM 一点点剪掉"删了最不心疼"的 token，直到目标大小；每个 token 带概率，一个词有多种切分可采样。</p>
+    <div class="usedby"><span class="lbl">被这些模型使用：</span><span class="mbadge google">T5</span><span class="mbadge google">ALBERT</span><span class="mbadge dim">XLNet</span><span class="mbadge meta">mBART</span><span class="mbadge dim">多语言模型</span></div>
+  </div>
+
+  <h2>出身与论文</h2>
+  <p>Unigram 语言模型分词由 Taku Kudo（工藤拓，SentencePiece 的作者）在 2018 年提出。它诞生的语境不只是"再造一个分词器"，而是要解决一个更实际的问题：<strong>同一个词其实有很多种合理切分，为什么训练时只能固定用一种？</strong>Unigram 给每个 token 配上概率，从而让"一个词有多种切分、可以采样"成为可能——这就是论文标题里的<strong>子词正则（subword regularization）</strong>。</p>
+  <dl class="kv">
+    <dt>提出年份</dt><dd>2018 年（ACL）</dd>
+    <dt>作者</dt><dd>Taku Kudo（Google）</dd>
+    <dt>论文</dt><dd><em>Subword Regularization: Improving Neural Network Translation Models with Multiple Subword Candidates</em>, ACL 2018, pp. 66–75</dd>
+    <dt>链接</dt><dd><a href="https://aclanthology.org/P18-1007/" target="_blank">aclanthology.org/P18-1007</a> · <a href="https://arxiv.org/abs/1804.10959" target="_blank">arXiv:1804.10959</a> <span class="cite" title="Kudo (2018), Subword Regularization, ACL">[1]</span></dd>
+    <dt>核心思想</dt><dd>自顶向下：先建一个远大于目标的种子词表，给每个子词一个概率，再用 EM 反复剪掉"删除后对语料似然损害最小"的一批 token，把词表缩到目标大小。因为每个 token 有概率，一个词天然有多种切分，可取最优也可采样。</dd>
+  </dl>
+  <div class="note">
+    <div class="t">一句话定位</div>
+    BPE/WordPiece 是"从字符往上<strong>合并</strong>"，Unigram 是"从大词表往下<strong>剪枝</strong>"。方向完全相反，而且 Unigram 是唯一自带"每个 token 一个概率"和"一词多切分可采样"的方法。
+  </div>
+
+  <h2>核心算法</h2>
+
+  <h3>概率模型</h3>
+  <p>把一句话 <code>X</code> 切成子词序列 <code>x = (x₁, …, x_M)</code>。在一元语言模型下，这段切分的概率是各子词概率之积；所有 token 的概率之和为 1：</p>
+  <pre><code>P(x) = ∏_{i=1..M} p(xᵢ) ,     Σ_{x∈V} p(x) = 1</code></pre>
+  <p>而一句话本身的概率，是它<strong>所有</strong>合法切分 <code>S(X)</code> 的概率之和：</p>
+  <pre><code>P(X) = Σ_{x ∈ S(X)} P(x)</code></pre>
+  <p>最可能的切分就是让 <code>P(x)</code> 最大的那个：</p>
+  <pre><code>x* = argmax_{x ∈ S(X)} P(x)</code></pre>
+  <p>这个 <code>x*</code> 可以用 <strong>Viterbi 算法</strong> 在"所有可能切分构成的格（lattice）"上高效求出。</p>
+
+  <h3>训练算法（种子 → EM 剪枝）</h3>
+  <pre><code>1. 建一个很大的种子词表（远大于目标），例如：所有单字符
+   + 长度受限的所有子串 / 最频繁的一批 n-gram（常用后缀自动机
+   Suffix Automaton 枚举）。务必包含所有单字符，保证任何串都可切分。
+2. 初始化每个子词的概率 p(x)（如按子串频次）。
+3. 重复，直到 |V| <= 目标大小：
+   a. (EM 重估 p(x)) 固定词表，跑 EM：
+        E 步：对每句话，在其"切分格"上做前向-后向 / Viterbi 式
+              计算，得到每个子词的期望出现次数；
+        M 步：令 p(x) 正比于其期望次数。迭代到收敛。
+   b. 对每个子词 x，计算 loss_x = 若把 x 从词表移除，
+        整个语料对数似然会下降多少（受影响的词用剩余片段重切）。
+   c. 按 loss 排序。所有单字符永远保留（绝不剪，以保证全覆盖）；
+        剪掉 loss 最小的一批（如底部 10~20% 的"最没用"token）。
+   d. 若 |V| 仍高于目标，回到 (a)。
+4. 输出最终词表及其概率 p(x)。</code></pre>
+  <p>这里有两个关键点要抓住：<strong>（1）</strong>选择准则是"删掉谁语料似然损失最小"，这是一个更接近<strong>全局</strong>的判据（衡量的是这个 token 对整个语料的边际贡献），不像 BPE/WordPiece 那样一步步贪心地挑相邻对；<strong>（2）</strong>单字符永远不剪——因为只要保留全部单字符，任何字符串都一定还有合法切分，这就从结构上保证了<strong>零 OOV</strong>。</p>
+  <div class="note o">
+    <div class="t">一处需要坦白的不确定性</div>
+    论文对"种子词表怎么建"留有余地（频繁子串 / 后缀自动机枚举都行），具体选择由 SentencePiece 的实现敲定。但上面的 <strong>EM-剪枝循环</strong> 和 <strong>Viterbi 解码</strong> 是准确、可复现的。<span class="cite" title="Kudo (2018); SentencePiece implementation notes">[1]</span>
+  </div>
+
+  <h2>怎么切分（推理）</h2>
+  <pre><code>默认：Viterbi 解码 —— 返回 argmax_x P(x)，即唯一最可能的切分，
+      用 p(x) 作为切分格上各片段的发射分数。
+
+子词正则（训练期数据增强）：不取 1-best，而是从 l-best 候选里
+      采样一个切分（或用前向过滤 / 后向采样），由温度参数 α 控制：
+         P_sample(x) ∝ P(x)^α 。
+      不同训练轮次里同一个词被切成不同样子 → 对模型起正则作用。</code></pre>
+  <p>这就是 Unigram 最独特的能力：<strong>训练时按 <code>P(x)^α</code> 采样不同切分，等于对训练数据做增强</strong>，让模型见过同一个词的多种切法、更鲁棒（尤其在低资源、跨领域场景）。BPE 本身做不到这点，要靠额外的 <strong>BPE-dropout</strong>（Provilkov 等 2020，<a href="https://arxiv.org/abs/1910.13267" target="_blank">arXiv:1910.13267</a>，靠随机跳过合并制造随机性）来近似。<span class="cite" title="Provilkov et al. (2020), BPE-Dropout, ACL">[2]</span> 推理/部署时则通常回到默认的 Viterbi 1-best，取最稳的那一种切分。</p>
+
+  <h2>一个具体例子</h2>
+  <p>假设词表里有这些片段及概率（数值仅为示意）：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>token</th><th>p(x)</th><th>token</th><th>p(x)</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">hug</td><td>0.30</td><td class="mono">hu</td><td>0.10</td></tr>
+      <tr><td class="mono">##s</td><td>0.20</td><td class="mono">g</td><td>0.05</td></tr>
+      <tr><td class="mono">gs</td><td>0.02</td><td class="mono">s</td><td>0.08</td></tr>
+    </tbody>
+  </table></div>
+  <p>给 <code>hugs</code> 分词，几种合法切分和它们的概率（片段概率相乘）：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>切分</th><th>P(x) = 各片段概率之积</th><th>结果</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">hug · s</td><td class="mono">0.30 × 0.08 = 0.0240</td><td>最高 → Viterbi 选它</td></tr>
+      <tr><td class="mono">hu · gs</td><td class="mono">0.10 × 0.02 = 0.0020</td><td>较低</td></tr>
+      <tr><td class="mono">hu · g · s</td><td class="mono">0.10 × 0.05 × 0.08 = 0.0004</td><td>更低</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>默认（Viterbi）</strong>：返回概率最高的 <code>hug · s</code>。<strong>子词正则（采样）</strong>：以正比于 <code>P(x)^α</code> 的概率，可能这一轮返回 <code>hug · s</code>、下一轮返回 <code>hu · g · s</code>——同一个词在不同 epoch 被切成不同样子，模型因此被"正则化"。这正是"一个词有多种切分、可采样"的直观含义，也是 BPE/WordPiece 那种"一词一切"做不到的。</p>
+
+  <h2>与 BPE 的关键区别</h2>
+  <div class="note g">
+    <div class="t">最本质的一句话</div>
+    <strong>BPE 自底向上、按频次、一词一切、无概率；Unigram 自顶向下、按似然、一词多切可采样、有概率。</strong>方向、判据、产物三处全反。
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>维度</th><th>BPE / WordPiece</th><th>Unigram LM</th></tr></thead>
+    <tbody>
+      <tr><td>方向</td><td><strong>自底向上</strong>：从字符出发，逐步向上<strong>合并</strong></td><td><strong>自顶向下</strong>：从大词表出发，逐步<strong>剪枝</strong></td></tr>
+      <tr><td>选择准则</td><td>贪心：最频繁的对（BPE）/ 似然比最优的对（WordPiece）</td><td>全局：移除"最不减少语料似然"的 token（EM）</td></tr>
+      <tr><td>每个 token 的信息</td><td>无（只有一个合并顺序）</td><td>一个显式<strong>概率</strong> <code>p(x)</code></td></tr>
+      <tr><td>每个词的切分数</td><td>恰好一种（确定）</td><td><strong>多种</strong>，带分数；可取最优或<strong>采样</strong></td></tr>
+      <tr><td>能否原生正则</td><td>不能（需 BPE-dropout）</td><td>能，原生支持（子词正则）</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>各自的取舍：</strong>Unigram 优化的是一个更干净的概率目标，通过采样白送一份正则化，切分往往更鲁棒（尤其低资源、跨领域）。代价是训练更重——EM + 反复的"格上重切分"和剪枝，比 BPE 那个简单的合并循环慢，模型概念上也更复杂。</p>
+
+  <h2>被哪些模型使用</h2>
+  <p>Unigram 是很多现代分词器背后的默认算法，尤其在多语言场景：</p>
+  <div class="usedby">
+    <span class="mbadge google">T5</span>
+    <span class="mbadge google">ALBERT</span>
+    <span class="mbadge dim">XLNet</span>
+    <span class="mbadge meta">mBART</span>
+    <span class="mbadge dim">多语言模型</span>
+  </div>
+  <p>T5、ALBERT、XLNet、mBART 以及很多多语言模型都用它。更重要的是：<strong>Unigram 是 SentencePiece 的默认 <code>model_type</code></strong>（<code>--model_type=unigram</code>）——你在很多项目里用 SentencePiece 却没特意指定算法，用到的就是 Unigram。</p>
+
+  <div class="note">
+    <div class="t">小结 · 承上启下</div>
+    Unigram 把分词从"合并"翻转成"剪枝"：先撒一张大词表，用 EM 反复重估概率、按"删了最不心疼"的标准剪到目标大小；每个 token 带概率，一个词因此可以有多种切分——取最优用 Viterbi，采样则得到子词正则。它和 BPE 的对立可以浓缩成一句：<strong>自顶向下 / 似然 / 一词多切 / 有概率</strong>。而承载它、也承载 BPE 的那个工程框架，正是下一节要讲的 <a href="m6-sentencepiece.html">SentencePiece</a>——它用 <code>▁</code> 把空格也当成普通字符，让整套子词分词变得语言无关、无损可逆。
+  </div>
+
+  <div class="pagenav">
+    <a href="m4-wordpiece.html"><div class="lbl">← 上一节</div><div class="ttl">WordPiece</div></a>
+    <a class="next" href="m6-sentencepiece.html"><div class="lbl">下一节 →</div><div class="ttl">SentencePiece</div></a>
+  </div>
+</div>
+</body>
+</html>

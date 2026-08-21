@@ -3,28 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BPE 详解 | 第一课 Tokenizer</title>
+<title>BPE 字节对编码 | 第一课 Tokenizer</title>
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 <div class="topbar"><div class="inner">
   <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
   <nav>
-    <a href="index.html">目录</a><a href="01-why.html">为什么分词</a>
-    <a href="02-history.html">历代方法</a><a href="03-bpe.html" class="active">BPE 详解</a>
-    <a href="04-wordpiece-unigram.html">WordPiece/Unigram</a><a href="05-byte-level.html">字节级</a>
-    <a href="06-models.html">主流模型</a><a href="07-frontier.html">前沿</a><a href="08-token-compare.html">切词对比</a><a href="references.html">参考文献</a>
+    <a href="index.html">目录</a>
+    <a href="why.html">为什么分词</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="compare.html">切词对比</a>
+    <a href="references.html">参考文献</a>
   </nav>
 </div></div>
 
 <div class="wrap page">
-  <div class="breadcrumb"><a href="index.html">目录</a> / 03 BPE 详解</div>
-  <h1>BPE：字节对编码</h1>
-  <p class="lead">Byte Pair Encoding 是今天绝大多数生成式大模型分词器的算法底座。核心朴素到一句话就能说清：<b>反复把语料里出现最频繁的一对相邻符号，合并成一个新符号。</b></p>
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / BPE 字节对编码</div>
+  <div class="method-head">
+    <span class="yr-badge">1994 起源 · 2016 进入 NLP</span>
+    <h1>BPE：字节对编码</h1>
+    <p class="lead">Byte Pair Encoding 是今天绝大多数生成式大模型分词器的算法底座。核心朴素到一句话就能说清：<b>反复把语料里出现最频繁的一对相邻符号，合并成一个新符号。</b></p>
+    <div class="usedby"><span class="lbl">被这些模型使用：</span>
+      <span class="mbadge dim">Sennrich NMT</span>
+      <span class="mbadge gpt">GPT 全系（字节级）</span>
+      <span class="mbadge qwen">Qwen</span>
+      <span class="mbadge ds">DeepSeek</span>
+      <span class="mbadge dim">RoBERTa/BART（字节级）</span>
+    </div>
+  </div>
 
   <div class="note">
     <div class="t">📜 出身</div>
-    BPE 最早是 1994 年 Philip Gage 提出的一种<b>数据压缩</b>算法，跟 NLP 毫无关系。2016 年 Sennrich 等人把它"借"来处理机器翻译里的稀有词，从此开启了 subword 时代<span class="cite" title="Sennrich et al. 2016, Neural Machine Translation of Rare Words with Subword Units">[2]</span>。它的思想和压缩一脉相承：高频的组合值得用一个更短的符号来表示。
+    BPE 最早是 1994 年 Philip Gage 提出的一种<b>数据压缩</b>算法，跟 NLP 毫无关系。2016 年 Sennrich 等人把它"借"来处理机器翻译里的稀有词，从此开启了 subword 时代<span class="cite" title="Sennrich et al. 2016, Neural Machine Translation of Rare Words with Subword Units, ACL">[2]</span>。它的思想和压缩一脉相承：高频的组合值得用一个更短的符号来表示。
   </div>
 
   <h2>① 训练：怎么"学"出一套合并规则</h2>
@@ -53,7 +65,7 @@
   <ul>
     <li><b>高频词整体成 token</b>：像 <code>the</code>、<code>ing</code> 这种高频组合会被反复合并，最终变成单个 token → 序列短、高效。</li>
     <li><b>低频词自动降级</b>：罕见词没被合并到底，就留在较小的片段状态 → 不丢信息，也不炸词表。</li>
-    <li><b>确定性 & 可逆</b>：同样的 merge list，任何文本切法唯一；把 token 拼回去就能无损还原原文。</li>
+    <li><b>确定性 &amp; 可逆</b>：同样的 merge list，任何文本切法唯一；把 token 拼回去就能无损还原原文。</li>
     <li><b>数据驱动</b>：切分粒度不是人拍脑袋定的，而是从语料统计里自然涌现的——语料里常见什么，什么就成为一个 token。</li>
   </ul>
 
@@ -76,14 +88,28 @@ def encode(word):
         seq = 把 seq 中相邻的 (a,b) 都替换成 a+b
     return seq</code></pre>
 
+  <h2>⑤ 被哪些主流大模型使用</h2>
+  <p>BPE 是所有 subword 方法里传播最广的。要分清两种形态：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>形态</th><th>在什么符号上合并</th><th>代表使用者</th></tr></thead>
+    <tbody>
+      <tr><td>经典 BPE（字符级）</td><td>Unicode 字符</td><td>Sennrich 机器翻译、早期 subword 模型</td></tr>
+      <tr><td><b>字节级 BPE（BBPE）</b> ⭐</td><td>UTF-8 字节</td><td class="mono">GPT 全系、Qwen、DeepSeek、LLaMA-3、Kimi K2、RoBERTa、BART …</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note p">
+    <div class="t">👉 今天你听到的"大模型用 BPE"，几乎都指字节级 BPE</div>
+    GPT-2 把 BPE 从字符挪到字节上，解决了未知字符问题，此后成为生成式大模型的绝对主流。字节级 BPE 是本课的重头戏，单独一页详解 → <a href="m7-bbpe.html">字节级 BPE（BBPE）</a>。各模型的确切词表大小见 <a href="models.html">模型×方法矩阵</a>。
+  </div>
+
   <div class="note o">
     <div class="t">➡️ 下一步的两个分岔</div>
-    BPE 用<b>频次</b>决定合并谁。但"频次最高"真的等于"最该合并"吗？<a href="04-wordpiece-unigram.html">下一课</a>看 WordPiece 如何改用<b>似然</b>、Unigram 如何反着来<b>自顶向下剪枝</b>。另一个分岔是：在字符上做 BPE 会被生僻字/多语言坑到，于是 GPT-2 干脆改在<a href="05-byte-level.html">字节</a>上做。
+    BPE 用<b>频次</b>决定合并谁。但"频次最高"真的等于"最该合并"吗？<a href="m4-wordpiece.html">下一节 WordPiece</a> 改用<b>似然</b>，再往后 <a href="m5-unigram.html">Unigram</a> 干脆反着来<b>自顶向下剪枝</b>。
   </div>
 
   <div class="pagenav">
-    <a href="02-history.html"><div class="lbl">← 上一节</div><div class="ttl">历代方法总览</div></a>
-    <a class="next" href="04-wordpiece-unigram.html"><div class="lbl">下一节 →</div><div class="ttl">WordPiece 与 Unigram</div></a>
+    <a href="m2-char.html"><div class="lbl">← 上一节</div><div class="ttl">字符级分词</div></a>
+    <a class="next" href="m4-wordpiece.html"><div class="lbl">下一节 →</div><div class="ttl">WordPiece</div></a>
   </div>
 </div>
 
