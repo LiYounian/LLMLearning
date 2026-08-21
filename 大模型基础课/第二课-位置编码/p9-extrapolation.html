@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>长上下文外推 PI/NTK/YaRN/LongRoPE | 第二课 位置编码</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第二课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="p1-why.html">为什么要位置编码</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / 长上下文外推</div>
+  <div class="method-head">
+    <span class="yr-badge">2023–2024 · 当下最热的工程战场 ⭐</span>
+    <h1>长上下文外推：PI · NTK · YaRN · LongRoPE</h1>
+    <p class="lead">训练时上下文只有 4K，用户却要塞进 128K 甚至 2M token。直接把 RoPE 用到没训练过的长度会"失灵"。这一页讲清：如何在 RoPE 的<b>频率</b>上做插值/缩放，几乎不重训就把上下文窗口撑大。</p>
+    <div class="usedby"><span class="lbl">被这些模型/方案使用：</span>
+      <span class="mbadge meta">LLaMA-2 Long (PI)</span>
+      <span class="mbadge dim">CodeLLaMA (NTK)</span>
+      <span class="mbadge qwen">Qwen 长文本 (NTK/YaRN)</span>
+      <span class="mbadge dim">Phi-3 (LongRoPE)</span>
+    </div>
+  </div>
+
+  <h2>① 为什么 RoPE 直接外推会崩</h2>
+  <p><a href="p6-rope.html">RoPE</a> 在位置 <code>m</code> 处把每组分量旋转 <code>m·θ<span class="sub">k</span></code>。训练时 <code>m</code> 最大到 <code>L</code>（如 4096），模型只见过 <code>[0, L·θ<span class="sub">k</span>]</code> 这段角度。推理到 <code>m = 100000</code> 时：</p>
+  <div class="note o">
+    <div class="t">🎯 高频维"转过头"了</div>
+    高频维 <code>θ<span class="sub">k</span></code> 大，位置一远，旋转角就<b>远超训练见过的范围</b>（甚至绕好几圈）。模型面对这些没见过的角度，注意力分数变得混乱——困惑度飙升、输出崩坏。核心矛盾：<b>角度超出训练分布</b>。
+  </div>
+
+  <h2>② 位置插值 PI（Chen et al. 2023）：把位置"压"回训练区间</h2>
+  <p>最直接的思路：既然位置 <code>m</code> 太大超范围，那就把它<b>等比例缩小</b>回训练区间。要扩展 <code>s</code> 倍（<code>L→sL</code>），就把每个位置的旋转角除以 <code>s</code>：</p>
+  <div class="formula">
+    <span class="big">角度: m·θ &nbsp;→&nbsp; (m / s)·θ</span>
+    <span class="note-inline">等价于把 <code>[0, sL]</code> 的位置线性压进 <code>[0, L]</code>。所有角度都落回训练见过的范围，不再越界。只需<b>少量微调</b>（约 1000 步）即可恢复效果。LLaMA-2 的长上下文版本用的就是这一招。</span>
+  </div>
+  <div class="note">
+    <div class="t">代价</div>
+    压缩是"一刀切"的：<b>高频维（管局部、相邻词关系）也被压扁</b>，相邻 token 的角度差变小、分辨率下降，可能损伤局部细节。这个缺陷催生了下面的非均匀方案。
+  </div>
+
+  <h2>③ NTK-aware（社区起源，2023）：高频少动、低频多插</h2>
+  <p>PI 对所有频率一视同仁地压缩。NTK-aware 的洞见是：<b>不该均匀压</b>。它通过改<b>频率基 (base)</b>，让</p>
+  <ul>
+    <li><b>高频维</b>（局部信息）几乎<b>不动</b>——保住相邻词的分辨率；</li>
+    <li><b>低频维</b>（全局信息）<b>多插值</b>——腾出空间容纳更长距离。</li>
+  </ul>
+  <p>好处：中等扩展倍数下常常<b>无需微调</b>就能用。<b>Dynamic-NTK</b> 进一步让缩放因子随当前序列长度动态变化（短序列不缩、长序列才缩）。</p>
+  <div class="note p">
+    <div class="t">📌 来源说明（诚实标注）</div>
+    NTK-aware / Dynamic-NTK <b>起源于社区</b>（Reddit 用户 u/bloc97 提出 NTK-aware、u/emozilla 提出 Dynamic 版，早期 PI 微调实践来自 kaiokendev），<b>并非正式论文</b>，后被 Hugging Face transformers 收录为标准 RoPE 缩放选项。详见 <a href="references.html">参考文献</a>。
+  </div>
+
+  <h2>④ YaRN（Peng et al. 2023）：分段插值 + 注意力温度</h2>
+  <p>YaRN 把 NTK 的思想做成系统方法，两个关键部件：</p>
+  <ul>
+    <li><b>NTK-by-parts（分段插值）</b>：把维度按频率分三档——高频<b>照旧外推</b>（保局部）、低频<b>插值</b>（保全局）、中间<b>平滑过渡</b>。</li>
+    <li><b>注意力温度缩放</b>：长序列下给注意力 logits 乘一个缩放系数，补偿因插值带来的分布变化。</li>
+  </ul>
+  <div class="note g">
+    <div class="t">🏆 效率惊人</div>
+    YaRN 用<b>约 0.1% 的原始预训练数据、约 400 步微调</b>，就把上下文从数千扩到 <b>128K</b>，且质量优于 PI。因为高效又好用，被大量开源长文本模型采用。
+  </div>
+
+  <h2>⑤ LongRoPE（Ding et al. 2024, Microsoft）：搜索式非均匀缩放，冲到 2M</h2>
+  <p>LongRoPE 把"非均匀缩放"推到极致，三招组合：</p>
+  <ol>
+    <li><b>进化搜索</b>：不再人工设定缩放曲线，而是<b>搜索</b>出每个维度（甚至考虑前几个 token 特殊性）的最优缩放因子，利用位置插值里的两种"非均匀性"。</li>
+    <li><b>渐进扩展</b>：先微调到 256K，再做一次插值直冲 <b>2048K（约 2M）</b>token。</li>
+    <li><b>短序列回调</b>：在 8K 长度上重新校准，找回原始短上下文的性能（长了不能把短的搞坏）。</li>
+  </ol>
+  <p>LongRoPE 被 <b>ICML 2024</b> 接收，并集成进微软 <b>Phi-3</b>。</p>
+
+  <h2>⑥ 外推行为对比（可交互）</h2>
+  <p>下图是一个<b>直觉示意</b>：横轴是 token 的真实位置，纵轴是"模型有效感知到的位置"。灰色区是训练见过的安全区 <code>[0, L]</code>。<b>拖滑块</b>调训练长度和扩展倍数，看四种策略如何把超长位置"塞"回安全区——PI 一刀切压缩、NTK/YaRN 保住近处只压远处、直接外推则冲出安全区（红色=危险）。</p>
+  <div class="demo"><div id="extrap-demo"></div></div>
+  <p class="figcap">示意图：为传达"均匀压缩 vs 非均匀压缩"的直觉而简化，非各方法的精确数值曲线。</p>
+
+  <h2>⑦ 四法速览</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>方法</th><th>核心做法</th><th>要微调?</th><th>典型能力</th><th>出处</th></tr></thead>
+    <tbody>
+      <tr><td><b>PI</b> 位置插值</td><td>所有频率均匀压缩位置</td><td>少量微调</td><td class="mono">数千→32K</td><td class="mono">Chen 2023</td></tr>
+      <tr><td><b>NTK-aware</b></td><td>改 base，高频少动低频多插</td><td>常可免微调</td><td class="mono">中等扩展</td><td class="mono">社区(非论文)</td></tr>
+      <tr><td><b>YaRN</b></td><td>分段插值 + 注意力温度</td><td>极少(0.1%数据)</td><td class="mono">→128K</td><td class="mono">Peng 2023</td></tr>
+      <tr><td><b>LongRoPE</b></td><td>进化搜索非均匀缩放 + 渐进扩展</td><td>少量(≤256K)</td><td class="mono">→2M</td><td class="mono">Ding 2024</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>⑧ 被哪些模型/方案使用</h2>
+  <p>PI 用于 LLaMA-2 的长上下文版本；NTK/Dynamic-NTK 广泛见于社区微调与 CodeLLaMA、Qwen 等长文本方案；YaRN 被众多开源长文本模型采用；LongRoPE 集成于 Phi-3。<b>各模型具体上下文长度与所用外推方案，随版本演进变化很快，确切数值以官方发布为准</b>——见 <a href="models.html">模型×方法矩阵</a>与<a href="references.html">参考文献</a>。</p>
+
+  <div class="note p">
+    <div class="t">🎓 全课收束</div>
+    从"自注意力看不见顺序"，到正弦/学习式绝对编码、相对位置、T5 偏置，再到今日主流 <b>RoPE</b> 与 <b>ALiBi</b>、反思式的 <b>NoPE</b>，最后到把上下文撑到百万级的<b>外推四法</b>——位置编码这条线，正是大模型"理解顺序、并把顺序理解得越来越长"的演化史。
+  </div>
+
+  <div class="pagenav">
+    <a href="p8-nope.html"><div class="lbl">← 上一节</div><div class="ttl">NoPE 无位置编码</div></a>
+    <a class="next" href="models.html"><div class="lbl">总览 →</div><div class="ttl">模型 × 方法 矩阵</div></a>
+  </div>
+</div>
+
+<script src="assets/extrap-demo.js"></script>
+<script>initExtrapDemo("extrap-demo");</script>
+</body>
+</html>

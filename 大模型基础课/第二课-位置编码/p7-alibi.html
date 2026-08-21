@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ALiBi 线性偏置注意力 | 第二课 位置编码</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第二课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="p1-why.html">为什么要位置编码</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / ALiBi</div>
+  <div class="method-head">
+    <span class="yr-badge">2021 · Train Short, Test Long</span>
+    <h1>ALiBi：线性偏置注意力</h1>
+    <p class="lead">比 RoPE 还极简的一条路：<b>完全不加位置向量</b>。只在注意力打分上，按两个 token 的距离做<b>线性衰减惩罚</b>——离得越远、扣分越狠。就这么一招，却带来了出色的"训练短、推理长"外推能力。</p>
+    <div class="usedby"><span class="lbl">被这些模型使用：</span>
+      <span class="mbadge meta">BLOOM (176B)</span>
+      <span class="mbadge dim">MPT · Replit</span>
+      <span class="mbadge dim">部分 Cerebras · MosaicBERT</span>
+    </div>
+  </div>
+
+  <h2>① 核心思想：给远处的注意力"打个折扣"</h2>
+  <p>ALiBi（Attention with Linear Biases）不动输入、不动 Q/K/V，只在算完 <code>qᵢ·kⱼ</code> 后、进 softmax 前，减去一个和距离成正比的惩罚：</p>
+  <div class="formula">
+    <span class="big">score(i, j) = q<span class="sub">i</span>·k<span class="sub">j</span> − m · (i − j)</span>
+    <span class="note-inline">（decoder 里 <code>j ≤ i</code>，<code>i−j</code> 是"往回看多远"。）<code>m</code> 是一个<b>固定的、不训练的</b>斜率。距离越大，被减得越多 → 远处的 token 更难获得高注意力。这就是一种"近因偏好 (recency bias)"。</span>
+  </div>
+  <div class="note g">
+    <div class="t">🔑 和相对位置的关系</div>
+    这其实是<b>最简形式的相对位置编码</b>：偏置只依赖 <code>i−j</code>，而且形状被<b>写死成一条直线</b>（不学习）。少了参数、少了灵活性，换来的是干净和强外推。
+  </div>
+
+  <h2>② 每个注意力头一个斜率：有的看近，有的看远</h2>
+  <p>如果所有头都用同一个斜率，模型就只会"近视"。ALiBi 让<b>不同的头用不同的斜率 <code>m</code></b>，取一串几何级数（如 <code>1/2, 1/4, 1/8, …</code>）：</p>
+  <ul>
+    <li><b>斜率大</b>的头：惩罚陡，只关注最近几个 token（强近因）。</li>
+    <li><b>斜率小</b>的头：惩罚缓，能望向很远的上下文（弱近因）。</li>
+  </ul>
+  <p>多头合起来，模型就同时具备"看细节"和"看全局"的能力。</p>
+
+  <h2>③ 斜率衰减可视化（可交互）</h2>
+  <p>下图每条线是一个注意力头：横轴是"往回看的距离"，纵轴是被加到打分上的偏置（越负=越被抑制）。<b>拖滑块</b>调头的数量，看不同斜率如何分工——陡线只顾眼前，缓线放眼千里。</p>
+  <div class="demo"><div id="alibi-demo"></div></div>
+
+  <h2>④ 它主打的卖点：外推</h2>
+  <div class="note p">
+    <div class="t">📈 训练 1024，推理 2048+ 仍稳</div>
+    论文标题就叫 <i>Train Short, Test Long</i>。因为惩罚是一条<b>无上限的直线</b>，推理时遇到没训练过的更远距离，也只是"按同一斜率继续扣分"，行为平滑可预测——不像 learned 绝对编码直接"查表越界"，也比原始 RoPE 直接外推更稳。BLOOM(176B) 实测：ALiBi 训练更平滑、下游更好，甚至在原长度上也优于 learned 与 rotary。
+  </div>
+
+  <h2>⑤ 优缺点</h2>
+  <div class="proscons">
+    <div class="col pro"><h4>✓ 优点</h4><ul>
+      <li><b>零位置参数</b>、实现极简，几乎不增计算。</li>
+      <li><b>外推强</b>：线性惩罚天然可延伸到更长序列。</li>
+      <li>近因偏好符合语言/因果建模直觉，训练稳定。</li>
+    </ul></div>
+    <div class="col con"><h4>✗ 局限</h4><ul>
+      <li><b>形状写死</b>：单调衰减，表达力不如 RoPE 的旋转，某些需要精确长程定位的任务偏弱。</li>
+      <li>主要为<b>因果（decoder）</b>设计，双向场景需变体。</li>
+      <li>生态上不如 RoPE 普及——旗舰开源模型多数最终选了 RoPE。</li>
+    </ul></div>
+  </div>
+
+  <h2>⑥ 被哪些模型使用</h2>
+  <p>代表使用者是 <b>BLOOM(176B)</b>、<b>MPT</b>（MosaicML）、<b>Replit</b>，以及部分 Cerebras-GPT、MosaicBERT。</p>
+  <div class="note o">
+    <div class="t">⚠️ 一个常见误传</div>
+    早期不少资料把 <b>Falcon</b> 归为 ALiBi，其实 Falcon 团队实测后选择了 <b>RoPE</b>（认为 RoPE 效果更好，只是算力成本高，用自定义 kernel 弥补）。本课已按其技术报告纠正，详见 <a href="references.html">参考文献</a>。
+  </div>
+
+  <div class="note o">
+    <div class="t">➡️ 下一步：真的一定要位置编码吗？</div>
+    RoPE、ALiBi 之后，2023 年冒出一个反问：decoder-only 有因果掩码，<b>不加任何位置编码</b>会怎样？<a href="p8-nope.html">下一节 NoPE</a>。
+  </div>
+
+  <div class="pagenav">
+    <a href="p6-rope.html"><div class="lbl">← 上一节</div><div class="ttl">RoPE 旋转位置编码</div></a>
+    <a class="next" href="p8-nope.html"><div class="lbl">下一节 →</div><div class="ttl">NoPE 无位置编码</div></a>
+  </div>
+</div>
+
+<script src="assets/alibi-demo.js"></script>
+<script>initAlibiDemo("alibi-demo");</script>
+</body>
+</html>

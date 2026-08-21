@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>学习式绝对位置嵌入 | 第二课 位置编码</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第二课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="p1-why.html">为什么要位置编码</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / 学习式绝对位置嵌入</div>
+  <div class="method-head">
+    <span class="yr-badge">2018–2020 · BERT / GPT-2 / ViT</span>
+    <h1>学习式绝对位置嵌入 Learned Absolute</h1>
+    <p class="lead">比正弦编码更省事的思路：位置也做成一张<b>可学习的向量表</b>，第 <code>i</code> 个位置就查表里第 <code>i</code> 行，加到词向量上。简单、直接、好训——代价是序列长度被钉死在训练上限。</p>
+    <div class="usedby"><span class="lbl">被这些模型使用：</span>
+      <span class="mbadge google">BERT / RoBERTa</span>
+      <span class="mbadge gpt">GPT-1 / 2 / 3</span>
+      <span class="mbadge dim">原始 ViT</span>
+    </div>
+  </div>
+
+  <h2>① 核心思想：位置就是一张查找表</h2>
+  <p>词有词表（token → 向量），那就<b>再给位置也建一张表</b>。预设最大长度 <code>L</code>（比如 512、1024、2048），初始化一个 <code>L×d</code> 的矩阵 <code>P</code>，第 <code>i</code> 行就是"第 <code>i</code> 个位置"的向量，和词向量一起参与训练、被梯度优化：</p>
+  <div class="formula">
+    <span class="big">输入<span class="sub">i</span> = 词向量(token<span class="sub">i</span>) + P[i]</span>
+    <span class="note-inline"><code>P ∈ ℝ<span class="sup">L×d</span></code> 是可学习参数。和正弦版唯一的区别：正弦版的 <code>PE(i)</code> 是<b>算出来的固定值</b>，这里的 <code>P[i]</code> 是<b>训出来的自由参数</b>。</span>
+  </div>
+  <p>不用手工设计任何函数，模型自己学"每个位置该长什么样"，只要对下游任务有利。BERT、GPT 系列、原始 ViT 都用这一招。</p>
+
+  <h2>② 它相对正弦编码好在哪</h2>
+  <ul>
+    <li><b>任务自适应</b>：位置向量由数据驱动，直接朝"降低训练损失"的方向优化，不受人工函数形式约束。</li>
+    <li><b>实现极简</b>：就是多一张 embedding 表，和词嵌入同构，工程上零心智负担。</li>
+    <li><b>短序列上表现好</b>：在训练长度范围内，效果通常不输甚至略胜正弦编码。</li>
+  </ul>
+
+  <h2>③ 致命短板：长度被钉死，不能外推</h2>
+  <div class="note o">
+    <div class="t">🚧 只有 L 行，第 L+1 个位置没有对应向量</div>
+    表是 <code>L×d</code>，一旦推理时序列超过 <code>L</code>，<b>第 <code>L</code> 行之后根本不存在</b>——模型没有任何东西可查。这就是为什么 BERT 的输入被硬限制在 512 token、GPT-2 在 1024、GPT-3 在 2048。想变长只能<b>重新训练</b>更大的表。
+  </div>
+  <div class="proscons">
+    <div class="col pro"><h4>✓ 优点</h4><ul>
+      <li>数据驱动、任务自适应，训练长度内效果好。</li>
+      <li>实现最简单，与词嵌入完全同构。</li>
+    </ul></div>
+    <div class="col con"><h4>✗ 局限</h4><ul>
+      <li><b>硬长度上限</b>：超过 <code>L</code> 无编码可用，无法外推。</li>
+      <li><b>占参数</b>：长序列 = 大表；且每个位置独立学，位置 511 与 512 之间没有内建的"平滑/邻近"关系，全靠数据学。</li>
+      <li>仍是<b>绝对位置</b>，相对关系要模型自己悟。</li>
+    </ul></div>
+  </div>
+
+  <h2>④ 被哪些模型使用</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>模型</th><th>位置编码</th><th>训练最大长度</th></tr></thead>
+    <tbody>
+      <tr><td>BERT / RoBERTa</td><td>learned absolute</td><td class="mono">512</td></tr>
+      <tr><td>GPT-1</td><td>learned absolute</td><td class="mono">512</td></tr>
+      <tr><td>GPT-2</td><td>learned absolute</td><td class="mono">1024</td></tr>
+      <tr><td>GPT-3</td><td>learned absolute</td><td class="mono">2048</td></tr>
+      <tr><td>原始 ViT</td><td>learned（1D 图像 patch 位置）</td><td class="mono">固定 patch 数</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note p">
+    <div class="t">👉 一个观察</div>
+    早期<b>编码器 / 早期 GPT</b> 偏爱 learned absolute；但它"不能变长"的硬伤，在大模型追求长上下文的年代越来越刺眼。这直接推动了两条新路：把位置改成<b>相对</b>的（更符合语言直觉），以及用<b>旋转 / 偏置</b>让位置天然可外推。
+  </div>
+
+  <div class="note o">
+    <div class="t">➡️ 下一步</div>
+    绝对位置（无论固定还是学习）都在问"你是第几号"。但语言其实更在乎"你离我多远"。<a href="p4-relative.html">下一节：相对位置表示</a>，换一个提问方式。
+  </div>
+
+  <div class="pagenav">
+    <a href="p2-sinusoidal.html"><div class="lbl">← 上一节</div><div class="ttl">正弦/余弦绝对编码</div></a>
+    <a class="next" href="p4-relative.html"><div class="lbl">下一节 →</div><div class="ttl">相对位置表示</div></a>
+  </div>
+</div>
+</body>
+</html>

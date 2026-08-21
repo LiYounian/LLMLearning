@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NoPE 无位置编码 | 第二课 位置编码</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第二课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="p1-why.html">为什么要位置编码</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / NoPE 无位置编码</div>
+  <div class="method-head">
+    <span class="yr-badge">2023 · 研究性结论</span>
+    <h1>NoPE：干脆不加位置编码</h1>
+    <p class="lead">一个反直觉的发现：<b>decoder-only</b> 模型带有因果掩码，掩码本身就泄漏了位置信息——于是<b>不加任何显式位置编码</b>，模型照样能学到顺序，在某些长度泛化任务上甚至更好。</p>
+    <div class="usedby"><span class="lbl">性质：</span>
+      <span class="mbadge dim">Kazemnejad et al. 2023</span>
+      <span class="mbadge dim">研究前沿</span>
+      <span class="mbadge dim">非旗舰生产默认</span>
+    </div>
+  </div>
+
+  <h2>① 出发点：因果掩码已经"偷偷"编了位置</h2>
+  <p>回到<a href="p1-why.html">第一页</a>那个伏笔。纯双向自注意力是置换等变的（打乱顺序输出照旧），所以必须外挂位置编码。但 decoder-only 用<b>因果掩码</b>：第 <code>i</code> 个 token 只能看到 <code>1…i</code>。</p>
+  <div class="note g">
+    <div class="t">🔑 掩码打破了置换等变</div>
+    第 1 个位置只能看见 1 个 token，第 2 个看见 2 个……"我的可见窗口有多大"这件事，<b>唯一地对应了"我在第几位"</b>。换句话说，因果掩码给每个位置发了一张隐形的"号码牌"。既然位置信息已经在了，还非得再加一层显式编码吗？
+  </div>
+
+  <h2>② 理论 + 实验：NoPE 学得到位置</h2>
+  <p>Kazemnejad 等人（2023）系统研究了这个问题：</p>
+  <ul>
+    <li><b>理论</b>：他们证明，不带位置编码的 decoder-only Transformer <b>有能力表示</b>绝对位置编码，也能表示相对位置编码——表达力并不缺。</li>
+    <li><b>实验</b>：在一系列<b>长度泛化</b>（train short / test long）的算法任务上，NoPE 的表现<b>不输、甚至优于</b>加了显式位置编码（含相对、RoPE、ALiBi）的模型。</li>
+  </ul>
+  <p>直觉上：显式位置编码有时反而"帮倒忙"——它把训练长度的分布偏见也一并编码进去，到了更长的序列上成了包袱；而 NoPE 让模型自己从掩码结构里学位置，反而更灵活。</p>
+
+  <h2>③ 优缺点与边界</h2>
+  <div class="proscons">
+    <div class="col pro"><h4>✓ 优点 / 启发</h4><ul>
+      <li>最简：<b>什么都不加</b>，零位置参数、零额外计算。</li>
+      <li>在若干长度泛化任务上外推表现亮眼。</li>
+      <li>提醒我们：位置信息的来源不止"编码"，<b>架构（掩码）本身</b>也是来源。</li>
+    </ul></div>
+    <div class="col con"><h4>✗ 边界 / 存疑</h4><ul>
+      <li><b>结论主要来自研究规模的模型与特定任务</b>，未必直接外推到超大规模通用 LLM。</li>
+      <li>只适用于<b>因果 decoder</b>；双向 encoder 没有掩码这张"号码牌"，仍需显式编码。</li>
+      <li><b>不是当前旗舰模型的默认选择</b>——主流生产模型仍以 RoPE 为主。</li>
+    </ul></div>
+  </div>
+
+  <div class="note o">
+    <div class="t">📌 如何看待 NoPE</div>
+    把它当成一个<b>重要的研究性洞见</b>，而不是"可以扔掉位置编码了"的工程结论。它厘清了"位置信息到底从哪来"，也为后续架构设计（如某些混合方案里对部分层去掉显式 PE）提供了理论依据。涉及具体生产模型是否采用，本课不做无据断言。
+  </div>
+
+  <h2>④ 承上启下</h2>
+  <p>到这里，位置编码的"要不要、怎么加"这条主线已经走完：从<b>必须显式加</b>（绝对/相对）→ <b>加得更聪明</b>（RoPE/ALiBi）→ <b>也许不必加</b>（NoPE）。但无论哪种方案，都绕不开一个越来越紧迫的现实问题——</p>
+  <div class="note p">
+    <div class="t">👉 训练时短、上线要长，怎么办？</div>
+    模型训练时上下文可能只有 4K，用户却想喂进 128K 甚至 2M token 的长文档。位置编码在训练长度之外会"失灵"。最后一页专讲这个当下最热的工程战场：<a href="p9-extrapolation.html">长上下文外推</a>。
+  </div>
+
+  <div class="pagenav">
+    <a href="p7-alibi.html"><div class="lbl">← 上一节</div><div class="ttl">ALiBi 线性偏置注意力</div></a>
+    <a class="next" href="p9-extrapolation.html"><div class="lbl">下一节 →</div><div class="ttl">长上下文外推</div></a>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>参考文献与来源 | 第二课 位置编码</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第二课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="p1-why.html">为什么要位置编码</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="references.html" class="active">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / 参考文献与来源</div>
+  <h1>参考文献与来源</h1>
+  <p class="lead">本课每一条涉及公式 / 模型 / 数字的结论都尽量对应一手来源：论文（arXiv / ACL / ICML）、官方技术报告、代码仓库。存疑或社区起源处已在正文与下方显式标注，不臆造。</p>
+
+  <h2>核心方法论文</h2>
+  <div class="reflist"><ol>
+    <li>[Sinusoidal / Transformer] Vaswani et al. (2017). <i>Attention Is All You Need</i>. NeurIPS. <a href="https://arxiv.org/abs/1706.03762">arXiv:1706.03762</a></li>
+    <li>[Learned absolute / BERT] Devlin et al. (2018/2019). <i>BERT: Pre-training of Deep Bidirectional Transformers</i>. NAACL. <a href="https://arxiv.org/abs/1810.04805">arXiv:1810.04805</a></li>
+    <li>[Learned absolute / GPT-2] Radford et al. (2019). <i>Language Models are Unsupervised Multitask Learners</i>. <a href="https://cdn.openai.com/better-language-models/language_models_are_unsupervised_multitask_learners.pdf">OpenAI PDF</a></li>
+    <li>[Learned absolute / ViT] Dosovitskiy et al. (2020). <i>An Image is Worth 16x16 Words</i>. ICLR 2021. <a href="https://arxiv.org/abs/2010.11929">arXiv:2010.11929</a></li>
+    <li>[Relative / Shaw] Shaw, Uszkoreit, Vaswani (2018). <i>Self-Attention with Relative Position Representations</i>. NAACL. <a href="https://arxiv.org/abs/1803.02155">arXiv:1803.02155</a></li>
+    <li>[Relative / Transformer-XL] Dai et al. (2019). <i>Transformer-XL: Attentive Language Models Beyond a Fixed-Length Context</i>. ACL. <a href="https://arxiv.org/abs/1901.02860">arXiv:1901.02860</a></li>
+    <li>[Relative / DeBERTa] He et al. (2020). <i>DeBERTa: Decoding-enhanced BERT with Disentangled Attention</i>. ICLR 2021. <a href="https://arxiv.org/abs/2006.03654">arXiv:2006.03654</a></li>
+    <li>[T5 相对位置偏置] Raffel et al. (2019/2020). <i>Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer (T5)</i>. JMLR. <a href="https://arxiv.org/abs/1910.10683">arXiv:1910.10683</a></li>
+    <li>[RoPE] Su et al. (2021). <i>RoFormer: Enhanced Transformer with Rotary Position Embedding</i>. <a href="https://arxiv.org/abs/2104.09864">arXiv:2104.09864</a></li>
+    <li>[ALiBi] Press, Smith, Lewis (2021). <i>Train Short, Test Long: Attention with Linear Biases Enables Input Length Extrapolation</i>. ICLR 2022. <a href="https://arxiv.org/abs/2108.12409">arXiv:2108.12409</a></li>
+    <li>[NoPE] Kazemnejad et al. (2023). <i>The Impact of Positional Encoding on Length Generalization in Transformers</i>. NeurIPS. <a href="https://arxiv.org/abs/2305.19466">arXiv:2305.19466</a></li>
+  </ol></div>
+
+  <h2>长上下文外推</h2>
+  <div class="reflist"><ol start="12">
+    <li>[位置插值 PI] Chen et al. (2023). <i>Extending Context Window of Large Language Models via Positional Interpolation</i>. <a href="https://arxiv.org/abs/2306.15595">arXiv:2306.15595</a></li>
+    <li>[NTK-aware / Dynamic-NTK] <b>社区起源、非正式论文</b>：Reddit 用户 u/bloc97（NTK-aware Scaled RoPE）、u/emozilla（Dynamic-NTK），早期 PI 微调实践 kaiokendev。后被 Hugging Face <code>transformers</code>（v4.31 起）收录为 RoPE scaling 选项。<a href="https://www.reddit.com/r/LocalLLaMA/comments/14lz7j5/ntkaware_scaled_rope_allows_llama_models_to_have/">原始讨论帖</a></li>
+    <li>[YaRN] Peng, Quesnelle, Fan, Shippole (2023). <i>YaRN: Efficient Context Window Extension of Large Language Models</i>. ICLR 2024. <a href="https://arxiv.org/abs/2309.00071">arXiv:2309.00071</a> · <a href="https://github.com/jquesnelle/yarn">代码</a></li>
+    <li>[LongRoPE] Ding, Zhang et al. (2024). <i>LongRoPE: Extending LLM Context Window Beyond 2 Million Tokens</i>. ICML 2024（集成于 Phi-3）。<a href="https://arxiv.org/abs/2402.13753">arXiv:2402.13753</a> · <a href="https://github.com/microsoft/LongRoPE">代码</a></li>
+  </ol></div>
+
+  <h2>主流大模型技术报告（位置编码采用核对）</h2>
+  <div class="reflist"><ol start="16">
+    <li>[LLaMA] Touvron et al. (2023). <i>LLaMA / Llama 2</i>. <a href="https://arxiv.org/abs/2302.13971">arXiv:2302.13971</a> · <a href="https://arxiv.org/abs/2307.09288">arXiv:2307.09288</a>（RoPE）</li>
+    <li>[Qwen] Bai et al. (2023). <i>Qwen Technical Report</i>. <a href="https://arxiv.org/abs/2309.16609">arXiv:2309.16609</a>（RoPE + 动态 NTK / 长文本方案）</li>
+    <li>[DeepSeek-V2] DeepSeek-AI (2024). <i>DeepSeek-V2</i>（MLA 与 <b>decoupled RoPE</b>）。<a href="https://arxiv.org/abs/2405.04434">arXiv:2405.04434</a></li>
+    <li>[BLOOM] BigScience (2022). <i>BLOOM: A 176B-Parameter Open-Access Multilingual LM</i>（ALiBi）。<a href="https://arxiv.org/abs/2211.05100">arXiv:2211.05100</a></li>
+    <li>[MPT] MosaicML (2023). <i>MPT-7B / Introducing MPT</i>（ALiBi）。<a href="https://www.databricks.com/blog/mpt-7b">MosaicML 博客</a></li>
+    <li>[Falcon] Almazrouei et al. (2023). <i>The Falcon Series of Open Language Models</i>（团队实测选 <b>RoPE</b> 而非 ALiBi）。<a href="https://arxiv.org/abs/2311.16867">arXiv:2311.16867</a></li>
+    <li>[GLM/ChatGLM] Du et al. (2022). <i>GLM: General Language Model Pretraining</i>（2D RoPE 谱系）。<a href="https://arxiv.org/abs/2103.10360">arXiv:2103.10360</a></li>
+  </ol></div>
+
+  <div class="note o">
+    <div class="t">⚠️ 关于准确性与时效</div>
+    位置编码本身相对稳定，但各模型「上下文长度 / 具体外推方案」随版本迭代变化很快，本课表格取代表值，<b>确切数字请以对应官方发布为准</b>。NTK-aware 这类<b>社区起源、无正式论文</b>的方法已显式标注。若发现与最新官方口径不一致，以官方为准。
+  </div>
+
+  <div class="pagenav">
+    <a href="models.html"><div class="lbl">← 上一节</div><div class="ttl">模型 × 方法 矩阵</div></a>
+    <a class="next" href="index.html"><div class="lbl">返回 →</div><div class="ttl">目录 / 时间线</div></a>
+  </div>
+</div>
+</body>
+</html>

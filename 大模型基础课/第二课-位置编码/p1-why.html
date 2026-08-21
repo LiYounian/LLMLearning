@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>为什么需要位置编码 | 第二课 位置编码</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第二课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="p1-why.html" class="active">为什么要位置编码</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / 为什么需要位置编码</div>
+  <div class="method-head">
+    <span class="yr-badge">2017 · 一切的起点</span>
+    <h1>为什么自注意力需要位置编码？</h1>
+    <p class="lead">因为自注意力本质是<b>对一个"集合"做加权平均</b>——它天生看不见顺序。不额外告诉它"谁在第几位"，"猫追狗"和"狗追猫"在它眼里就是同一堆词。</p>
+    <div class="usedby"><span class="lbl">关键概念：</span>
+      <span class="mbadge dim">置换等变 permutation equivariance</span>
+      <span class="mbadge dim">因果掩码 causal mask</span>
+      <span class="mbadge dim">绝对 vs 相对</span>
+    </div>
+  </div>
+
+  <h2>① 自注意力做了什么</h2>
+  <p>给定一串 token 的向量 <code>x₁ … xₙ</code>，自注意力先把每个向量投影成 Query / Key / Value，然后每个位置的输出是<b>所有位置 Value 的加权和</b>，权重由 Q·K 的相似度决定：</p>
+  <div class="formula">
+    <span class="big">Attention(Q, K, V) = softmax( QK<span class="sup">⊤</span> / √d ) · V</span>
+    <span class="note-inline">注意：这个式子里<b>没有任何和"位置 i、j"绑定的项</b>。权重只取决于向量内容 <code>qᵢ·kⱼ</code>，与它们排在第几位无关。</span>
+  </div>
+
+  <h2>② 关键性质：置换等变</h2>
+  <p>如果把输入序列的顺序打乱（做一个置换 <code>π</code>），自注意力的输出<b>只会跟着同样打乱</b>，每个 token 算出来的表示<b>数值完全不变</b>。用一句话说：</p>
+  <div class="note g">
+    <div class="t">🔑 Attention(πX) = π·Attention(X)</div>
+    打乱输入 → 输出原样打乱，但"每个 token 得到的向量"一模一样。这叫<b>置换等变</b>。它意味着：<b>纯自注意力无法区分词序</b>。前馈层 FFN 是逐位置独立的，也帮不上忙。
+  </div>
+  <p>这正是问题所在。语言的含义高度依赖顺序：</p>
+  <ul>
+    <li>"猫 追 狗" vs "狗 追 猫"——同一堆词，意思相反。</li>
+    <li>"不 好" vs "好 不"——顺序决定语气。</li>
+  </ul>
+  <p>如果模型看到的只是"一袋子词"（bag of words），它永远学不会这种区别。<b>所以必须把位置信息显式地喂进去</b>——这就是位置编码（Positional Encoding）存在的全部理由。</p>
+
+  <h2>③ 亲手打乱看看（可交互）</h2>
+  <p>下面是一句话的 token。<b>点"打乱顺序"</b>：在<b>没有</b>位置编码的假想里，注意力只把这些词看成一个集合，含义无从区分。给每个 token 贴上位置标签后，模型才能分清词序。</p>
+  <div class="demo"><div id="perm-demo"></div></div>
+
+  <h2>④ 一个例外：因果掩码其实"偷偷"泄漏了位置</h2>
+  <p>上面说的是标准（双向）自注意力。但今天的大模型多是 <b>decoder-only + 因果掩码</b>：第 <code>i</code> 个 token 只能看到 <code>1…i</code>，看不到未来。</p>
+  <div class="note p">
+    <div class="t">👀 掩码 = 一种隐含的位置信号</div>
+    第 1 个 token 只能看到 1 个词，第 5 个能看到 5 个词……"我能看到几个前文"本身就编码了"我在第几位"。2023 年的研究（<a href="p8-nope.html">NoPE</a>）正是利用这一点，论证 decoder-only 模型<b>即使不加任何显式位置编码也能学到顺序</b>。这是本课后半程的一个重要伏笔。
+  </div>
+
+  <h2>⑤ 两大家族：绝对 vs 相对</h2>
+  <p>解决方案历史上分成两条大路，后面每一页都能归到这两类（或它们的融合）：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>家族</th><th>思路</th><th>代表方法</th></tr></thead>
+    <tbody>
+      <tr><td><b>绝对位置</b></td><td>给"第 i 个位置"一个专属编码，加到词向量上</td><td class="mono"><a href="p2-sinusoidal.html">Sinusoidal</a> · <a href="p3-learned.html">Learned</a></td></tr>
+      <tr><td><b>相对位置</b></td><td>只编码"两个 token 相距多远"，注入到注意力打分里</td><td class="mono"><a href="p4-relative.html">Relative</a> · <a href="p5-t5bias.html">T5 bias</a></td></tr>
+      <tr><td><b>融合 / 现代主流</b></td><td>用绝对形式实现相对效果，或直接改注意力偏置</td><td class="mono"><a href="p6-rope.html">RoPE</a> · <a href="p7-alibi.html">ALiBi</a></td></tr>
+    </tbody>
+  </table></div>
+  <div class="note o">
+    <div class="t">➡️ 下一步</div>
+    最早的答案来自 2017 年原始 Transformer：<a href="p2-sinusoidal.html">用正弦/余弦函数给每个位置算一个固定向量</a>。它凭什么"无需训练还能外推"？下一页详解。
+  </div>
+
+  <div class="pagenav">
+    <a href="index.html"><div class="lbl">← 返回</div><div class="ttl">目录 / 时间线</div></a>
+    <a class="next" href="p2-sinusoidal.html"><div class="lbl">下一节 →</div><div class="ttl">正弦/余弦绝对位置编码</div></a>
+  </div>
+</div>
+
+<script src="assets/perm-demo.js"></script>
+<script>initPermDemo("perm-demo");</script>
+</body>
+</html>

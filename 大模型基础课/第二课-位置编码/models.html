@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>模型 × 方法 矩阵 | 第二课 位置编码</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第二课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="p1-why.html">为什么要位置编码</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html" class="active">模型×方法</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / 模型 × 方法 矩阵</div>
+  <h1>模型 × 方法：谁用了什么位置编码</h1>
+  <p class="lead">一句话结论：<b>今天开源生成式大模型几乎清一色用 RoPE</b>，长上下文靠 NTK/YaRN/LongRoPE 类外推撑长；ALiBi 是另一条以外推见长的支线（BLOOM/MPT）；learned absolute 是 BERT/GPT-2 时代的旧范式；T5 用相对位置偏置。</p>
+
+  <h2>① 方法 → 代表模型（交叉索引）</h2>
+  <p>每个方法点进去看详解；这里快速看它"花落谁家"：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>方法</th><th>代表使用者</th><th>今天的地位</th></tr></thead>
+    <tbody>
+      <tr><td><a href="p2-sinusoidal.html">正弦绝对编码</a></td><td class="mono">原始 Transformer</td><td>历史起点，已被取代</td></tr>
+      <tr><td><a href="p3-learned.html">学习式绝对编码</a></td><td class="mono">BERT / RoBERTa / GPT-1/2/3 / 原始 ViT</td><td>编码器与早期 GPT；有长度上限</td></tr>
+      <tr><td><a href="p4-relative.html">相对位置表示</a></td><td class="mono">Transformer-XL / XLNet / DeBERTa</td><td>思想深远，直接启发 RoPE/ALiBi</td></tr>
+      <tr><td><a href="p5-t5bias.html">T5 相对位置偏置</a></td><td class="mono">T5 / mT5</td><td>encoder-decoder 常见默认</td></tr>
+      <tr><td><a href="p6-rope.html">RoPE ⭐</a></td><td class="mono">LLaMA · Qwen · DeepSeek · Mistral · Gemma · Falcon · ChatGLM · GPT-NeoX · PaLM</td><td class="mono" style="color:var(--accent2)">当今绝对主流</td></tr>
+      <tr><td><a href="p7-alibi.html">ALiBi</a></td><td class="mono">BLOOM · MPT · Replit · 部分 Cerebras</td><td>外推支线</td></tr>
+      <tr><td><a href="p8-nope.html">NoPE</a></td><td class="mono">研究性（Kazemnejad 2023）</td><td>研究洞见，非旗舰默认</td></tr>
+      <tr><td><a href="p9-extrapolation.html">外推 PI/NTK/YaRN/LongRoPE</a></td><td class="mono">LLaMA-2 Long · CodeLLaMA · Qwen 长文本 · Phi-3</td><td class="mono" style="color:var(--accent3)">长上下文标配手段</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>② 模型 → 位置编码（主流生成式大模型总表）</h2>
+  <p>下表核对自各模型技术报告 / 论文 / 代码（见<a href="references.html">参考文献</a>）；上下文长度随版本变化很快，标注为代表值，确切以官方为准。</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>模型</th><th>位置编码</th><th>相对/绝对</th><th>代表上下文长度</th><th>长文本外推</th></tr></thead>
+    <tbody>
+      <tr><td>原始 Transformer</td><td>Sinusoidal</td><td class="mono">绝对</td><td class="mono">512</td><td class="mono">—</td></tr>
+      <tr><td>BERT / RoBERTa</td><td>learned absolute</td><td class="mono">绝对</td><td class="mono">512</td><td class="mono">无</td></tr>
+      <tr><td>GPT-2 / GPT-3</td><td>learned absolute</td><td class="mono">绝对</td><td class="mono">1024 / 2048</td><td class="mono">无</td></tr>
+      <tr><td>T5 / mT5</td><td>相对位置偏置(分桶标量)</td><td class="mono">相对</td><td class="mono">512(相对)</td><td class="mono">—</td></tr>
+      <tr><td>Transformer-XL / DeBERTa</td><td>相对位置表示</td><td class="mono">相对</td><td class="mono">段递归 / 长</td><td class="mono">—</td></tr>
+      <tr><td><b>LLaMA 1/2</b></td><td>RoPE</td><td class="mono" style="color:var(--accent2)">旋转(相对效果)</td><td class="mono">2k / 4k</td><td class="mono">PI(LLaMA-2 Long)</td></tr>
+      <tr><td><b>LLaMA 3 / 3.1</b></td><td>RoPE</td><td class="mono" style="color:var(--accent2)">旋转</td><td class="mono">8k → 128k</td><td class="mono">RoPE base 调整</td></tr>
+      <tr><td><b>Qwen 全系</b></td><td>RoPE</td><td class="mono" style="color:var(--accent2)">旋转</td><td class="mono">8k → 32k/128k+</td><td class="mono">NTK / YaRN 类</td></tr>
+      <tr><td><b>DeepSeek V2/V3</b></td><td>RoPE（MLA <b>decoupled RoPE</b>）</td><td class="mono" style="color:var(--accent2)">旋转</td><td class="mono">128k</td><td class="mono">YaRN 类</td></tr>
+      <tr><td>Mistral / Mixtral</td><td>RoPE</td><td class="mono" style="color:var(--accent2)">旋转</td><td class="mono">8k → 32k+(滑窗)</td><td class="mono">—</td></tr>
+      <tr><td>Gemma</td><td>RoPE</td><td class="mono" style="color:var(--accent2)">旋转</td><td class="mono">8k+</td><td class="mono">—</td></tr>
+      <tr><td>ChatGLM / GLM</td><td>RoPE（2D）</td><td class="mono" style="color:var(--accent2)">旋转</td><td class="mono">8k → 128k+</td><td class="mono">—</td></tr>
+      <tr><td>Falcon</td><td>RoPE <span style="color:var(--fg-faint)">(非 ALiBi，见下)</span></td><td class="mono" style="color:var(--accent2)">旋转</td><td class="mono">2k+</td><td class="mono">—</td></tr>
+      <tr><td>GPT-NeoX / PaLM</td><td>RoPE</td><td class="mono" style="color:var(--accent2)">旋转</td><td class="mono">2k+</td><td class="mono">—</td></tr>
+      <tr><td><b>BLOOM</b></td><td>ALiBi</td><td class="mono" style="color:var(--accent3)">线性偏置</td><td class="mono">2048</td><td class="mono">ALiBi 自带外推</td></tr>
+      <tr><td>MPT / Replit</td><td>ALiBi</td><td class="mono" style="color:var(--accent3)">线性偏置</td><td class="mono">2k → 长(外推)</td><td class="mono">ALiBi 自带外推</td></tr>
+      <tr><td>Phi-3</td><td>RoPE + <b>LongRoPE</b></td><td class="mono" style="color:var(--accent2)">旋转</td><td class="mono">4k → 128k</td><td class="mono">LongRoPE</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note o">
+    <div class="t">⚠️ 一个已纠正的常见误传</div>
+    早期不少二手资料把 <b>Falcon</b> 归入 ALiBi。按 Falcon 官方技术报告，Falcon 用的是 <b>RoPE</b>（团队实测 RoPE 效果优于 ALiBi，代价是算力更高、用自定义 kernel 弥补）。本表据此标注。
+  </div>
+  <div class="note p">
+    <div class="t">👉 怎么读这张表</div>
+    竖着看会发现一条清晰的分水岭：<b>2020 年前</b>是绝对编码（Sinusoidal/learned）与相对编码（T5/XL）的天下；<b>2021 年 RoPE 出现后</b>，开源大模型几乎全面转向 RoPE，位置编码本身趋于统一，竞争焦点转移到<b>「用什么外推方案把上下文做长」</b>——这正是<a href="p9-extrapolation.html">最后一页</a>的主题。
+  </div>
+
+  <div class="pagenav">
+    <a href="p9-extrapolation.html"><div class="lbl">← 上一节</div><div class="ttl">长上下文外推</div></a>
+    <a class="next" href="references.html"><div class="lbl">下一步 →</div><div class="ttl">参考文献与来源</div></a>
+  </div>
+</div>
+</body>
+</html>
