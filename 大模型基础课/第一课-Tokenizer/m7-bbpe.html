@@ -74,16 +74,19 @@
   </div>
 
   <h2>⑤ 进阶：一个 token 会"跨字符边界"吗？（真实实测）</h2>
-  <p>常见疑问：一串字里，<b>会不会出现"前一个字的后半字节 + 后一个字的前半字节"被合成一个 token</b>的现象？答案是——<b>会，而且我用真实 Qwen 分词器抓到了</b>。</p>
+  <p>常见疑问：一串字里，<b>会不会出现"前一个字的后半字节 + 后一个字的前半字节"被合成一个 token</b>的现象？答案分两半：<b>中文——实测没有；韩语/印地语等——确实会</b>。</p>
+  <div class="note g">
+    <div class="t">🈶 中文：实测<b>不会</b>（6 分词器 × 7 样本 = 0 命中）</div>
+    我用 GPT-2 / cl100k(GPT-4) / o200k(GPT-4o) / Qwen2.5 / DeepSeek-V3 / LLaMA-3 六个分词器，跑了常用句、地名、生僻鱼字、生僻网络字、成语、带标点等 7 组中文，<b>没有一个跨字符 token</b>。原因：中文语料多，分词器<b>先把每个汉字的 3 字节合成"整字 token"</b>，字节被整字"吃掉"，轮不到跨界合并。脚本 <code>scripts/probe_zh_crosschar.py</code>。
+  </div>
   <div class="note o">
-    <div class="t">🔬 实测证据（Qwen2.5）</div>
-    韩语 <code>토크나이저</code> 里，Qwen 产出一个 token，它的字节 = <b><code>토</code> 的最后一个字节 + <code>크</code> 的第一个字节</b>——不含任何一个完整字符，正是"前字尾 + 后字头"。印地语（天城文）里也大量出现。脚本见 <code>scripts/probe_crosschar.py</code>。
+    <div class="t">🔬 但韩语/印地语：确实<b>会</b>（Qwen 实测）</div>
+    韩语 <code>토크나이저</code> 里，Qwen 产出一个 token，它的字节 = <b><code>토</code> 的最后一个字节 + <code>크</code> 的第一个字节</b>——不含任何完整字符，正是"前字尾 + 后字头"。印地语（天城文）里也大量出现。这些文字在 Qwen 里覆盖不足、没学全整字合并，裸字节对就赢了。脚本 <code>scripts/probe_crosschar.py</code>。
   </div>
 
-  <p style="margin-top:16px"><b>👇 眼见为实</b>：下面用真实 Qwen 分词器把 <code>토크나이저</code> 走一遍，<span style="color:var(--danger)">红框那个 token 就是「토 尾字节 + 크 头字节」</span>：</p>
+  <p style="margin-top:16px"><b>👇 眼见为实（可切换中文 / 韩语对比）</b>：默认是中文——<span style="color:var(--accent2)">全部边界对齐、没有红框</span>；点"韩语"切换，就能看到<span style="color:var(--danger)">红框那个跨界 token（토尾+크头）</span>：</p>
   <div class="demo"><div id="crosschar"></div></div>
-  <p><b>为什么会</b>：BPE 合并纯按"字节对频次"驱动，<b>对字符边界毫无感知</b>；正则预切分只挡住"跨词/跨空格/跨标点"的合并，同一段同种文字内部，<b>跨字符边界的相邻字节对照样是合并候选</b>。只要它够高频就会被合并。</p>
-  <p><b>为什么中文里几乎看不到</b>（<code>深度学习模型…</code> 实测 34 字全部边界对齐）：中文语料多，Qwen 先把每个汉字自己的 3 字节合成"整字 token"（字内字节对超高频），再合成词，于是都卡在字/词边界。而覆盖不足的文字（此处韩语/印地语）没学全整字合并，裸字节对就赢了 → 冒出跨界碎片 token。</p>
+  <p><b>为什么会（当它发生时）</b>：BPE 合并纯按"字节对频次"驱动，<b>对字符边界毫无感知</b>；正则预切分只挡住"跨词/跨空格/跨标点"的合并，同一段同种文字内部，<b>跨字符边界的相邻字节对照样是合并候选</b>。只要它够高频、且没被"整字合并"抢先，就会形成跨界 token。</p>
   <div class="note">
     <div class="t">🧭 一句话</div>
     原理上<b>永远可能</b>（BPE 是"边界盲"的）；实践中<b>取决于训练覆盖</b>——高覆盖语言 token 边界对齐，低覆盖文字会出现"前字尾+后字头"的跨界 token。
@@ -122,6 +125,6 @@
 <script src="assets/byte-bpe-zh.js"></script>
 <script src="assets/qwen_pipeline.js"></script>
 <script src="assets/crosschar-demo.js"></script>
-<script>initByteDemo("byte-demo");initZhBpe("zhbpe");initCrossChar("crosschar","kr");</script>
+<script>initByteDemo("byte-demo");initZhBpe("zhbpe");initCrossChar("crosschar",["zh","kr"]);</script>
 </body>
 </html>
