@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>相对位置表示 Relative | 第二课 位置编码</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第二课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="p1-why.html">为什么要位置编码</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / 相对位置表示</div>
+  <div class="method-head">
+    <span class="yr-badge">2018 Shaw · 2019 Transformer-XL · 2020 DeBERTa</span>
+    <h1>相对位置表示 Relative Position</h1>
+    <p class="lead">换一个提问方式：与其告诉模型"你是第 5 号、你是第 8 号"，不如直接告诉它"你俩相距 3"。把<b>相对距离</b> <code>i−j</code> 注入注意力打分——这更贴合语言，也天生对"整体平移"免疫。</p>
+    <div class="usedby"><span class="lbl">被这些模型使用：</span>
+      <span class="mbadge dim">Shaw et al. 2018</span>
+      <span class="mbadge meta">Transformer-XL</span>
+      <span class="mbadge dim">XLNet</span>
+      <span class="mbadge google">DeBERTa</span>
+    </div>
+  </div>
+
+  <h2>① 核心思想：位置作用在"pair"上，不在"单点"上</h2>
+  <p>绝对编码把位置贴在<b>每个 token</b>身上。相对编码则认为：真正重要的是<b>两个 token 之间的距离</b>。于是位置信息不再加到输入向量里，而是在计算注意力分数 <code>qᵢ·kⱼ</code> 时，额外注入一个只依赖 <code>i−j</code> 的项。</p>
+  <div class="note g">
+    <div class="t">🔑 为什么"相对"更合理</div>
+    "the cat sat on the mat" 不管整句在文档里是第 1 行还是第 1000 行出现，词与词的关系不该变。相对编码对<b>整体平移不变</b>：把整段话往后挪，所有 <code>i−j</code> 不变，注意力也不变。绝对编码做不到这点。
+  </div>
+
+  <h2>② Shaw 2018：给 Key / Value 加一个"距离向量"</h2>
+  <p>最早的系统方案（Shaw et al.）。在注意力里，除了内容对内容，再叠加一个可学习的<b>相对位置向量</b> <code>a</code>，按 <code>i−j</code> 索引：</p>
+  <div class="formula">
+    e<span class="sub">ij</span> = q<span class="sub">i</span> · ( k<span class="sub">j</span> + a<span class="sub">i−j</span><span class="sup">K</span> ) / √d
+    <span class="note-inline">同理 Value 侧也加 <code>a<span class="sub">i−j</span><span class="sup">V</span></code>。相对距离被<b>截断</b>在一个窗口 <code>[−k, k]</code> 内（太远的都归一类），既省参数又够用——毕竟"距离 100 和 101"的差别可以忽略。</span>
+  </div>
+
+  <h2>③ Transformer-XL 2019：把注意力打分拆成四项</h2>
+  <p>为了配合它的<b>段递归</b>机制（跨片段建模长文本），Transformer-XL 把 <code>qᵢ·kⱼ</code> 展开、并把其中的绝对位置项换成<b>相对</b>版本，得到四个可解释的部分：</p>
+  <div class="formula" style="text-align:left;font-size:14px">
+    (a) 内容↔内容：&nbsp; E<span class="sub">xi</span>·E<span class="sub">xj</span> &nbsp;&nbsp;（这个词和那个词本身搭不搭）<br>
+    (b) 内容↔位置：&nbsp; E<span class="sub">xi</span>·R<span class="sub">i−j</span> &nbsp;（这个词偏好距离多远的邻居）<br>
+    (c) 全局内容偏置：u·E<span class="sub">xj</span> <br>
+    (d) 全局位置偏置：v·R<span class="sub">i−j</span> &nbsp;（对某些相对距离的普遍偏好）
+    <span class="note-inline"><code>R</code> 是（正弦式的）相对位置编码，<code>u、v</code> 是可学习的全局向量。核心变化：原来含"绝对位置 j"的项，全部替换成"相对距离 i−j"。</span>
+  </div>
+
+  <h2>④ DeBERTa 2020：解耦注意力（disentangled attention）</h2>
+  <p>DeBERTa 把"内容"和"位置"彻底拆成两套向量，注意力分数由三类交互相加：<b>内容↔内容、内容↔位置、位置↔内容</b>（它论证"位置↔位置"贡献很小可略）。相对位置在这里是一等公民，配合它的效果在当年多个榜单登顶。</p>
+
+  <h2>⑤ 它解决了什么、代价是什么</h2>
+  <div class="proscons">
+    <div class="col pro"><h4>✓ 优点</h4><ul>
+      <li><b>平移不变</b>：更符合语言本质，长度泛化通常优于绝对编码。</li>
+      <li><b>不占绝对长度上限</b>：距离截断后，超长序列也有对应的相对桶。</li>
+      <li>可解释：注意力被拆成"内容/位置"清晰的几项。</li>
+    </ul></div>
+    <div class="col con"><h4>✗ 局限</h4><ul>
+      <li><b>更复杂、更慢</b>：注意力多出若干项与索引，工程实现比"加个向量"重。</li>
+      <li>早期实现对 KV cache / 高效推理不够友好。</li>
+      <li>形式多样、各家不一，不如后来的 RoPE/ALiBi 统一简洁。</li>
+    </ul></div>
+  </div>
+
+  <h2>⑥ 被哪些模型使用</h2>
+  <p>Transformer-XL、XLNet、DeBERTa、Music Transformer 等是相对位置的代表。<b>相对位置这条思路影响极深</b>：它提出的"位置应作用在 token pair 的注意力上、且只关心相对距离"，正是后来 <a href="p6-rope.html">RoPE</a> 和 <a href="p7-alibi.html">ALiBi</a> 的共同出发点——只是它们用更优雅的方式（旋转 / 线性偏置）实现了同一目标。</p>
+
+  <div class="note o">
+    <div class="t">➡️ 下一步：能不能再简单点？</div>
+    Shaw/XL 的相对编码要给 Key、Value 都加向量，还挺重。<a href="p5-t5bias.html">T5 把它砍到极简</a>：只给注意力打分加<b>一个标量</b>，还跨层共享。
+  </div>
+
+  <div class="pagenav">
+    <a href="p3-learned.html"><div class="lbl">← 上一节</div><div class="ttl">学习式绝对位置嵌入</div></a>
+    <a class="next" href="p5-t5bias.html"><div class="lbl">下一节 →</div><div class="ttl">T5 相对位置偏置</div></a>
+  </div>
+</div>
+</body>
+</html>

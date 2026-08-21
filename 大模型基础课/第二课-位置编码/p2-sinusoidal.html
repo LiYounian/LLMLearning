@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>正弦/余弦绝对位置编码 | 第二课 位置编码</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第二课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="p1-why.html">为什么要位置编码</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / 正弦位置编码</div>
+  <div class="method-head">
+    <span class="yr-badge">2017 · Attention Is All You Need</span>
+    <h1>正弦 / 余弦绝对位置编码 Sinusoidal</h1>
+    <p class="lead">原始 Transformer 给出的第一个答案：用一组<b>不同频率的正弦、余弦函数</b>，为每个位置算出一个固定向量，直接加到词向量上。不需要训练，理论上还能外推到没见过的长度。</p>
+    <div class="usedby"><span class="lbl">被这些模型使用：</span>
+      <span class="mbadge meta">原始 Transformer (2017)</span>
+      <span class="mbadge dim">后被 learned / RoPE 取代</span>
+    </div>
+  </div>
+
+  <h2>① 核心思想：给每个位置一张"频率指纹"</h2>
+  <p>想象一排不同速度的时钟指针：有的转得快（高频），有的转得慢（低频）。把某个位置在<b>所有这些指针上的读数</b>拼起来，就得到一个独一无二的向量——这就是该位置的编码。位置越靠后，这组读数的组合就越不同。</p>
+  <p>形式上，对位置 <code>pos</code>、维度下标 <code>i</code>（向量共 <code>d</code> 维），偶数维用 sin、奇数维用 cos：</p>
+  <div class="formula">
+    <span class="big">PE(pos, 2i) = sin( pos / 10000<span class="sup">2i/d</span> )</span><br>
+    <span class="big">PE(pos, 2i+1) = cos( pos / 10000<span class="sup">2i/d</span> )</span>
+    <span class="note-inline">分母 <code>10000<span class="sup">2i/d</span></code> 控制"这一维指针转多快"：<code>i</code> 越大，波长越长、频率越低。最低维波长约 2π，最高维波长长达约 10000·2π——覆盖了从极快到极慢的一整段频率。</span>
+  </div>
+  <p>算好后，位置向量直接<b>加</b>到对应位置的词向量上：<code>输入ᵢ = 词向量ᵢ + PE(i)</code>。仅此一步，顺序信息就进了模型。</p>
+
+  <h2>② 热力图：亲眼看这套编码长什么样（可交互）</h2>
+  <p>下图每一<b>行</b>是一个位置、每一<b>列</b>是一个维度，颜色是该处的编码值（正暖色、负冷色）。低维（左侧）像细密的条纹（高频），高维（右侧）像宽阔的色带（低频）。<b>拖动滑块</b>调序列长度和维度，<b>点某一行</b>看该位置的完整编码向量。</p>
+  <div class="demo"><div id="sin-demo"></div></div>
+
+  <h2>③ 为什么偏偏用 sin/cos？——相对位置的线性表达</h2>
+  <p>这不是随便挑的三角函数。关键性质：<b>任意偏移 k 的位置编码，都能由当前位置编码经一个<u>固定的线性变换</u>得到</b>。因为对同一频率 <code>ω</code>：</p>
+  <div class="formula">
+    sin(ω(pos+k)) = sin(ω·pos)·cos(ωk) + cos(ω·pos)·sin(ωk)
+    <span class="note-inline">这正是二维旋转公式。也就是说 <code>PE(pos+k)</code> 是 <code>PE(pos)</code> 的一个只依赖 <code>k</code>（与 <code>pos</code> 无关）的旋转/线性组合。模型因此有机会从绝对编码里<b>学出"相对距离"</b>——这个"旋转"直觉，正是四年后 <a href="p6-rope.html">RoPE</a> 的思想源头。</span>
+  </div>
+
+  <h2>④ 它解决了什么、又留下什么</h2>
+  <div class="proscons">
+    <div class="col pro"><h4>✓ 优点</h4><ul>
+      <li><b>零参数、不用训练</b>：直接算出来，不占 embedding 表。</li>
+      <li><b>理论上可外推</b>：任意大的 <code>pos</code> 都能算，不像查表法有长度上限。</li>
+      <li><b>蕴含相对结构</b>：sin/cos 让相对位移有线性表达，利于模型泛化。</li>
+      <li><b>确定、可复现</b>：同一位置永远同一编码。</li>
+    </ul></div>
+    <div class="col con"><h4>✗ 局限</h4><ul>
+      <li><b>"加法注入"较弱</b>：位置和语义在同一向量里相加、互相干扰，不如后来把位置作用在注意力上直接。</li>
+      <li><b>外推实测打折</b>：理论能算，但没训练过的长距离，效果常明显下降。</li>
+      <li><b>仍是绝对位置</b>：模型得自己"悟"出相对关系，不如显式相对方法。</li>
+      <li>实践中很快被<b>学习式绝对编码</b>与 <b>RoPE</b> 取代。</li>
+    </ul></div>
+  </div>
+
+  <h2>⑤ 被哪些模型使用</h2>
+  <p>正弦编码的"生产代表作"就是<b>原始 Transformer（2017）</b>本身。论文里作者也试了可学习版本，效果相近，最终选正弦版因为它能外推。此后 BERT/GPT 转向<a href="p3-learned.html">学习式绝对编码</a>，主流生成式模型再转向 <a href="p6-rope.html">RoPE</a>——但正弦编码里"用旋转承载位置"的种子，一直影响到今天。</p>
+
+  <div class="note o">
+    <div class="t">➡️ 下一步的分岔</div>
+    正弦编码是"手工设计"的固定函数。既然位置信息也能<b>学</b>，为什么不干脆把它当成可训练的参数？<a href="p3-learned.html">下一节：学习式绝对位置嵌入</a>。
+  </div>
+
+  <div class="pagenav">
+    <a href="p1-why.html"><div class="lbl">← 上一节</div><div class="ttl">为什么需要位置编码</div></a>
+    <a class="next" href="p3-learned.html"><div class="lbl">下一节 →</div><div class="ttl">学习式绝对位置嵌入</div></a>
+  </div>
+</div>
+
+<script src="assets/sin-demo.js"></script>
+<script>initSinDemo("sin-demo");</script>
+</body>
+</html>
