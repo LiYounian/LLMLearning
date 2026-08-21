@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RoPE 旋转位置编码 | 第二课 位置编码</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第二课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="p1-why.html">为什么要位置编码</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / RoPE 旋转位置编码</div>
+  <div class="method-head">
+    <span class="yr-badge">2021 · RoFormer ⭐ 今日主流</span>
+    <h1>RoPE：旋转位置编码</h1>
+    <p class="lead">今天开源大模型的<b>绝对主流</b>。核心一招：按位置把 Query、Key 向量<b>旋转</b>一个角度。神奇之处在于——两个旋转后向量的内积，会<b>自动只依赖它们的相对位置差</b>。绝对的形式，相对的效果。</p>
+    <div class="usedby"><span class="lbl">被这些模型使用：</span>
+      <span class="mbadge meta">LLaMA 全系</span>
+      <span class="mbadge qwen">Qwen 全系</span>
+      <span class="mbadge ds">DeepSeek (MLA decoupled RoPE)</span>
+      <span class="mbadge dim">ChatGLM · Mistral · Gemma · Falcon · GPT-NeoX · PaLM</span>
+    </div>
+  </div>
+
+  <h2>① 核心思想：把"位置"变成"旋转角"</h2>
+  <p>前面所有方法都是"给向量<b>加</b>点位置信息"。RoPE 换成"给向量<b>转</b>个角度"。具体做法：把 <code>d</code> 维的 Query/Key 每两维分成一组（一个 2D 平面），在位置 <code>m</code> 处，把第 <code>k</code> 组的这对分量<b>旋转 <code>m·θ<span class="sub">k</span></code> 弧度</b>：</p>
+  <div class="formula">
+    <span class="big">q̃<span class="sub">m</span> = R(m·θ) · q &nbsp;&nbsp;&nbsp; k̃<span class="sub">n</span> = R(n·θ) · k</span>
+    <span class="note-inline"><code>R(·)</code> 是旋转矩阵；位置越靠后转得越多。每组用不同频率 <code>θ<span class="sub">k</span> = 10000<span class="sup">−2k/d</span></code>——和正弦编码同一套频率阶梯：低维转得快、高维转得慢。</span>
+  </div>
+
+  <h2>② 神来之笔：内积只剩相对位置</h2>
+  <p>注意力要算的是 Query 和 Key 的内积。把旋转后的 <code>q̃<span class="sub">m</span></code> 和 <code>k̃<span class="sub">n</span></code> 做内积，两个旋转会合并成<b>一个只含 (n−m) 的旋转</b>：</p>
+  <div class="formula">
+    <span class="big">⟨ R(mθ)q , R(nθ)k ⟩ = ⟨ q , R((n−m)θ)k ⟩</span>
+    <span class="note-inline">因为旋转矩阵满足 <code>R(a)<span class="sup">⊤</span>R(b)=R(b−a)</code>。绝对位置 <code>m、n</code> 单独看都在，但一做内积就<b>抵消成相对位置 n−m</b>。这就是 RoPE 的全部魔法：<b>用绝对旋转，得到纯相对的注意力</b>。</span>
+  </div>
+  <div class="note g">
+    <div class="t">🔑 一句话记住</div>
+    位置编码在<b>做内积那一刻</b>才"显形"，且只显形为相对距离。既不用像 learned 那样占长度上限，也不用像 Shaw 式相对编码那样在注意力里塞额外的向量——旋转本身就把相对信息编进去了。
+  </div>
+
+  <h2>③ 旋转可视化（可交互）</h2>
+  <p>下面把一组 Query（蓝）和 Key（绿）画在 2D 平面上。<b>拖 <code>m</code>、<code>n</code> 两个滑块</b>改变它们所在位置：两个向量各自旋转 <code>m·θ</code>、<code>n·θ</code>，但它们的<b>夹角只由 (n−m) 决定</b>——这正是内积所"看见"的量。试着让 m、n 一起增大：夹角不变。</p>
+  <div class="demo"><div id="rope-demo"></div></div>
+
+  <h2>④ 它一举解决了前几代的什么问题</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>前代痛点</th><th>RoPE 的回答</th></tr></thead>
+    <tbody>
+      <tr><td>learned 绝对编码有<b>长度上限</b></td><td>旋转对任意位置都能算，无表可爆</td></tr>
+      <tr><td>Shaw 式相对编码<b>要往注意力塞向量、复杂且慢</b></td><td>只旋转 Q/K，不加任何参数，对 <b>KV cache 友好</b></td></tr>
+      <tr><td>绝对编码<b>相对关系要模型硬悟</b></td><td>内积天然=相对距离函数，直接给到</td></tr>
+      <tr><td>正弦编码的旋转直觉<b>没落到注意力上</b></td><td>把"旋转"从加法项升级成作用在 Q/K 的真旋转</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>⑤ 优缺点</h2>
+  <div class="proscons">
+    <div class="col pro"><h4>✓ 优点</h4><ul>
+      <li><b>零额外参数</b>，只在 Q/K 上做旋转，几乎不增开销。</li>
+      <li><b>绝对形式、相对效果</b>，兼得两家之长。</li>
+      <li><b>对高效推理友好</b>：旋转可直接施加到缓存的 K 上。</li>
+      <li><b>可外推的底座</b>：改一下频率基 (base <code>θ</code>)，就能把上下文往长拉——这正是 <a href="p9-extrapolation.html">长上下文外推</a> 的立足点。</li>
+    </ul></div>
+    <div class="col con"><h4>✗ 局限</h4><ul>
+      <li><b>直接外推仍会衰减</b>：远超训练长度时，高频维旋转"绕圈"太多，注意力失真——需要 PI/NTK/YaRN 修正。</li>
+      <li>只作用在注意力里，不改变 Value 表示。</li>
+      <li>频率基、维度分组等超参对长文本效果敏感，需要调。</li>
+    </ul></div>
+  </div>
+
+  <h2>⑥ 被哪些模型使用（今日主流全景）</h2>
+  <p>RoPE 几乎"通吃"了开源生成式大模型：</p>
+  <ul>
+    <li><b>LLaMA 全系</b>（1/2/3）、<b>Qwen 全系</b>、<b>Mistral / Mixtral</b>、<b>Gemma</b>、<b>Falcon</b>（团队实测 RoPE 优于 ALiBi 才选它）、<b>GPT-NeoX</b>、<b>PaLM</b>、<b>ChatGLM/GLM</b>（2D RoPE）。</li>
+    <li><b>DeepSeek V2/V3</b>：因为用了 MLA（低秩压缩 KV）与旋转会冲突，特意设计了<b>解耦 RoPE（decoupled RoPE）</b>——单开一条只带旋转的小分支承载位置信息。见 <a href="models.html">模型×方法矩阵</a>。</li>
+  </ul>
+  <div class="note p">
+    <div class="t">👉 为什么大家都选它</div>
+    RoPE 把"相对位置该有的好处"用最省的方式（旋转、零参数、缓存友好）实现了，还留了一个可调的频率基当"长上下文旋钮"。这套性价比在 2023 年后的大模型军备竞赛里几乎无可替代。
+  </div>
+
+  <div class="note o">
+    <div class="t">➡️ 另一条现代路线</div>
+    RoPE 之外，同年还有一个更"极端简约"的答案：<a href="p7-alibi.html">ALiBi</a>——干脆不加任何位置向量，只在注意力打分上按距离线性罚分。它的外推能力尤其出名。
+  </div>
+
+  <div class="pagenav">
+    <a href="p5-t5bias.html"><div class="lbl">← 上一节</div><div class="ttl">T5 相对位置偏置</div></a>
+    <a class="next" href="p7-alibi.html"><div class="lbl">下一节 →</div><div class="ttl">ALiBi 线性偏置注意力</div></a>
+  </div>
+</div>
+
+<script src="assets/rope-demo.js"></script>
+<script>initRopeDemo("rope-demo");</script>
+</body>
+</html>
