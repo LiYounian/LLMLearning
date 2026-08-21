@@ -1,0 +1,12 @@
+# 参考模板：拷到 /etc/systemd/system/llmlearning-update.timer
+# 职责：每 2 分钟触发一次自动更新；开机 1 分钟后先跑一次；关机错过的补跑。
+[Unit]
+Description=Periodically run LLMLearning auto-update
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=2min
+Persistent=true
+
+[Install]
+WantedBy=timers.target
