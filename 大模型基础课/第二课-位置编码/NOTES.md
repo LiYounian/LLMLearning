@@ -31,5 +31,16 @@
 - **T5 bias**：T5 / mT5。
 - **Relative（Shaw 式 / XL 式 / DeBERTa 解耦）**：Transformer-XL、XLNet、DeBERTa、Music Transformer。
 
+## 交互 demo 验证（已过）
+5 个 demo 均在本地静态服务(python3 -m http.server)下浏览器验证通过，无 console error：
+- p1 置换演示：切换位置编码开/关 + Fisher-Yates 打乱，集合不变逻辑正确。
+- p2 正弦热力图：位置×维度热力图满绘，点击行→显示该位置编码向量色条。
+- p6 RoPE 旋转：q/k 向量随 m、n、θ 旋转，夹角只随 n−m 变，内积读数正确。
+- p7 ALiBi 斜率：每头一条线，斜率几何级数，滑块调头数/距离。
+- p9 外推对比：真实位置→有效感知位置，直接外推/PI/NTK-YaRN 三曲线 + 安全区，读数正确。
+
+链接完整性：17 个内部链接全部 resolve；脱敏扫描 clean。
+
 ## 待办 / 踩坑
-- （建设中）demo JS 需本地静态服务验证：`python3 -m http.server` 后浏览器打开。
+- 外推示意图为传达"均匀 vs 非均匀压缩"直觉而简化，非精确数值曲线（页内已用 figcap 标注）。
+- 各模型上下文长度/外推方案随版本变化快，表格取代表值，已在 references 标注"以官方为准"。
