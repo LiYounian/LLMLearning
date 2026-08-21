@@ -1,0 +1,187 @@
+<!DOCTYPE html><html lang="zh-CN"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OpenAI GPT 发展脉络 | 大模型演进路线</title>
+<link rel="stylesheet" href="assets/style.css"></head><body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型演进路线 <span class="dot">·</span> 8家调研</span>
+  <nav>
+    <a href="index.html">目录</a><a href="timeline.html">跨家时间线</a>
+    <a href="tech.html">技术脉络</a><a href="metrics.html">指标脉络</a>
+    <a href="data.html">数据规模</a><a href="references.html">来源</a>
+  </nav>
+</div></div>
+<div class="wrap page" style="--bar:#10a37f">
+  <div class="breadcrumb"><a href="index.html">目录</a> / OpenAI GPT</div>
+  <h1>OpenAI GPT <span class="badge closed">闭源为主</span></h1>
+  <p class="lead">从「预训练 decoder-only Transformer + 规模定律」起家，经 RLHF 对齐走向对话，经多模态（GPT-4o）与推理模型（o 系列）两次范式跃迁；GPT-5 起把「快速模型 + 深度推理模型 + 实时路由」合成一个统一系统。</p>
+
+  <div class="note o"><div class="t">阅读须知：口径与诚实标注</div>
+  参数量 / 训练 token 量 / 上下文长度这类数字，OpenAI 从 <strong>GPT-4 起基本不再公开</strong>。本页凡「官方未公开」处均明确标注，外界推测 / 传闻单独区分，未臆造。调研时间 2026-08；2025–2026 的版本已联网核实并补全。</div>
+
+  <div class="statgrid">
+    <div class="stat"><div class="k">首发</div><div class="v">2018-06</div><div class="s">GPT-1（117M 参数）</div></div>
+    <div class="stat"><div class="k">最新旗舰</div><div class="v">GPT-5.6</div><div class="s">Sol / Terra / Luna 三档 · 2026-07-09 公开</div></div>
+    <div class="stat"><div class="k">开放度</div><div class="v">闭源为主</div><div class="s">GPT-1/2 开源；GPT-3 起闭源；2025 另发 gpt-oss 开源权重系列</div></div>
+    <div class="stat"><div class="k">最大公开参数量</div><div class="v">175B</div><div class="s">GPT-3（GPT-4 起不再公开）</div></div>
+    <div class="stat"><div class="k">最大公开上下文</div><div class="v">1,000,000</div><div class="s">GPT-4.1（100 万 token）</div></div>
+  </div>
+
+  <h2>发展时间线</h2>
+  <p class="src">下表仅列重要版本；数字凡官方未公开处均标注「未公开」。完整表格见页内叙述与来源。</p>
+  <div class="timeline">
+
+    <div class="tl-item"><div class="yr">2018-06 · GPT-1</div>
+      <h4>Decoder-only Transformer · 117M（官方公开）· 512 token</h4>
+      <p>确立「生成式预训练 + 判别式微调」的半监督两阶段范式。训练语料 BooksCorpus（约 7000 本书 / 约 5GB / ~8 亿词，token 量级约 10 亿，官方未精确给 token 数）。在多项 NLU 任务上刷新 SOTA。<span class="cite">[1]</span></p></div>
+
+    <div class="tl-item"><div class="yr">2019-02 公告 / 2019-11 全量放出 · GPT-2</div>
+      <h4>Decoder-only Transformer · 1.5B 最大档（官方公开）· 1024 token</h4>
+      <p>纯无监督、zero-shot 多任务；首创「分阶段发布」的安全策略（先小档、后 1.5B 全量）。语料 WebText 约 40GB / 800 万网页（Reddit ≥3 karma 外链），约 100 亿 token（外界估算）。另有 117M/345M/762M 档。<span class="cite">[2][3]</span></p></div>
+
+    <div class="tl-item"><div class="yr">2020-05 · GPT-3</div>
+      <h4>Decoder-only Transformer · 175B（官方公开，96 层）· 2048 token</h4>
+      <p>规模定律（scaling law）大规模验证；提出 in-context learning / few-shot——在 prompt 里给几个示例即可完成新任务，无需梯度更新。约 3000 亿 token（Common Crawl 过滤 + WebText2 + Books1&2 + Wikipedia 混合加权）。MMLU few-shot ~43.9%。<span class="cite">[4][5]</span></p></div>
+
+    <div class="tl-item"><div class="yr">2022-01 · InstructGPT</div>
+      <h4>GPT-3 + RLHF 对齐 · 基于 175B 及更小档</h4>
+      <p>RLHF：SFT（标注者书写示范）+ 奖励模型 + PPO 强化学习，实现指令跟随对齐。人评偏好度约 85% 场景优于同规模 GPT-3，毒性 / 编造下降；对齐后 1.3B 版本人评已胜过 175B GPT-3。后训练数据具体样本量官方未精确公开。<span class="cite">[6]</span></p></div>
+
+    <div class="tl-item"><div class="yr">2022-11-30 · ChatGPT（GPT-3.5）</div>
+      <h4>GPT-3.5 + 对话式 RLHF · 参数量未公开 · 约 4k（后 16k 变体）</h4>
+      <p>对话式 RLHF + 产品化聊天界面，把语言模型变成可对话助手。5 天破 100 万用户（产品指标）。<span class="cite">[6][7]</span></p></div>
+
+    <div class="tl-item"><div class="yr">2023-03-14 · GPT-4</div>
+      <h4>多模态（图文输入）Transformer · 规模官方未公开 · 8k / 32k 变体</h4>
+      <p>首次在旗舰引入图像输入，复杂推理与专业考试能力大幅提升，并发布 System Card。<strong>官方明确拒绝披露规模 / 架构 / 数据 / 硬件</strong>。MMLU ~86.4%；多项人类专业考试达 top 10% 级别（如模拟律考）。<span class="cite">[8][9]</span></p></div>
+
+    <div class="tl-item"><div class="yr">2024-05-13 · GPT-4o（"omni"）</div>
+      <h4>原生多模态单一模型（文/图/音）· 规模未公开 · 128k</h4>
+      <p>文本 / 图像 / 音频在单一模型内原生统一，支持端到端语音-语音，延迟与成本大幅下降。知识截止 2023-10。MMLU 88.7%；语音 / 多语言 / 视觉多项 SOTA。<span class="cite">[10]</span></p></div>
+
+    <div class="tl-item"><div class="yr">2024-09-12 预览 / 2024-12-05 正式 · o1</div>
+      <h4>推理模型（RL + 私有思维链）· 规模未公开</h4>
+      <p>推理模型范式：模型在回答前用私有 CoT「思考」，思考越久越准（test-time compute）。数学 / 竞赛编程 / 科学（AIME、Codeforces 等）大幅超越 GPT-4o。<span class="cite">[11][12]</span></p></div>
+
+    <div class="tl-item"><div class="yr">2025-01 → 2025-06 · o3 系列</div>
+      <h4>推理模型（放大 RL）· 规模未公开</h4>
+      <p>o3-mini（2025-01-31）/ o3（2025-04-16）/ o3-pro（2025-06-10）。放大强化学习 + 推理时搜索；引入 deliberative alignment 安全对齐。编程 / 数学 / 科学再刷 SOTA，ARC-AGI 大幅提升（部分为传闻 / 报道口径）。<span class="cite">[13]</span></p></div>
+
+    <div class="tl-item"><div class="yr">2025-02-27 · GPT-4.5（代号 Orion）</div>
+      <h4>大规模非推理模型 · 规模未公开 · 128k</h4>
+      <p>迄今最大的非推理预训练模型；定位「更自然 / 更少幻觉」，不走显式 CoT。非推理基准提升。<span class="cite">[14]</span></p></div>
+
+    <div class="tl-item"><div class="yr">2025-04-14 · GPT-4.1（API 系列）</div>
+      <h4>GPT-4o 演进（含 mini / nano）· 规模未公开 · 1,000,000 token</h4>
+      <p>超长上下文（100 万 token）；强化编程、指令跟随、长文理解，仅 API 提供。知识截止 2024-06。SWE-bench 编程与长上下文基准显著优于 GPT-4o。<span class="cite">[15]</span></p></div>
+
+    <div class="tl-item"><div class="yr">2025-08-07 · GPT-5</div>
+      <h4>统一系统 + 实时路由（main / thinking 多档 + router）· 规模未公开</h4>
+      <p>路由器按问题复杂度自动在「快速模型」与「深度推理模型」间切换，对用户屏蔽选型；原生多模态。上下文产品端 128k~、API 更大（官方披露不一致）。AIME 2025 无工具 94.6%；SWE-bench Verified 74.9%；MMMU 84.2%；HealthBench Hard 46.2%。<span class="cite">[16][17][22]</span></p></div>
+
+    <div class="tl-item"><div class="yr">2025-11 → 2026-07 · GPT-5.1 / 5.2 / 5.4 / 5.5 / 5.6</div>
+      <h4>统一系统持续迭代（instant / thinking / pro / Codex 变体）· 规模未公开</h4>
+      <p>快速小步迭代：编程 Codex 专用档、知识工作与 agent（ChatGPT Work）、token 效率优化。GPT-5.6 Sol：Artificial Analysis Coding Agent Index v1.1 得分 80（最大推理档），官方称「最强编程 / 网络安全模型」且更省 token。<span class="cite">[18][19][20][21]</span></p></div>
+
+  </div>
+
+  <div class="note"><div class="t">GPT-5.x 关键日期</div>
+  GPT-5.1（2025-11-12，另有两款 11-19 补发）· GPT-5.2（2025-12-11，含 instant/thinking/Pro + GPT-5.2-Codex）· GPT-5.3-Codex（2026-02-05）· GPT-5.4（2026-03-05）· GPT-5.5（2026-04-23）· GPT-5.6（2026-06-26 预览 / 2026-07-09 公开，Sol/Terra/Luna 三档 + ChatGPT Work agent）。<span class="cite">[18][19][20][21]</span></div>
+
+  <h2>核心技术标签</h2>
+  <p>
+    <span class="tag g">生成式预训练</span>
+    <span class="tag g">无监督 zero-shot</span>
+    <span class="tag b">规模定律 scaling law</span>
+    <span class="tag b">in-context learning / few-shot</span>
+    <span class="tag o">RLHF 对齐</span>
+    <span class="tag o">对话式 RLHF</span>
+    <span class="tag p">图像多模态</span>
+    <span class="tag p">原生 omni 多模态</span>
+    <span class="tag b">推理模型 / test-time compute</span>
+    <span class="tag o">deliberative alignment</span>
+    <span class="tag g">超长上下文 1M</span>
+    <span class="tag b">统一系统 + 实时路由</span>
+    <span class="tag o">Agent 化 / token 效率</span>
+  </p>
+  <ul>
+    <li><strong>Decoder-only Transformer + 生成式预训练（GPT-1，2018）</strong>：确立「先在大规模无标注语料上自回归预训练，再在下游微调」的两阶段范式，奠定整个 GPT 家族的架构底座。<span class="cite">[1]</span></li>
+    <li><strong>无监督多任务 / zero-shot（GPT-2，2019）</strong>：证明模型和数据足够大时，单一语言模型无需任务专用微调即可 zero-shot 完成多任务；同时首创「分阶段发布」安全策略。<span class="cite">[2][3]</span></li>
+    <li><strong>规模定律 + in-context learning（GPT-3，2020）</strong>：把参数量放大到 175B 验证 scaling law；提出「在 prompt 里给几个示例即可完成新任务」，无需梯度更新。<span class="cite">[4]</span></li>
+    <li><strong>RLHF 对齐（InstructGPT / ChatGPT，2022）</strong>：用「监督微调 + 奖励模型 + PPO 强化学习」让模型跟随人类指令、更有用更少有害——把原始语言模型变成可对话助手的关键一步。<span class="cite">[6]</span></li>
+    <li><strong>图像多模态（GPT-4，2023）</strong>：首次在旗舰引入图像输入，复杂推理与专业考试能力大幅提升；同时开始对规模 / 架构 / 数据完全保密。<span class="cite">[8][9]</span></li>
+    <li><strong>原生 omni 多模态（GPT-4o，2024）</strong>：文本 / 图像 / 音频在单一模型内原生统一，支持端到端语音-语音，延迟与成本大幅下降。<span class="cite">[10]</span></li>
+    <li><strong>推理模型 / test-time compute（o1 → o3，2024–2025）</strong>：用 RL 训练模型在回答前生成私有思维链「思考」，把算力从训练时转向推理时（think longer → 更准）；o3 进一步放大 RL 并引入 deliberative alignment。<span class="cite">[11][13]</span></li>
+    <li><strong>超长上下文（GPT-4.1，2025）</strong>：上下文扩到 100 万 token，并提升长文理解与利用能力。<span class="cite">[15]</span></li>
+    <li><strong>统一系统 + 实时路由（GPT-5，2025）</strong>：把「快速模型 + 深度推理模型」合成一个系统，用 router 按复杂度 / 工具需求 / 用户意图自动选择，对用户屏蔽选型。<span class="cite">[16][17]</span></li>
+    <li><strong>Agent 化与 token 效率（GPT-5.x → 5.6，2026）</strong>：面向 agentic 工作流（ChatGPT Work）、编程（Codex 专用档）持续迭代，强调「用更少 token 达到更高智能」。<span class="cite">[19][20][21]</span></li>
+  </ul>
+
+  <h2>数据 / 规模</h2>
+  <ul>
+    <li><strong>预训练 token 量（可核实部分）</strong>：GPT-1 语料 BooksCorpus（约 5GB / ~8 亿词，token 量级约 10 亿，官方未精确给数）→ GPT-2 WebText 约 40GB / 800 万网页（外界估约 100 亿 token）→ GPT-3 约 3000 亿 token（官方论文给出）。<span class="cite">[1][2][4]</span></li>
+    <li><strong>参数量（官方公开部分）</strong>：117M（GPT-1）→ 1.5B（GPT-2 最大档）→ 175B（GPT-3）。GPT-4 起官方不再公开。<span class="cite">[1][3][4][9]</span></li>
+    <li><strong>数据配比变化</strong>：GPT-3 首次公开混合加权配方——Common Crawl（质量过滤）+ WebText2 + Books1&2 + Wikipedia，高质量语料上采样。此后（GPT-4 及以后）数据来源与配比官方未公开，仅笼统表述为「书籍 / 文章 / 网页 / 学术论文 / 授权数据」等多语种大规模语料。<span class="cite">[4][16]</span></li>
+    <li><strong>后训练数据规模</strong>：InstructGPT 公开了后训练由「标注者示范（SFT）+ 人工偏好比较（奖励模型）」两部分组成，但具体样本量官方未精确公开；ChatGPT 及以后的后训练（含 RLHF、推理 RL）数据规模均未公开。<span class="cite">[6]</span></li>
+  </ul>
+  <div class="note r"><div class="t">传闻 / 存疑，切勿当事实</div>
+  GPT-4 的「约 1.8T、MoE、8×220B」等说法均为媒体 / 研究者传闻（如 Semafor 报道「1 万亿参数量级」），<strong>OpenAI 从未证实</strong>。Sam Altman 仅确认训练成本超 1 亿美元。GPT-4 及以后的参数量 / 架构 / 训练数据全部官方未公开。</div>
+  <p class="src">总体趋势：2020 年前是「公开参数 / 数据、拼规模」；2023 年 GPT-4 起转为「全面保密规模与数据」，公开叙事重心从「多大」转向「多能」（推理、多模态、agent、token 效率）。</p>
+
+  <h2>代表指标</h2>
+  <p>选用可跨版本对比的代表基准。注意 OpenAI 后期主推 SWE-bench / AIME 而非 MMLU，故分两段看。</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>阶段</th><th>版本</th><th>基准</th><th>成绩</th><th>来源</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="3">MMLU（通识多任务，早中期主力）</td><td>GPT-3（175B）</td><td class="mono">MMLU few-shot</td><td class="mono">~43.9%</td><td class="mono">[4]</td></tr>
+      <tr><td>GPT-4</td><td class="mono">MMLU</td><td class="mono">~86.4%</td><td class="mono">[8]</td></tr>
+      <tr><td>GPT-4o</td><td class="mono">MMLU</td><td class="mono">88.7%（GPT-4 为 86.5%）</td><td class="mono">[10]</td></tr>
+      <tr><td rowspan="5">编程 / 数学（推理时代主力）</td><td rowspan="4">GPT-5</td><td class="mono">SWE-bench Verified</td><td class="mono">74.9%</td><td class="mono" rowspan="4">[16]</td></tr>
+      <tr><td class="mono">AIME 2025（无工具）</td><td class="mono">94.6%</td></tr>
+      <tr><td class="mono">MMMU</td><td class="mono">84.2%</td></tr>
+      <tr><td class="mono">HealthBench Hard</td><td class="mono">46.2%</td></tr>
+      <tr><td>GPT-5.6 Sol</td><td class="mono">AA Coding Agent Index v1.1</td><td class="mono">80（最大推理档）</td><td class="mono">[19][21]</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note p"><div class="t">口径提醒</div>
+  o1 / o3 阶段官方主要以 AIME、Codeforces、GPQA、ARC-AGI 等展示，分数随<strong>档位</strong>与<strong>是否用工具 / 是否 majority vote</strong> 差异很大，不同来源数字不可直接横比，此处不逐一列举以免混淆口径。GPT-5.x 的上下文窗口官方文档披露不一致（产品端与 API 端不同），本页标「未公开 / 因档位而异」。</div>
+
+  <h2>不确定与空白</h2>
+  <ul>
+    <li>GPT-4 及以后的参数量 / 架构 / 训练数据全部官方未公开；「1.8T / MoE」为未证实传闻。</li>
+    <li>上下文长度：GPT-4（8k/32k）、GPT-4o（128k）、GPT-4.1（1M）为官方明确数字；GPT-5 及 GPT-5.x 官方披露不一致，标「未公开 / 因档位而异」。</li>
+    <li>训练 token 量：仅 GPT-3（3000 亿）由官方论文给出确切数字；GPT-1 约 10 亿、GPT-2 约 100 亿为外界估算；GPT-3.5 及以后均未公开。</li>
+    <li>后训练（RLHF / 推理 RL）数据规模：InstructGPT 公开方法与流程，但样本量级、ChatGPT 及后续对齐数据规模均未公开。</li>
+    <li>GPT-5.x 高频小版本（5.1/5.3-Codex/5.4/5.5/5.6）迭代极快，多数只有发布说明与第三方评测，缺乏 system card 级技术细节；部分中间版本资料稀疏。</li>
+  </ul>
+
+  <h2>一手来源</h2>
+  <div class="reflist"><ol>
+    <li>[1] Improving Language Understanding by Generative Pre-Training（GPT-1 论文，OpenAI 2018）— <a href="https://cdn.openai.com/research-covers/language-unsupervised/language_understanding_paper.pdf">cdn.openai.com PDF</a></li>
+    <li>[2] Better Language Models and Their Implications（GPT-2 公告，OpenAI 2019-02）— <a href="https://openai.com/index/better-language-models/">openai.com/index/better-language-models</a></li>
+    <li>[3] GPT-2: 1.5B release（OpenAI 2019-11）— <a href="https://openai.com/index/gpt-2-1-5b-release/">openai.com</a> ；<a href="https://en.wikipedia.org/wiki/GPT-2">Wikipedia: GPT-2</a></li>
+    <li>[4] Language Models are Few-Shot Learners（GPT-3 论文，arXiv:2005.14165）— <a href="https://arxiv.org/abs/2005.14165">arxiv.org/abs/2005.14165</a> <span class="src">（已核实：175B 参数）</span></li>
+    <li>[5] NVIDIA Technical Blog: OpenAI Presents GPT-3 — <a href="https://developer.nvidia.com/blog/openai-presents-gpt-3-a-175-billion-parameters-language-model/">developer.nvidia.com</a></li>
+    <li>[6] Aligning language models to follow instructions / InstructGPT（OpenAI 2022，arXiv:2203.02155）— <a href="https://openai.com/index/instruction-following/">openai.com/index/instruction-following</a> ；<a href="https://arxiv.org/abs/2203.02155">arxiv.org/abs/2203.02155</a> <span class="src">（已核实）</span></li>
+    <li>[7] Wikipedia: ChatGPT — <a href="https://en.wikipedia.org/wiki/ChatGPT">en.wikipedia.org/wiki/ChatGPT</a></li>
+    <li>[8] GPT-4 Technical Report（OpenAI，arXiv:2303.08774 / PDF）— <a href="https://cdn.openai.com/papers/gpt-4.pdf">cdn.openai.com/papers/gpt-4.pdf</a> ；<a href="https://arxiv.org/abs/2303.08774">arxiv.org/abs/2303.08774</a></li>
+    <li>[9] Wikipedia: GPT-4 — <a href="https://en.wikipedia.org/wiki/GPT-4">en.wikipedia.org/wiki/GPT-4</a></li>
+    <li>[10] Wikipedia: GPT-4o — <a href="https://en.wikipedia.org/wiki/GPT-4o">en.wikipedia.org/wiki/GPT-4o</a> ；Hello GPT-4o（OpenAI）— <a href="https://openai.com/index/hello-gpt-4o/">openai.com/index/hello-gpt-4o</a></li>
+    <li>[11] Learning to reason with LLMs（o1，OpenAI）— <a href="https://openai.com/index/learning-to-reason-with-llms/">openai.com/index/learning-to-reason-with-llms</a></li>
+    <li>[12] Wikipedia: OpenAI o1 — <a href="https://en.wikipedia.org/wiki/OpenAI_o1">en.wikipedia.org/wiki/OpenAI_o1</a></li>
+    <li>[13] Wikipedia: OpenAI o3 — <a href="https://en.wikipedia.org/wiki/OpenAI_o3">en.wikipedia.org/wiki/OpenAI_o3</a></li>
+    <li>[14] Wikipedia: GPT-4.5 — <a href="https://en.wikipedia.org/wiki/GPT-4.5">en.wikipedia.org/wiki/GPT-4.5</a></li>
+    <li>[15] Introducing GPT-4.1 in the API（OpenAI）— <a href="https://openai.com/index/gpt-4-1/">openai.com/index/gpt-4-1</a> ；<a href="https://en.wikipedia.org/wiki/GPT-4.1">Wikipedia: GPT-4.1</a></li>
+    <li>[16] Introducing GPT-5（OpenAI 2025-08）— <a href="https://openai.com/index/introducing-gpt-5/">openai.com/index/introducing-gpt-5</a> <span class="src">（已核实：2025-08-07 发布）</span></li>
+    <li>[17] Wikipedia: GPT-5 — <a href="https://en.wikipedia.org/wiki/GPT-5">en.wikipedia.org/wiki/GPT-5</a> ；GPT-5 System Card — <a href="https://openai.com/index/gpt-5-system-card/">openai.com/index/gpt-5-system-card</a></li>
+    <li>[18] Wikipedia: GPT-5.1 — <a href="https://en.wikipedia.org/wiki/GPT-5.1">en.wikipedia.org/wiki/GPT-5.1</a></li>
+    <li>[19] Wikipedia: GPT-5.2 — <a href="https://en.wikipedia.org/wiki/GPT-5.2">en.wikipedia.org/wiki/GPT-5.2</a></li>
+    <li>[20] Wikipedia: GPT-5.4 — <a href="https://en.wikipedia.org/wiki/GPT-5.4">en.wikipedia.org/wiki/GPT-5.4</a> ；<a href="https://en.wikipedia.org/wiki/GPT-5.5">GPT-5.5</a></li>
+    <li>[21] Previewing GPT-5.6 Sol / GPT-5.6（OpenAI）— <a href="https://openai.com/index/previewing-gpt-5-6-sol/">openai.com/index/previewing-gpt-5-6-sol</a> ；<a href="https://openai.com/index/gpt-5-6/">openai.com/index/gpt-5-6</a> ；<a href="https://en.wikipedia.org/wiki/GPT-5.6">Wikipedia: GPT-5.6</a> <span class="src">（已核实：Sol/Terra/Luna 三档，2026-07-09 公开）</span></li>
+    <li>[22] OpenAI GPT-5 System Card（arXiv:2601.03267）— <a href="https://arxiv.org/abs/2601.03267">arxiv.org/abs/2601.03267</a> <span class="src">（已核实存在）</span></li>
+  </ol></div>
+
+  <div class="pagenav">
+    <a href="index.html"><div class="lbl">← 返回</div><div class="ttl">课程目录</div></a>
+    <a class="next" href="02-anthropic-claude.html"><div class="lbl">下一家 →</div><div class="ttl">Anthropic Claude</div></a>
+  </div>
+</div></body></html>
