@@ -35,13 +35,20 @@
 
   <h2>② 几个可跨家看趋势的锚点</h2>
   <p class="src">⚠️ 注意口径差异：是否带工具、thinking 档位、shot 数不同，同名基准跨来源常差数个百分点，下表仅示意"量级爬升"，不可直接相减。</p>
+  <p class="src">🔗 每个分数右侧的 <span style="color:var(--accent)">↗</span> 可<b>点到一手来源</b>：有 arXiv 报告的直达论文，闭源/自评的则链到本站对应<b>公司详情页</b>（其底部列该家全部一手来源）——本站不编造外部 URL。悬停 ↗ 看来源类型。</p>
 
   <h3>MMLU（通识，已饱和）</h3>
   <div id="bar-mmlu"></div>
   <h3>GPQA Diamond（研究生科学）</h3>
   <div id="bar-gpqa"></div>
+  <h3>AIME 2024（竞赛数学 · 推理模型的分水岭）</h3>
+  <p class="src">从 GPT-4o 的十几分到推理模型 80 分——最能体现"测试期算力"威力的基准（详见<a href="tech-deep.html#think">深挖页</a>）。</p>
+  <div id="bar-aime"></div>
   <h3>SWE-bench Verified（编码 agent）</h3>
   <div id="bar-swe"></div>
+  <h3>HLE · Humanity's Last Exam（前沿难题 · 量级示意）</h3>
+  <p class="src">⚠️ HLE 分数极度依赖是否带工具/检索，各来源口径差异巨大，此处数值为<b>近似量级（~）</b>，仅示"前沿难题仍普遍很低、但在快速上升"，不可当精确值。</p>
+  <div id="bar-hle"></div>
 
   <div class="note o" style="margin-top:34px">
     <div class="t">🚩 读指标的三条警惕（分享时务必提醒）</div>
@@ -59,39 +66,60 @@
 </div>
 
 <script>
+// 来源类型标签（悬停 ↗ 显示）
+const SRCLABEL = {arxiv:"一手来源：arXiv 论文", page:"溯源：本站该公司详情页（底部列全部一手来源）", ref:"溯源：本站来源汇总页"};
+function srcAnchor(d){
+  if(!d.src) return `<span style="font-family:var(--mono);font-size:13px;color:var(--fg)">${d.v}</span>`;
+  const ext = d.src.startsWith("http") ? ' target="_blank" rel="noopener"' : '';
+  const kind = d.src.startsWith("http") ? "arxiv" : (d.src.indexOf("references")>=0 ? "ref" : "page");
+  return `<a href="${d.src}"${ext} title="${SRCLABEL[kind]}" style="font-family:var(--mono);font-size:13px;color:var(--fg);text-decoration:none">${d.v}<span style="color:var(--accent);font-size:11px"> ↗</span></a>`;
+}
 function bars(mountId, data, unit){
   const max = Math.max(...data.map(d=>d.v));
   const rows = data.map(d=>{
     const w = (d.v/max*100).toFixed(1);
-    return `<div style="display:grid;grid-template-columns:200px 1fr 56px;align-items:center;gap:10px;margin:7px 0">
+    return `<div style="display:grid;grid-template-columns:210px 1fr 64px;align-items:center;gap:10px;margin:7px 0">
       <div style="font-size:13px;color:var(--fg-dim);text-align:right">${d.n}</div>
       <div style="background:#0b0f18;border-radius:7px;overflow:hidden;height:24px;border:1px solid var(--border-s)">
         <div style="width:${w}%;height:100%;background:linear-gradient(90deg,${d.c||'#6ea8fe'},${d.c||'#6ea8fe'}bb);border-radius:7px"></div>
       </div>
-      <div style="font-family:var(--mono);font-size:13px;color:var(--fg)">${d.v}${unit}</div>
+      <div>${srcAnchor(d)}${unit}</div>
     </div>`;
   }).join("");
   document.getElementById(mountId).innerHTML = rows;
 }
+// 已核实 arXiv 来源（同 references 页）；闭源/自评 → 链本站详情页；混合/近似 → 来源汇总页
 bars("bar-mmlu",[
-  {n:"GPT-3 (2020)",v:43.9,c:"#10a37f"},
-  {n:"GPT-4 (2023)",v:86.4,c:"#10a37f"},
-  {n:"GPT-4o (2024)",v:88.7,c:"#10a37f"},
-  {n:"Gemini Ultra / Claude Opus 4.5",v:90.0,c:"#4285f4"},
+  {n:"GPT-3 (2020)",v:43.9,c:"#10a37f",src:"https://arxiv.org/abs/2005.14165"},
+  {n:"GPT-4 (2023)",v:86.4,c:"#10a37f",src:"01-openai-gpt.html"},
+  {n:"GPT-4o (2024)",v:88.7,c:"#10a37f",src:"01-openai-gpt.html"},
+  {n:"Gemini Ultra / Claude Opus 4.5",v:90.0,c:"#4285f4",src:"references.html"},
 ],"%");
 bars("bar-gpqa",[
-  {n:"Claude 3 Opus (2024)",v:50.4,c:"#d97757"},
-  {n:"Gemini 2.5 Pro (2025)",v:84.0,c:"#4285f4"},
-  {n:"Gemini 3 Pro (2026)",v:91.9,c:"#4285f4"},
-  {n:"Qwen3.8-Max (自评)",v:92.6,c:"#a855f7"},
-  {n:"GPT-5.6 / Opus 5 (~)",v:94.0,c:"#10a37f"},
+  {n:"Claude 3 Opus (2024)",v:50.4,c:"#d97757",src:"02-anthropic-claude.html"},
+  {n:"Gemini 2.5 Pro (2025)",v:84.0,c:"#4285f4",src:"03-google-gemini.html"},
+  {n:"Gemini 3 Pro (2026)",v:91.9,c:"#4285f4",src:"03-google-gemini.html"},
+  {n:"Qwen3.8-Max (自评)",v:92.6,c:"#a855f7",src:"05-alibaba-qwen.html"},
+  {n:"GPT-5.6 / Opus 5 (~)",v:94.0,c:"#10a37f",src:"references.html"},
+],"%");
+bars("bar-aime",[
+  {n:"GPT-4o (2024)",v:13.4,c:"#10a37f",src:"01-openai-gpt.html"},
+  {n:"o1 (2024)",v:79.2,c:"#10a37f",src:"https://arxiv.org/abs/2501.12948"},
+  {n:"DeepSeek R1 (2025)",v:79.8,c:"#4d6bfe",src:"https://arxiv.org/abs/2501.12948"},
+  {n:"前沿 2026 (~)",v:94.0,c:"#a855f7",src:"references.html"},
 ],"%");
 bars("bar-swe",[
-  {n:"Claude 3.5 Sonnet (2024)",v:33.4,c:"#d97757"},
-  {n:"Claude Opus 4 (2025)",v:72.5,c:"#d97757"},
-  {n:"GPT-5 (2025)",v:74.9,c:"#10a37f"},
-  {n:"Claude Opus 4.8 (2026)",v:88.6,c:"#d97757"},
-  {n:"Fable5 / Opus5 (~)",v:95.0,c:"#d97757"},
+  {n:"Claude 3.5 Sonnet (2024)",v:33.4,c:"#d97757",src:"02-anthropic-claude.html"},
+  {n:"Claude Opus 4 (2025)",v:72.5,c:"#d97757",src:"02-anthropic-claude.html"},
+  {n:"GPT-5 (2025)",v:74.9,c:"#10a37f",src:"01-openai-gpt.html"},
+  {n:"Claude Opus 4.8 (2026)",v:88.6,c:"#d97757",src:"02-anthropic-claude.html"},
+  {n:"Fable5 / Opus5 (~)",v:95.0,c:"#d97757",src:"references.html"},
+],"%");
+bars("bar-hle",[
+  {n:"GPT-4o (2024, ~)",v:3,c:"#10a37f",src:"01-openai-gpt.html"},
+  {n:"o1 / R1 (2025, ~)",v:9,c:"#4d6bfe",src:"references.html"},
+  {n:"Gemini Deep Think 级 (2025, ~)",v:20,c:"#4285f4",src:"references.html"},
+  {n:"前沿 2026 (~)",v:26,c:"#d2a8ff",src:"references.html"},
 ],"%");
 </script>
 </body>
