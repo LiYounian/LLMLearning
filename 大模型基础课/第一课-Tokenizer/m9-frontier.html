@@ -3,24 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>前沿趋势 | 第一课 Tokenizer</title>
+<title>前沿：tokenizer-free / 动态分块 | 第一课 Tokenizer</title>
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
 <div class="topbar"><div class="inner">
   <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
   <nav>
-    <a href="index.html">目录</a><a href="01-why.html">为什么分词</a>
-    <a href="02-history.html">历代方法</a><a href="03-bpe.html">BPE 详解</a>
-    <a href="04-wordpiece-unigram.html">WordPiece/Unigram</a><a href="05-byte-level.html">字节级</a>
-    <a href="06-models.html">主流模型</a><a href="07-frontier.html" class="active">前沿</a><a href="08-token-compare.html">切词对比</a><a href="references.html">参考文献</a>
+    <a href="index.html">目录</a>
+    <a href="why.html">为什么分词</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="compare.html">切词对比</a>
+    <a href="references.html">参考文献</a>
   </nav>
 </div></div>
 
 <div class="wrap page">
-  <div class="breadcrumb"><a href="index.html">目录</a> / 07 前沿趋势</div>
-  <h1>前沿：大模型正在"抛弃分词器"吗？</h1>
-  <p class="lead">分词器被越来越多研究者称为"大模型流水线里最后一个 hack"——一个<b>独立、不可微、单独统计训练</b>的预处理阶段，硬焊在一个本该端到端学习的模型前面。这一节讲清它的病根、正在替代它的技术，以及 2026 年的真实现状。</p>
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / 前沿趋势</div>
+  <div class="method-head">
+    <span class="yr-badge">2021–2025 · 研究前沿</span>
+    <h1>前沿：大模型正在"抛弃分词器"吗？</h1>
+    <p class="lead">分词器被越来越多研究者称为"大模型流水线里最后一个 hack"——一个<b>独立、不可微、单独统计训练</b>的预处理阶段，硬焊在一个本该端到端学习的模型前面。这一节讲清它的病根、正在替代它的技术，以及 2026 年的真实现状。</p>
+    <div class="usedby"><span class="lbl">代表工作：</span>
+      <span class="mbadge dim">ByT5 · CANINE</span>
+      <span class="mbadge meta">MegaByte · BLT</span>
+      <span class="mbadge dim">MambaByte · H-Net</span>
+      <span class="mbadge dim">T-FREE · SuperBPE</span>
+    </div>
+  </div>
 
   <h2>① 病根：为什么说分词器是"最后一个 hack"</h2>
   <p>Karpathy 那句广为流传的话点破了要害：<b>相当一部分大模型的"抽风"，是分词器的错，不是模型的错</b><span class="cite" title="Karpathy, Let's build the GPT Tokenizer">[1]</span>。具体症状：</p>
@@ -87,7 +98,7 @@
     <li><b>H-Net（2025，革命派）</b>：最激进——<b>在模型内部端到端学出字节分块</b>，靠可微的"动态分块"，不要熵模型、不要启发式、不要外部分词器。算力/数据对齐下，单层 H-Net <b>超过强 BPE Transformer</b>，字符鲁棒性大涨；是 MambaByte/BLT 的自然接班人。<span class="cite" title="Hwang, Wang & Gu 2025, H-Net">[15]</span></li>
   </ul>
 
-  <h2>⑥ 总轨迹 & 2026 年真实现状</h2>
+  <h2>⑥ 总轨迹 &amp; 2026 年真实现状</h2>
   <pre><code>词级        （词表小，OOV 灾难）
   ↓
 字符级      （无 OOV，但序列长、语义薄）
@@ -105,8 +116,8 @@
   </div>
 
   <div class="pagenav">
-    <a href="06-models.html"><div class="lbl">← 上一节</div><div class="ttl">主流大模型对比</div></a>
-    <a class="next" href="08-token-compare.html"><div class="lbl">下一节 →</div><div class="ttl">tiktoken 切词对比</div></a>
+    <a href="m8-tiktoken.html"><div class="lbl">← 上一节</div><div class="ttl">tiktoken 与大词表时代</div></a>
+    <a class="next" href="models.html"><div class="lbl">下一节 →</div><div class="ttl">模型 × 方法 矩阵</div></a>
   </div>
 </div>
 </body>

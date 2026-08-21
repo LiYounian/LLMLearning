@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WordPiece | 第一课 Tokenizer</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="why.html">为什么分词</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="compare.html">切词对比</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / WordPiece</div>
+  <div class="method-head">
+    <span class="yr-badge">2012 提出 · 2018 因 BERT 走红</span>
+    <h1>WordPiece</h1>
+    <p class="lead">和 BPE 一样自底向上合并，但不看"频次"看"似然增益"——合并那个让训练语料似然提升最多的对。</p>
+    <div class="usedby"><span class="lbl">被这些模型使用：</span><span class="mbadge google">BERT</span><span class="mbadge google">DistilBERT</span><span class="mbadge google">ELECTRA</span><span class="mbadge google">MobileBERT</span></div>
+  </div>
+
+  <h2>出身与论文</h2>
+  <p>WordPiece 最早出现在 Google 的语音搜索工作里，是为了解决日语、韩语这类"没有空格分词"的语言的建模问题，和今天 NLP 里的用法初衷略有不同。真正让它家喻户晓的，是 2018 年底发布的 BERT——BERT 用的正是 WordPiece。</p>
+  <dl class="kv">
+    <dt>提出年份</dt><dd>2012 年（ICASSP）</dd>
+    <dt>原始作者</dt><dd>Mike Schuster、Kaisuke Nakajima（Google）</dd>
+    <dt>原始论文</dt><dd><em>Japanese and Korean Voice Search</em>, ICASSP 2012, pp. 5149–5152 <a href="https://research.google/pubs/pub37842/" target="_blank">research.google/pubs/pub37842</a> <span class="cite" title="Schuster &amp; Nakajima (2012), Japanese and Korean Voice Search, ICASSP">[1]</span></dd>
+    <dt>发扬光大</dt><dd>Devlin, Chang, Lee, Toutanova (2019), <em>BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding</em>, NAACL <a href="https://arxiv.org/abs/1810.04805" target="_blank">arXiv:1810.04805</a> <span class="cite" title="Devlin et al. (2019), BERT, NAACL">[2]</span></dd>
+    <dt>核心思想</dt><dd>和 BPE 同属"自底向上、逐步合并"的家族，但每一步合并的选择标准不是"哪个相邻对出现最频繁"，而是"合并哪个对能让整个训练语料在一元语言模型（unigram LM）下的似然提升最多"。</dd>
+  </dl>
+  <div class="note">
+    <div class="t">一句话定位</div>
+    WordPiece = BPE 的"合并框架" + 换一个更聪明的打分公式。整套流程和 BPE 几乎一样，唯一的实质差别就在于"选哪个对来合并"。
+  </div>
+
+  <h2>核心算法</h2>
+  <p>先说贯穿全篇的关键——<strong>选择准则</strong>。BPE 每一步选的是频次最高的相邻对，即最大化 <code>freq(ab)</code>；WordPiece 选的是让下面这个分数最大的对：</p>
+  <pre><code>score(a, b) = freq(ab) / ( freq(a) · freq(b) )</code></pre>
+  <p>其中 <code>freq(ab)</code> 是相邻对 <code>a b</code> 一起出现的次数，<code>freq(a)</code>、<code>freq(b)</code> 是两个片段各自单独出现的次数。这个分数的含义是：<strong>只有当 a 和 b "凑在一起的概率" 远高于 "各自独立时碰巧相邻的概率" 时，分数才高。</strong>换句话说，它会<strong>惩罚那些本身就很常见的片段</strong>——一个到处都是的高频片段（<code>freq</code> 很大）会把分母撑大，除非它和某个片段是"真·搭档"，否则不会被优先合并。这样合出来的往往是有意义的词素组合，而不是"因为都很常见所以经常相邻"的伪组合。</p>
+
+  <h3>为什么这个分数 = 似然增益</h3>
+  <p>用一元语言模型给语料建模：一个片段 <code>t</code> 的概率 <code>p(t) = freq(t) / Total</code>，一段切分的概率是各片段概率之积。把 <code>a</code>、<code>b</code> 合并成 <code>ab</code> 后，语料对数似然的变化，到一阶近似正比于：</p>
+  <pre><code>log p(ab) − log p(a) − log p(b)
+  = log[ freq(ab) · Total / ( freq(a) · freq(b) ) ] + 常数</code></pre>
+  <p>去掉与 (a,b) 无关的常数项，最大化它就等价于最大化 <code>freq(ab) / (freq(a)·freq(b))</code>。这正是上面那个 score。所以 WordPiece 那"一行公式的差别"，背后是"最大化语料似然增益"这个更干净的目标。<span class="cite" title="Schuster &amp; Nakajima (2012); Hugging Face LLM Course, WordPiece">[1]</span></p>
+
+  <h3>##  续接前缀约定</h3>
+  <p>WordPiece 用 <code>##</code> 前缀标记<strong>词内非首片段</strong>（continuation piece）：</p>
+  <ul>
+    <li><code>playing</code> → <code>play</code>, <code>##ing</code></li>
+    <li><code>unaffable</code> → <code>un</code>, <code>##aff</code>, <code>##able</code></li>
+  </ul>
+  <p>规则很明确：<strong>不带 <code>##</code> 的片段可以作为一个词的开头；带 <code>##</code> 的片段必须紧贴在前一个片段后面</strong>。这就是 WordPiece 编码词边界的方式。BERT 的词表 = 特殊符号（<code>[UNK] [CLS] [SEP] [MASK]</code>）+ 基础字符 + 一批带 <code>##</code> 和不带 <code>##</code> 的子词。还原文本时：把片段拼接、去掉 <code>##</code>，并在每个"裸片段（不带 ##）"前补一个空格。</p>
+  <div class="note g">
+    <div class="t">## 与 ▁ 恰好相反</div>
+    SentencePiece 用 <code>▁</code> 标记"这个片段<strong>前面有空格</strong>"（词首），WordPiece 的 <code>##</code> 则标记"这个片段<strong>前面没有空格</strong>"（词内续接）。一个标"有空格"，一个标"没空格"，方向正好相反。
+  </div>
+
+  <h3>训练算法（建词表）</h3>
+  <pre><code>输入：语料的词频表 {word: count}；目标词表大小 V
+输出：WordPiece 词表（含 ## 形式的片段）
+
+1. 初始化词表 = 所有基础字符。注意同一个字符要收两种形式：
+     词首形式（如 'p'）和词内形式（如 '##l', '##a', '##y' ...），
+     因为同一字符出现在词首和词内行为不同。
+2. 把每个词表示成上面这些（带 ## 标记的）字符片段序列。
+3. 重复，直到词表达到目标大小 V（或最高分低于阈值）：
+   a. 对当前所有相邻对 (a,b)，计算
+        score(a,b) = freq(ab) / ( freq(a) · freq(b) )。
+   b. 选分数最高的对，合并成一个新片段，加入词表。
+   c. 在所有词里同步把该相邻对替换为新片段。</code></pre>
+  <div class="note o">
+    <div class="t">一处需要坦白的不确定性</div>
+    Schuster–Nakajima 原论文把目标表述为"选让训练数据语言模型似然最大的合并"，但 Google 从未开源原始训练代码。上面 <code>freq(ab)/(freq(a)·freq(b))</code> 的具体公式是社区标准复现（与 Hugging Face 参考实现一致），Google 内部版本的细节可能略有出入。<span class="cite" title="Hugging Face LLM Course, chapter6/6, WordPiece step by step">[3]</span>
+  </div>
+
+  <h2>怎么切分（推理）</h2>
+  <p>这里是 WordPiece 与 BPE 的又一处显著不同。BPE 推理是"按学到的顺序重放合并列表"；WordPiece 推理是<strong>贪心最长匹配（greedy longest-match-first）</strong>：</p>
+  <pre><code>对一个词 W 分词：
+1. 从 W 的开头出发，找出"能在词表里查到的最长前缀"。
+     - 第一个片段用它的裸形式匹配；
+     - 后续片段必须以 "##..." 的形式存在于词表。
+2. 输出这个片段，把它从 W 前端切掉，对剩余部分重复（查 ## 形式）。
+3. 如果在任何一步，剩余串的任何前缀都不在词表里，
+     则整个词直接映射为 [UNK]。</code></pre>
+  <p>注意第 3 步：WordPiece 一旦有一小段切不动，就把<strong>整个词</strong>判成 <code>[UNK]</code>——不是只丢那一小段。这是它和字节级 BPE（BBPE 对任意输入都零 OOV）在"无 OOV 保证"上的一个真实差距。</p>
+
+  <h2>一个具体例子</h2>
+  <p>假设词表里含有 <code>un</code>, <code>##aff</code>, <code>##able</code>, <code>##a</code>, <code>##b</code> … 等片段，给 <code>unaffable</code> 分词：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>步骤</th><th>剩余待切</th><th>最长匹配片段</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td class="mono">unaffable</td><td class="mono">un</td><td>裸形式，在词表里最长的前缀是 <code>un</code></td></tr>
+      <tr><td>2</td><td class="mono">affable</td><td class="mono">##aff</td><td>词内，须查 ## 形式；最长匹配是 <code>##aff</code></td></tr>
+      <tr><td>3</td><td class="mono">able</td><td class="mono">##able</td><td>剩下 <code>able</code> 整段命中 <code>##able</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>最终结果：<code>[un, ##aff, ##able]</code>。三个片段拼回去（去掉 <code>##</code>）正好还原 <code>unaffable</code>。对比一下：BPE 面对同一个词会去"重放它的有序合并列表"，而不是这样从左到右做最长前缀查表——这就是两者推理机制的根本差异。</p>
+
+  <h2>与 BPE 的关键区别</h2>
+  <div class="note g">
+    <div class="t">一句话记住</div>
+    <strong>BPE 按 <code>freq(ab)</code> 选合并对；WordPiece 按 <code>freq(ab)/(freq(a)·freq(b))</code> 选。</strong>前者只问"谁最常相邻"，后者问"谁的相邻是真·搭档而非各自都太常见"。这一行公式，就是两个算法几乎全部的实质区别。
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>维度</th><th>BPE</th><th>WordPiece</th></tr></thead>
+    <tbody>
+      <tr><td>家族方向</td><td>自底向上合并</td><td>自底向上合并（同一家族）</td></tr>
+      <tr><td>选择准则</td><td class="mono">max freq(ab)</td><td class="mono">max freq(ab)/(freq(a)·freq(b))</td></tr>
+      <tr><td>准则含义</td><td>最频繁的相邻对</td><td>似然增益最大 = 惩罚"本身就常见"的片段</td></tr>
+      <tr><td>词边界标记</td><td>词尾 <code>&lt;/w&gt;</code>（或 SP 的 <code>▁</code>）</td><td>词内续接前缀 <code>##</code></td></tr>
+      <tr><td>推理方式</td><td>按有序合并列表重放</td><td>贪心最长前缀查表</td></tr>
+      <tr><td>无法切分时</td><td>字节级 BPE 保证零 OOV</td><td>整词 → <code>[UNK]</code></td></tr>
+      <tr><td>产物</td><td>有序合并列表 + 基础字母表</td><td>一张词表（含 ## 片段）</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>各自的取舍：</strong>WordPiece 基于似然的打分，往往能切出更"有信息量"的子词——它不会仅因为一个片段很常见、和什么都经常相邻，就贪婪地把它并进一切。代价有两点：一是推理是贪心最长匹配，局部可能不是最优；二是切不动就整词 <code>[UNK]</code>，无 OOV 保证不如字节级 BPE；三是训练目标本质仍是启发式，不是对整体切分做全局优化（这一点要留到下一节的 Unigram 才补上）。</p>
+
+  <h2>被哪些模型使用</h2>
+  <p>WordPiece 基本是"BERT 家族"的专属分词器：</p>
+  <div class="usedby">
+    <span class="mbadge google">BERT</span>
+    <span class="mbadge google">DistilBERT</span>
+    <span class="mbadge google">ELECTRA</span>
+    <span class="mbadge google">MobileBERT</span>
+  </div>
+  <p>这些几乎都是 Google 系的<strong>编码器（encoder）</strong>类模型，做的是理解类任务（分类、抽取、检索）。</p>
+  <div class="note o">
+    <div class="t">一个常被忽略的事实</div>
+    <strong>生成式的解码器模型（GPT、LLaMA 等）一般不用 WordPiece。</strong>它们绝大多数走的是字节级 BPE（BBPE）或 SentencePiece 路线——因为生成场景下"任意输入都不能变成 <code>[UNK]</code>、且要能无损还原"的要求，字节级方案满足得更彻底。所以你可以近似记：看到 <code>##</code> 前缀，多半是 BERT 系；看到 <code>▁</code> 或字节级 token，多半是 GPT/LLaMA 系。
+  </div>
+
+  <div class="note">
+    <div class="t">小结 · 承上启下</div>
+    WordPiece 把 BPE 的"数频次"升级成了"看似然增益"，用一条 <code>freq(ab)/(freq(a)·freq(b))</code> 的打分让合并更贴近真正的词素结构，并用 <code>##</code> 标记词内续接、用贪心最长匹配做推理。但它和 BPE 一样，仍是<strong>自底向上、一步步贪心</strong>的启发式，每个词也只有一种确定切分。下一节的 <a href="m5-unigram.html">Unigram 语言模型分词</a>会彻底反过来：先建一个大词表，再用 EM 算法自顶向下地"剪"，给每个 token 配上概率，让一个词可以有多种切分、甚至可以采样。
+  </div>
+
+  <div class="pagenav">
+    <a href="m3-bpe.html"><div class="lbl">← 上一节</div><div class="ttl">BPE 字节对编码</div></a>
+    <a class="next" href="m5-unigram.html"><div class="lbl">下一节 →</div><div class="ttl">Unigram 语言模型</div></a>
+  </div>
+</div>
+</body>
+</html>

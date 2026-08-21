@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>字符级分词 character-level | 第一课 Tokenizer</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="why.html">为什么分词</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="compare.html">切词对比</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / 字符级分词</div>
+  <div class="method-head">
+    <span class="yr-badge">2015 · 字符建模</span>
+    <h1>字符级分词（character-level）</h1>
+    <p class="lead">与词级正好相反的另一个极端：词表就是所有字符（几十到几千个，字节级更是固定 256 个）。它天生零 OOV、词表极小、语言无关；代价是序列极长、单个字符几乎不携带语义。</p>
+    <div class="usedby"><span class="lbl">代表使用者：</span><span class="mbadge dim">char-RNN</span><span class="mbadge dim">Character-Aware LM (Kim 2016)</span><span class="mbadge dim">(字节级后继见前沿)</span></div>
+  </div>
+
+  <h2>① 出身与论文</h2>
+  <p>字符级建模的想法很早就有，2015 年前后随着 RNN 语言模型的流行而成为一条明确的研究路线。代表工作是 Kim 等人的 <b>Character-Aware Neural Language Models</b><span class="cite" title="Kim, Jernite, Sontag, Rush (2016), Character-Aware Neural Language Models, AAAI">[1]</span>：模型直接吃字符，用 CNN 在字符序列上卷出词的表示，从而摆脱固定词表；以及 Ling 等人的 <b>Compositional Character Models</b><span class="cite" title="Ling et al. (2015), Finding Function in Form: Compositional Character Models for Open Vocabulary Word Representation, EMNLP">[2]</span>，用双向 LSTM 从字符组合出开放词汇的词向量。更早的 "char-RNN"（如 Karpathy 广为流传的教学实现）也属于这一族。</p>
+  <p>核心思想一句话：<b>不再把"词"当原子，而是把"字符"（或字节）当原子</b>——任何字符串都是这些原子的序列。既然词表就是字符全集，那么<b>按构造就不可能有 OOV</b>：再生僻的词，也不过是若干已知字符拼起来。</p>
+  <ul>
+    <li>Kim et al. (2016), <i>Character-Aware Neural Language Models</i>, AAAI. <a href="https://arxiv.org/abs/1508.06615">arXiv:1508.06615</a></li>
+    <li>Ling et al. (2015), <i>Finding Function in Form: Compositional Character Models for Open Vocabulary Word Representation</i>, EMNLP. <a href="https://arxiv.org/abs/1508.02096">arXiv:1508.02096</a></li>
+    <li>（后继：字节级端到端）Xue et al. (2022), <i>ByT5: Towards a Token-Free Future with Pre-trained Byte-to-Byte Models</i>, TACL. <a href="https://arxiv.org/abs/2105.13626">arXiv:2105.13626</a></li>
+  </ul>
+
+  <h2>② 它是怎么做的（训练/构建词表）</h2>
+  <p>字符级"训练"几乎是<b>平凡（trivial）</b>的——它不需要像 BPE 那样学合并、也不需要像 Unigram 那样跑 EM 剪枝：</p>
+  <ol>
+    <li><b>枚举字符</b>：扫一遍语料，收集其中出现过的所有不同字符，就是词表。对多语言 Unicode，字符表大小从几十到几千不等（含中日韩汉字时偏大）。</li>
+    <li><b>或直接固定 256 字节</b>：如果走<b>字节级</b>（byte-level），干脆把词表钉死为全部 <code>256</code> 个字节值——这时甚至<b>不需要任何训练语料</b>，词表是常量。</li>
+    <li><b>分配 ID</b>：给每个字符/字节一个整数 ID，建一张极小的 embedding 表。加上少量特殊符号（<code>&lt;PAD&gt;</code>/<code>&lt;BOS&gt;</code>/<code>&lt;EOS&gt;</code>）即可。</li>
+  </ol>
+  <div class="note g">
+    <div class="t">🔑 关键点：几乎不用"学"，词表天然完备</div>
+    词级要数频次砍长尾、subword 要迭代学合并，而字符级<b>什么都不用学</b>：字符全集本身就是一个封闭、完备的原子集合。这带来最强的覆盖保证，也埋下了序列长度的隐患。
+  </div>
+
+  <h2>③ 怎么切分（推理）</h2>
+  <p>切分同样平凡：</p>
+  <ol>
+    <li>把输入字符串<b>逐字符（或逐字节）</b>拆开，每个字符查表得到 ID。</li>
+    <li><b>遇到没见过的怎么办？</b>——本质上不存在这个问题。字符级下唯一可能"没见过"的是训练语料里没出现过的稀有字符；而<b>字节级把词表固定成 256 字节后，任何可能的输入（任意字节序列）都必然可表示，OOV 概率严格为零</b>。</li>
+    <li>还原（detokenize）是<b>无损拼接</b>：把字符/字节直接接起来就是原文，不需要任何去分词规则。整个过程<b>完全语言无关</b>，不需要 jieba/MeCab 之类的预分词器。</li>
+  </ol>
+
+  <h2>④ 一个具体例子</h2>
+  <p>对比同一句英文在词级与字符级下的切法（<code>␣</code> 表示空格也会占一个字符）：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>粒度</th><th>切分 <code>lower</code></th><th>token 数</th></tr></thead>
+    <tbody>
+      <tr><td>词级</td><td><code>lower</code></td><td>1</td></tr>
+      <tr><td>字符级</td><td><code>l · o · w · e · r</code></td><td>5</td></tr>
+    </tbody>
+  </table></div>
+  <p>再看一个词级会崩、字符级毫发无伤的例子。生造词 <code>antidisestablish</code> 在词级词表里必然是 <code>&lt;UNK&gt;</code>；在字符级下则被老老实实拆成 <code>a·n·t·i·d·i·s·e·s·t·a·b·l·i·s·h</code>（16 个 token），信息一点没丢——但一个 16 字符的词就吃掉了 16 个位置。中文 <code>「跑步」</code> 则被切成 <code>跑 · 步</code> 两个字，无需任何预分词器，但每个字单独看语义都很稀薄。这就是字符级的双面性：<b>零 OOV 的完备</b> 与 <b>序列暴涨 + 语义稀释</b> 是同一枚硬币的两面。</p>
+
+  <h2>⑤ 优缺点与权衡</h2>
+  <p>同样放到四个维度（词表大小 / 序列长度 / OOV / 语义）上看，字符级几乎处处与词级相反：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>维度</th><th>字符级的表现</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><b>词表大小</b></td><td>✅ 极小</td><td>几十到几千（字节级恰好 256）→ embedding 表小、softmax 便宜。</td></tr>
+      <tr><td><b>OOV / 覆盖</b></td><td>✅ 零 OOV</td><td>任何脚本、emoji、拼写错误、代码、混合语言都能表示；字节级对任意输入严格零 OOV。</td></tr>
+      <tr><td><b>序列长度</b></td><td>❌ 极长</td><td>英文单词平均约 4~5 个字符，序列长度约为词级的 <b>4~5 倍</b>。自注意力开销 <b>O(n²)</b>，代价高，且有效上下文窗口被稀释（装得下的"真实词数"变少）。</td></tr>
+      <tr><td><b>语义</b></td><td>❌ 稀薄</td><td>单个字符几乎不携带意义，把字符组装成词素、词的重担<b>全压给模型</b>——需要更多层、更多参数、更多数据，才能学到 subword 免费送的东西；长距离依赖（跨很多步记住拼写）也更难。</td></tr>
+    </tbody>
+  </table></div>
+  <p>一句话概括这场交易：<b>字符级用"每 token 语义"和"序列效率"，去彻底换取"零 OOV"和"极小词表"</b>。它把词级最擅长的（语义、短序列）全部让出，把词级最短板的（覆盖、词表）做到满分——正好是光谱的另一端。</p>
+
+  <h2>⑥ 被哪些模型使用</h2>
+  <p>字符级主要活跃在 2015 年前后的研究型模型里：</p>
+  <ul>
+    <li><b>char-RNN</b>：直接在字符序列上跑 RNN 的语言模型，教学与研究里极常见。</li>
+    <li><b>Character-Aware Neural LM</b>（Kim 2016）：用字符 CNN 构造词表示，无固定词表。</li>
+    <li><b>Compositional Character Models</b>（Ling 2015）：字符 LSTM 组合出开放词汇的词向量。</li>
+    <li>优点鲜明：<b>零 OOV、词表小、语言无关</b>；缺点也鲜明：序列约为词级的 <b>4~5 倍</b>（注意力 O(n²) 吃不消）、单 token 语义弱。</li>
+  </ul>
+  <div class="note o">
+    <div class="t">⚠️ 主流生产 LLM 不用纯字符级</div>
+    正因为序列过长、语义太弱，主流生产级大模型<b>没有</b>采用纯字符级分词。但它的思想并未消失——在<b>字节级</b>（byte-level BPE，GPT-2 起的主流做法）和前沿的 <b>tokenizer-free</b> 路线（如 ByT5 直接吃字节）里"复活"了：保留字符/字节的零 OOV 与语言无关，同时用别的手段压序列长度。详见<a href="references.html">前沿与参考</a>。
+  </div>
+
+  <h2>⑦ 小结</h2>
+  <div class="note p">
+    <div class="t">📝 一句话小结 & 承上启下</div>
+    字符级和词级是同一条光谱的<b>两极</b>：词级"语义好、覆盖差、序列短、词表大"，字符级"覆盖满、语义弱、序列长、词表小"。两极都不好用，真正的赢家是被"谈判"出来的<b>中间地带</b>——subword。<a href="m3-bpe.html">下一页的 BPE（字节对编码）</a>就是这个中间地带最经典的算法：小而够用的词表、无 OOV，又能把序列压回接近词级的长度。
+  </div>
+
+  <div class="pagenav">
+    <a href="m1-word.html"><div class="lbl">← 上一节</div><div class="ttl">词级分词</div></a>
+    <a class="next" href="m3-bpe.html"><div class="lbl">下一节 →</div><div class="ttl">BPE 字节对编码</div></a>
+  </div>
+</div>
+</body>
+</html>

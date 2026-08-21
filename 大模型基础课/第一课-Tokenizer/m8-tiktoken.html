@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>tiktoken 与大词表时代 | 第一课 Tokenizer</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="why.html">为什么分词</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="compare.html">切词对比</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / tiktoken · 大词表</div>
+  <div class="method-head">
+    <span class="yr-badge">2022–2024 · 大词表时代</span>
+    <h1>tiktoken 与"大词表"时代</h1>
+    <p class="lead">算法还是字节级 BPE，但工程上进入了「大词表」竞赛——从 GPT-2 的 5 万，一路涨到 GPT-4o 的约 20 万、Gemma 的 25.6 万；同时预切分正则也在进化（如数字按 1–3 位分组）。</p>
+    <div class="usedby"><span class="lbl">被这些模型使用：</span><span class="mbadge gpt">GPT-3.5/4 cl100k</span><span class="mbadge gpt">GPT-4o o200k</span><span class="mbadge qwen">Qwen 152k</span><span class="mbadge ds">DeepSeek 128k</span><span class="mbadge meta">Llama3 128k</span><span class="mbadge google">Gemma 256k</span></div>
+  </div>
+
+  <h2>① 出身：tiktoken 是 OpenAI 的 BPE 实现库</h2>
+  <p>先厘清一点：<b>tiktoken 不是新算法</b>。它是 OpenAI 开源的一个高性能 <b>字节级 BPE（BBPE）</b>实现库，Rust 内核 + Python 绑定，仓库在 <code>github.com/openai/tiktoken</code>。算法内核就是<a href="m7-bbpe.html">上一节</a>的字节级 BPE（256 字节起步、正则预切分、无 unk）——tiktoken 提供的是「怎么把它跑得又快又标准」，以及一套命名好的 <b>encoding</b>（词表 + 预切分正则的组合）。这一节真正的主角，是这套 encoding 背后的一个清晰历史趋势：<b>词表一路变大</b>。</p>
+
+  <h2>② 核心机制：encoding 的演进</h2>
+  <p>OpenAI 全系模型都用 tiktoken，不同世代对应不同的 encoding。三个里程碑（数据以 tiktoken 源码 <code>openai_public.py</code> 为准<span class="cite" title="tiktoken 仓库 tiktoken_ext/openai_public.py，含各 encoding 的 pat_str 与 special tokens">[1]</span>）：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>encoding</th><th>对应模型</th><th>词表（约）</th><th>预切分正则的关键变化</th></tr></thead>
+    <tbody>
+      <tr><td><code>r50k_base</code>（旧名 <code>gpt2</code>）</td><td>GPT-2 / GPT-3</td><td><b>50,257</b><br><span style="opacity:.7">= 256 字节 + 50,000 merges + 1 个 <code>&lt;|endoftext|&gt;</code></span></td><td>缩写 / 字母段 / 数字段 / 标点段 / 空白段分开；<b>不</b>做数字逐位拆分</td></tr>
+      <tr><td><code>cl100k_base</code></td><td>GPT-3.5 / GPT-4</td><td><b>约 10 万</b><br><span style="opacity:.7">基础 ranks 100,256，含特殊 token 约 100,277</span></td><td>正则升级：<b>数字按 1–3 位分组</b>（<code>\p{N}{1,3}</code>，抑制超长数字 token）；缩写大小写不敏感；连续空白 / 换行处理更细</td></tr>
+      <tr><td><code>o200k_base</code></td><td>GPT-4o / o 系列（o1、o3）</td><td><b>约 20 万</b><br><span style="opacity:.7">基础 ranks 199,998，含特殊 token 约 200,019</span></td><td>正则进一步针对<b>多语言与 CJK</b> 优化；数字分组沿用；非英文压缩率显著提升</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="note o">
+    <div class="t">⚠️ 为什么词表数总是「对不上」？</div>
+    你会在网上看到 cl100k 被写成 100,256、100,277、"100k"，o200k 被写成 199,998、200,000、200,019……这些差异几乎都来自<b>「是否把特殊 token（如 <code>&lt;|endoftext|&gt;</code>、FIM 三件套、<code>&lt;|endofprompt|&gt;</code>）算进去」</b>。以 tiktoken 源码为准：cl100k_base 基础 mergeable ranks 是 100,256、含特殊约 100,277；o200k_base 基础 199,998、含特殊约 200,019。<b>课件里写「约 10 万 / 约 20 万」最稳妥</b>，不要纠结个位数。同理 Qwen 的 151,643 / 151,936 / 152,064 三个数分别是「BPE 常规 token 数 / embedding 补齐后 / config 里的 vocab_size」，也是口径不同。
+  </div>
+
+  <h3>大词表趋势：一张时间线</h3>
+  <p>把主流模型的词表按大小排一排，能清楚看到这个旋钮在过去几年整体右移：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>词表量级</th><th>代表模型</th><th>年代 / 说明</th></tr></thead>
+    <tbody>
+      <tr><td>~50k</td><td>GPT-2 / GPT-3</td><td>2019–2020，英文语料学出，非英文「税」重</td></tr>
+      <tr><td>~100k</td><td>GPT-3.5 / GPT-4（cl100k）</td><td>2022–2023，数字 1–3 位分组</td></tr>
+      <tr><td>128k</td><td>Llama 3 / DeepSeek-V3</td><td>Llama 3 = 128,256；DeepSeek-V3 = 128,000</td></tr>
+      <tr><td>152k</td><td>Qwen</td><td>BPE 常规 token 151,643，embedding 补到 151,936</td></tr>
+      <tr><td>160k</td><td>Kimi K2</td><td>约 16 万，面向 agentic / 长上下文</td></tr>
+      <tr><td>200k</td><td>GPT-4o（o200k）</td><td>2024，多语言 / CJK 压缩优化</td></tr>
+      <tr><td>256k</td><td>Gemma / Gemini</td><td>SentencePiece 超大词表</td></tr>
+    </tbody>
+  </table></div>
+  <p>约 5 年时间，主流词表放大了 <b>4–5 倍</b>（50k → 256k）。</p>
+
+  <h2>③ 为什么要更大的词表？</h2>
+  <p>一句话：<b>词表越大 → 压缩率越好 → 同样一段文本 token 数更少</b>。高频的子词、整词、甚至短语能被并成单个 token。这带来三重直接收益：</p>
+  <ul>
+    <li><b>省算力</b>：序列更短，而注意力是 O(n²)，token 数下降对训练 / 推理成本是超线性的节省。</li>
+    <li><b>上下文更经用</b>：同样的 context window（比如 128k token）能装下更多真实内容。</li>
+    <li><b>API 更便宜</b>：按 token 计费时，压缩率好直接等于账单便宜。</li>
+  </ul>
+  <p>而且<b>多语言 / 中文·CJK / 代码受益最大</b>。早期 50k 词表主要按英文语料学出，一个汉字常被切成 2–3 个字节 token，非英文成本极高；扩大词表并纳入多语言语料后，中文可做到约 <b>1 token ≈ 1.5–1.8 个汉字</b>（Qwen），代码里常见的缩进、关键字、符号组合也能整体成一个 token。这正是 Llama 3、DeepSeek-V3、Qwen、Kimi 把词表推到 128k–160k 的主因。</p>
+
+  <h2>④ 为什么不无限大？（代价与权衡）</h2>
+  <ul>
+    <li><b>embedding / 输出层参数线性膨胀</b>：embedding 参数量 = 词表大小 × hidden_dim，输出层（LM head）还要再来一份。词表从 32k 涨到 256k 是 8×，对中小模型这块占比可能高得离谱（如 Gemma-2B 的 embedding 就吃掉了模型相当比例的参数），显存和参数预算被挤占。</li>
+    <li><b>稀有 token 训练不足（glitch token）</b>：词表越大，长尾 token 出现频率越低，训练中见得少、embedding 学不透。这些「未充分训练 token」会触发异常行为——最著名的是 <b><code>SolidGoldMagikarp</code></b> 现象（某些几乎没被训练过的 token 会让模型胡言乱语 / 拒答）；DeepSeek-V3/r1 也被报告存在类似异常 token。</li>
+    <li><b>收益递减</b>：压缩率随词表增长是<b>次线性</b>的——32k → 128k 提升明显，再往上边际收益变小，而参数成本、稀有 token 风险却持续上升。</li>
+  </ul>
+  <div class="note g">
+    <div class="t">🔑 当前的甜蜜区间</div>
+    在「压缩率」与「embedding 成本 + 稀有 token 可训练性」之间取折中，<b>当前主流落在 128k–256k</b>。词表大小本质是一个「压缩率 ↔ 参数量 / 可训练性」的权衡旋钮；过去几年因为多语言、代码需求和算力允许，整体右移到了 10 万–25 万量级，但不会无限右移。
+  </div>
+
+  <h2>⑤ 被哪些模型使用</h2>
+  <p>tiktoken 的 encoding 直接对应 OpenAI 各代模型：</p>
+  <ul>
+    <li><span class="mbadge gpt">cl100k_base</span> → <b>GPT-3.5 / GPT-4</b></li>
+    <li><span class="mbadge gpt">o200k_base</span> → <b>GPT-4o / o 系列（o1、o3 等）</b></li>
+  </ul>
+  <p>而更重要的是，「<b>tiktoken 风格的字节级大词表</b>」已经成为开源 / 国产模型的主流范式，纷纷放弃早期的 SentencePiece 路线：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>模型</th><th>词表</th><th>路线</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mbadge qwen">Qwen 1/2/2.5/3</span></td><td>约 15.2 万（BPE 151,643）</td><td>tiktoken 风格 BBPE，官方明确在 UTF-8 字节上跑 BPE、用 tiktoken 高性能包<span class="cite" title="Qwen 技术报告 arXiv:2309.16609；tokenization_note.md">[7]</span></td></tr>
+      <tr><td><span class="mbadge ds">DeepSeek-V3</span></td><td>128,000（config 129,280）</td><td>字节级 BPE，V3 相比 V2（100k）扩到 128k，并处理换行 / 标点合并 token 的边界偏置<span class="cite" title="DeepSeek-V3 arXiv:2412.19437">[8]</span></td></tr>
+      <tr><td><span class="mbadge meta">Llama 3 / 3.1</span></td><td>128,256</td><td>从 Llama 2 的 SentencePiece-BPE(32k) 改用 <b>tiktoken 风格</b>，在 10 万基础 encoding 上扩 28,672 个多语言 / 代码 token<span class="cite" title="Llama 3 arXiv:2407.21783 §Tokenizer">[11]</span></td></tr>
+      <tr><td><span class="mbadge dim">Kimi K2</span></td><td>约 16 万（160,000）</td><td>regex 预切分 + 字节级 BPE，与 tiktoken/GPT-4 风格一致<span class="cite" title="Kimi K2 arXiv:2507.20534">[12]</span></td></tr>
+    </tbody>
+  </table></div>
+  <p>各家的精确数字、口径差异与来源，详见<a href="models.html">「模型 × 方法」</a>页。</p>
+
+  <div class="note">
+    <div class="t">📎 小结 &amp; 承上启下</div>
+    tiktoken 本身没有改变算法——它仍是字节级 BPE；它标记的是一个<b>工程趋势</b>：词表从 5 万一路扩到 128k–256k，换来更好的压缩率（省算力、上下文更经用、API 更便宜），多语言与代码收益最大。但词表不能无限大：embedding / 输出层线性膨胀、稀有 token 训练不足（glitch token）、收益递减，把甜蜜区间钉在了 128k–256k。<br>
+    那么下一个问题自然浮现：<b>词表还能更大吗？还是干脆不要分词器？</b>字节 / 字符级端到端模型（ByT5、字节潜变量等）能否绕开这整套权衡？这正是<a href="m9-frontier.html">前沿趋势</a>一节要探讨的。
+  </div>
+
+  <div class="pagenav">
+    <a href="m7-bbpe.html"><div class="lbl">← 上一节</div><div class="ttl">字节级 BPE</div></a>
+    <a class="next" href="m9-frontier.html"><div class="lbl">下一节 →</div><div class="ttl">前沿趋势</div></a>
+  </div>
+</div>
+</body>
+</html>

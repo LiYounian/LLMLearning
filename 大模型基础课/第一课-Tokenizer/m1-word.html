@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>词级分词 word-level | 第一课 Tokenizer</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="why.html">为什么分词</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="compare.html">切词对比</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / 词级分词</div>
+  <div class="method-head">
+    <span class="yr-badge">2013 · word2vec 时代</span>
+    <h1>词级分词（word-level）</h1>
+    <p class="lead">最直觉的分词方式：按空格与标点把句子切成一个个词，每个词就是一个 token。思路简单、语义最清楚，却饱受 OOV（未登录词）与超大词表两大痼疾之苦，是现代大模型集体弃用的"反面教材"。</p>
+    <div class="usedby"><span class="lbl">代表使用者：</span><span class="mbadge dim">word2vec</span><span class="mbadge dim">GloVe</span><span class="mbadge dim">早期 seq2seq NMT</span></div>
+  </div>
+
+  <h2>① 出身与论文</h2>
+  <p>词级分词没有单一"发明人"——它是把文本切成词这件事在 NLP 里最自然、最古老的默认做法。真正让它成为深度学习标配的，是 2013 年前后的一批工作：Mikolov 等人的 <b>word2vec</b><span class="cite" title="Mikolov, Sutskever, Chen, Corrado, Dean (2013), Distributed Representations of Words and Phrases and their Compositionality, NeurIPS">[1]</span> 把每个词映射成一个稠密向量；斯坦福的 <b>GloVe</b> 走的也是"一个词一个向量"的路子。随后第一波神经机器翻译（NMT）——Sutskever 等人的 seq2seq<span class="cite" title="Sutskever, Vinyals, Le (2014), Sequence to Sequence Learning with Neural Networks, NeurIPS">[2]</span> 与 Bahdanau 等人的注意力翻译<span class="cite" title="Bahdanau, Cho, Bengio (2015), Neural Machine Translation by Jointly Learning to Align and Translate, ICLR">[3]</span>——同样以词为基本单位。</p>
+  <p>核心思想只有一句：<b>把语言看成词的序列，每个不同的词形（surface word）当作一个不可再分的原子符号</b>，为它单独分配一个整数 ID 和一行 embedding 向量。模型的全部输入输出都在这套固定词表上进行。</p>
+  <ul>
+    <li>Mikolov et al. (2013), <i>Distributed Representations of Words and Phrases and their Compositionality</i>, NeurIPS. <a href="https://arxiv.org/abs/1310.4546">arXiv:1310.4546</a></li>
+    <li>Sutskever et al. (2014), <i>Sequence to Sequence Learning with Neural Networks</i>, NeurIPS. <a href="https://arxiv.org/abs/1409.3215">arXiv:1409.3215</a></li>
+    <li>Bahdanau et al. (2015), <i>Neural Machine Translation by Jointly Learning to Align and Translate</i>, ICLR. <a href="https://arxiv.org/abs/1409.0473">arXiv:1409.0473</a></li>
+  </ul>
+
+  <h2>② 它是怎么做的（训练/构建词表）</h2>
+  <p>词级分词几乎没有"学习"的成分，构建词表是一套确定的统计流程，四步即可复现：</p>
+  <ol>
+    <li><b>预分词 / 切分（pre-tokenize）</b>：先把语料切成词。英文这类有空格的语言，用规则或正则的分词器完成——例如 Moses 的 <code>tokenizer.perl</code> 或 Penn Treebank 分词器：按空格切，再把标点从词上"剥"下来（<code>don't</code> → <code>do</code> <code>n't</code>，<code>end.</code> → <code>end</code> <code>.</code>）。中文、日文、泰文等<b>没有空格</b>（scriptio continua）的语言，必须先额外上一个独立的分词器作为预处理，如 <code>jieba</code>（中文）、<code>MeCab</code>（日文）、<code>KyTea</code>。</li>
+    <li><b>统计词频</b>：数一遍整个语料，统计每个不同词形（word type）出现了多少次。</li>
+    <li><b>截断词表</b>：只保留频次最高的前 <code>V</code> 个词（NMT 常见 <code>V = 3 万 ~ 8 万</code>，个别系统上到 50 万）。剩下所有低频词一律映射到同一个特殊符号 <code>&lt;UNK&gt;</code>（unknown）。再补上其它特殊符号：<code>&lt;UNK&gt;</code>、<code>&lt;PAD&gt;</code>（补齐）、<code>&lt;BOS&gt;</code>/<code>&lt;EOS&gt;</code>（句首/句尾）。</li>
+    <li><b>分配 ID、建 embedding 矩阵</b>：给每个保留的词一个整数 ID，据此建立形状为 <code>V × d</code> 的 embedding 表（<code>d</code> 是向量维度）。</li>
+  </ol>
+
+  <div class="note g">
+    <div class="t">🔑 关键点：词表是"数出来"的，不是"学出来"的</div>
+    与后来的 BPE/WordPiece/Unigram 不同，词级分词没有任何合并或剪枝的迭代过程。它只做一件事——<b>数频次、砍长尾</b>。这既是它简单的原因，也是它一切毛病的根源：词表边界是硬切的，一刀切完就再也没有回旋余地。
+  </div>
+
+  <h2>③ 怎么切分（推理）</h2>
+  <p>推理时跑<b>完全相同</b>的预分词器，把句子切成词，然后逐词在词表字典里查 ID：</p>
+  <ol>
+    <li>用与训练一致的规则/分词器（英文正则、中文 jieba…）把新文本切成词序列。</li>
+    <li>每个词去词表里查：查得到 → 用它的 ID；<b>查不到</b>（没登录进词表的词）→ 一律替换成 <code>&lt;UNK&gt;</code>。</li>
+    <li>反向还原（detokenize）时，用空格把词拼回去，再套一套去分词规则修正标点周围的空格（把 <code>do</code> <code>n't</code> 还原成 <code>don't</code>）。</li>
+  </ol>
+  <p><b>遇到没见过的词怎么办？</b>——这是词级分词的死穴：<b>没有办法</b>。任何未登录词（人名、数字、罕见变形、拼写错误、URL、外语单词）都会坍缩成一个毫无意义的 <code>&lt;UNK&gt;</code>。模型既读不懂它，也生成不出它。在翻译里这尤其致命：源句里的 <code>&lt;UNK&gt;</code> 无从翻译，目标句里的 <code>&lt;UNK&gt;</code> 就是输出里一个直接的"窟窿"。</p>
+
+  <h2>④ 一个具体例子</h2>
+  <p>假设我们用一个只保留高频词的英文词表（含 <code>the, cat, sat, on, mat</code> 等），处理下面两句：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>输入句子</th><th>预分词结果</th><th>查表后的 token 序列</th></tr></thead>
+    <tbody>
+      <tr><td><code>The cat sat on the mat.</code></td><td>the / cat / sat / on / the / mat / .</td><td><code>the cat sat on the mat .</code>（全部命中）</td></tr>
+      <tr><td><code>The cat sat on the antidisestablishmentarianism.</code></td><td>the / cat / sat / on / the / antidise… / .</td><td><code>the cat sat on the &lt;UNK&gt; .</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>第二句里那个长词从没进过词表，直接变成 <code>&lt;UNK&gt;</code>。更隐蔽的问题是词形变化：<code>run</code>、<code>runs</code>、<code>running</code>、<code>runner</code> 在词表里是<b>四个毫无关联的 ID</b>，模型在其中一个上学到的东西完全无法迁移到另外三个——因为它根本看不见这四个词共享词根 <code>run</code>。中文场景则更早就要付出代价：<code>「他正在跑步」</code>必须先靠 jieba 切成 <code>他 / 正在 / 跑步</code>，切错了后面全错。</p>
+
+  <h2>⑤ 优缺点与权衡</h2>
+  <p>把词级分词放到四个维度（词表大小 / 序列长度 / OOV / 语义）上看它的取舍：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>维度</th><th>词级分词的表现</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td><b>语义</b></td><td>✅ 最好</td><td>一个 token ≈ 一个词，天然对齐人类的意义单位，几乎不用模型再去拼装。这是它唯一的强项。</td></tr>
+      <tr><td><b>序列长度</b></td><td>✅ 最短</td><td>一句话的 token 数就是词数，序列最短，注意力（O(n²)）开销最省。</td></tr>
+      <tr><td><b>词表大小</b></td><td>❌ 又大又不全</td><td>要覆盖更多词就得增大 V，但输出 <b>softmax 成本随 V 线性增长</b>（在 NMT 里常是计算瓶颈），embedding 表也随之膨胀——花了大代价却<b>永远补不全</b>，因为构词是无限可产的（德语复合词、黏着语、代码标识符）。</td></tr>
+      <tr><td><b>OOV / 覆盖</b></td><td>❌ 根本无法解决</td><td>词表外的词一律 <code>&lt;UNK&gt;</code>，信息彻底丢失，且开放词汇下必然漏词。</td></tr>
+    </tbody>
+  </table></div>
+  <p>三个互相勾连的致命伤，用一句话概括：</p>
+  <ul>
+    <li><b>OOV / <code>&lt;UNK&gt;</code> 坍缩</b>：任何没见过的词都变成同一个空洞符号，读不了也写不出。</li>
+    <li><b>长尾稀疏</b>：自然语言词频服从 <b>Zipf 定律</b>，大量词形只出现一两次，它们的 embedding 几乎没有训练信号，等同噪声；同时词法信息完全不可见（<code>run/runs/running</code> 互不相干）。</li>
+    <li><b>词表又大又漏</b>：为覆盖率增大 V → softmax 与 embedding 成本上涨，却仍旧漏 OOV，两头不讨好。</li>
+  </ul>
+  <p>正因如此，Luong 等人 2015 年还专门打过一个"补丁"<span class="cite" title="Luong, Sutskever, Le, Vinyals, Zaremba (2015), Addressing the Rare Word Problem in Neural Machine Translation, ACL">[4]</span>：用一张 UNK 对照词典把源句里的未登录词"拷贝"到目标句——这个笨办法本身就说明了 OOV 问题当年有多痛（<a href="https://arxiv.org/abs/1410.8206">arXiv:1410.8206</a>）。</p>
+
+  <h2>⑥ 被哪些模型使用</h2>
+  <p>词级分词是"上古"深度 NLP 的标配，代表使用者包括：</p>
+  <ul>
+    <li><b>word2vec</b>（Mikolov 2013）、<b>GloVe</b>：经典词向量模型，整个方法就建立在"一个词一个向量"之上。</li>
+    <li><b>早期神经机器翻译</b>：Sutskever 2014 的 seq2seq、Bahdanau 2015 的注意力翻译，用固定词表（常 3 万~8 万），词表外统统 <code>&lt;UNK&gt;</code>。</li>
+    <li>需要预分词的语言（中文/日文）在这条路线上还得<b>先上一个独立分词器</b>（jieba / MeCab）作为前置步骤，管线更脆。</li>
+  </ul>
+  <div class="note o">
+    <div class="t">⚠️ 现代大模型已全部弃用纯词级分词</div>
+    今天的生成式大模型（GPT、LLaMA、Qwen、BERT…）<b>没有一个</b>用纯词级分词。原因就是上面那三条：OOV 无解、长尾稀疏、词表又大又不全（softmax 成本高）。它是理解后续所有 subword 方法为何存在的<b>反面教材</b>——把痛点讲清楚，才能懂后面的解法。
+  </div>
+
+  <h2>⑦ 小结</h2>
+  <div class="note p">
+    <div class="t">📝 一句话小结 & 承上启下</div>
+    词级分词把语义做到了极致（一个 token 就是一个词），却在覆盖率、词表规模和长尾上全线崩溃——它是"语义好、覆盖差"这一极端。<a href="m2-char.html">下一页</a>我们走向<b>另一个极端</b>：字符级分词，用几十到几千个字符当词表，彻底消灭 OOV，代价却是序列暴涨、语义稀薄。两个极端摆好之后，就能理解为什么真正的赢家是被"谈判"出来的中间地带——subword（BPE 等）。
+  </div>
+
+  <div class="pagenav">
+    <a href="why.html"><div class="lbl">← 上一节</div><div class="ttl">为什么分词</div></a>
+    <a class="next" href="m2-char.html"><div class="lbl">下一节 →</div><div class="ttl">字符级分词</div></a>
+  </div>
+</div>
+</body>
+</html>

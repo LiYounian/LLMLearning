@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SentencePiece（框架） | 第一课 Tokenizer</title>
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="topbar"><div class="inner">
+  <span class="brand">大模型基础课 <span class="dot">·</span> 第一课</span>
+  <nav>
+    <a href="index.html">目录</a>
+    <a href="why.html">为什么分词</a>
+    <a href="index.html#timeline">方法时间线</a>
+    <a href="models.html">模型×方法</a>
+    <a href="compare.html">切词对比</a>
+    <a href="references.html">参考文献</a>
+  </nav>
+</div></div>
+<div class="wrap page">
+  <div class="breadcrumb"><a href="index.html">目录</a> / <a href="index.html#timeline">方法时间线</a> / SentencePiece</div>
+  <div class="method-head">
+    <span class="yr-badge">2018 · Kudo &amp; Richardson</span>
+    <h1>SentencePiece：让分词语言无关、可逆</h1>
+    <p class="lead">它不是一种新算法，而是一个库 / 框架，内含 BPE 和 Unigram 两种模式；真正的贡献是把输入当作原始 Unicode 流、用 ▁ 表示空格，从而做到<b>语言无关</b> + <b>无损可逆</b>。</p>
+    <div class="usedby"><span class="lbl">被这些模型使用：</span><span class="mbadge meta">LLaMA 1/2</span><span class="mbadge google">T5</span><span class="mbadge google">Gemma</span><span class="mbadge dim">XLM-R</span><span class="mbadge meta">mBART</span></div>
+  </div>
+
+  <h2>① 出身：一篇 EMNLP 系统演示论文</h2>
+  <p>SentencePiece 由 Google 的 Taku Kudo 与 John Richardson 在 2018 年提出，发表于 <b>EMNLP 2018 系统演示（System Demonstrations）</b>，论文题为 <i>SentencePiece: A Simple and Language Independent Subword Tokenizer and Detokenizer for Neural Text Processing</i><span class="cite" title="Kudo &amp; Richardson 2018, EMNLP System Demonstrations, arXiv:1808.06226">[6]</span>。注意作者 Taku Kudo 也正是前一节 Unigram 算法（2018 ACL）的作者——SentencePiece 可以看成他把 Unigram / BPE「产品化」的工程成果，代码开源在 <code>github.com/google/sentencepiece</code>。</p>
+
+  <div class="note o">
+    <div class="t">⚠️ 先破除一个常见误解：SentencePiece 不是「一种分词算法」</div>
+    很多人把 SentencePiece 和 BPE、WordPiece、Unigram 并列，当成「第四种算法」——这是错的。SentencePiece 是一个<b>框架 / 实现库</b>，它<b>内部</b>既能跑 BPE、也能跑 Unigram（还支持 char / word 模式）。它本身<b>没有发明新的「怎么学词表」的算法</b>；学词表这一步完全复用 BPE（前面第 3 节）或 Unigram（第 5 节）。它的真正贡献在<b>预处理与工程封装</b>：把整条流水线做成语言无关、无损可逆的。所以正确的说法是「SentencePiece-BPE 模式」「SentencePiece-Unigram 模式」，而不是「SentencePiece 算法」。
+  </div>
+
+  <h2>② 核心机制：▁ 空格技巧 + 语言无关流水线</h2>
+  <p>在 SentencePiece 之前，subword 分词有一个隐藏的脏活：<b>预切分（pre-tokenization）</b>。BPE / WordPiece 都假设文本已经先按空格和标点切成了「词」，再在词内部做子词合并。对英文，这一步靠 Moses、Penn Treebank 之类的规则切分器；但对<b>中文、日文、泰文这些没有空格的语言（scriptio continua）</b>，你必须先上 jieba、MeCab 这类语言相关的分词器。这既脆弱又不可移植：换一种语言就要换一套预处理，而且分词器的切法和后续子词模型不一致，还原时也要靠一堆启发式规则拼回空格。</p>
+  <p>SentencePiece 的解法是把这一步<b>整个删掉</b>：直接把输入当作一串原始 Unicode 字符（空格也是普通字符之一），端到端处理。关键就在于怎么处理空格——它引入了一个元符号 <b><code>▁</code>（U+2581，"下八分之一块" lower one-eighth block）</b>，专门用来编码空格。整条流水线是这样的：</p>
+  <ol>
+    <li><b>归一化（normalize）</b>：对原始文本做 Unicode 归一化，默认 <b>NFKC</b>。不需要任何分词器、Moses 或 jieba。</li>
+    <li><b>空格 → ▁</b>：把每个空格替换成 <code>▁</code>。习惯上还会在整段文本开头补一个 <code>▁</code>，让第一个词和其他词受到一致对待。例：<code>"Hello world"</code> → <code>▁Hello▁world</code>。</li>
+    <li><b>在这个流上跑 BPE 或 Unigram</b>：此时空格已经是普通字符，直接在这串符号上做子词合并 / 剪枝。学出来的 token 长这样：<code>▁Hello</code>、<code>▁world</code>、<code>▁the</code>、<code>ing</code>……<b>一个 token 前面带 ▁ 就代表「它前面本来有个空格」。</b></li>
+    <li><b>拼回、▁ → 空格，即无损还原</b>：解码时把所有 token 直接拼接，再把 <code>▁</code> 换回空格。没有任何启发式规则，天然精确 round-trip。</li>
+  </ol>
+
+  <div class="note g">
+    <div class="t">🔑 两个直接好处</div>
+    <ul>
+      <li><b>语言无关</b>：不需要 jieba / MeCab 之类语言相关的预处理。对中日泰这种无空格语言尤其重要——它们分词后本来就没有空格，<code>▁</code> 自然不会出现在词内部，流水线一视同仁。</li>
+      <li><b>无损可逆</b>：<code>text == decode(encode(text))</code> 严格成立。因为空格被当成数据一起编码，还原时不靠猜。这对需要精确复现原文的场景（代码、格式敏感文本）是硬需求。</li>
+    </ul>
+  </div>
+
+  <h3>▁ 与 WordPiece 的 ## 正好相反</h3>
+  <p>两者都在标记「词边界」，但标记的东西正相反，很容易记混：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>标记</th><th>含义</th><th>出现位置</th><th>例子</th></tr></thead>
+    <tbody>
+      <tr><td><code>▁</code>（SentencePiece）</td><td>「我<b>前面有</b>一个空格」（词的开头）</td><td>词首片段带 ▁</td><td><code>▁Hello</code> · <code>▁world</code></td></tr>
+      <tr><td><code>##</code>（WordPiece）</td><td>「我<b>前面没有</b>空格」（接在上一片段后）</td><td>词内片段带 ##</td><td><code>play</code> · <code>##ing</code></td></tr>
+    </tbody>
+  </table></div>
+  <p>换句话说：▁ 标「前面有空格」，## 标「前面没空格」——一个正向标词首，一个反向标词内。</p>
+
+  <h2>③ 具体用法与例子</h2>
+  <p>训练一份 SentencePiece 模型，核心就两个参数：用哪种算法、词表多大。</p>
+  <pre><code># 训练（伪命令行）
+spm_train \
+  --input=corpus.txt \
+  --model_type=bpe|unigram \   # 选算法：BPE 或 Unigram（默认 unigram）
+  --vocab_size=32000 \         # 目标词表大小
+  --character_coverage=0.9995  # 多语言/CJK 常调这个
+
+# 结果产物：tokenizer.model（词表 + 参数）</code></pre>
+  <p>用 <code>--model_type=bpe</code> 就走第 3 节的 BPE 合并逻辑，用 <code>--model_type=unigram</code>（默认）就走第 5 节的 EM 剪枝 + Viterbi 逻辑；<code>--vocab_size</code> 控制最终词表大小。学词表这一步和前面两节讲的<b>完全一样</b>，唯一区别是它跑在 ▁ 编码后的原始流上、并套了自己的归一化。</p>
+  <p>一个具体的编码 / 解码往返：</p>
+  <pre><code>encode("Hello world")
+  → 归一化 + 空格转 ▁ :  "▁Hello▁world"
+  → 子词切分（BPE/Unigram）:  ["▁Hello", "▁world"]
+
+decode(["▁Hello", "▁world"])
+  → 拼接:  "▁Hello▁world"
+  → ▁ 换回空格:  "Hello world"   ✅ 与原文逐字节一致</code></pre>
+  <p>对中文这种无空格文本，例如 <code>"今天天气"</code>，归一化后不会插入 ▁（词内没有空格），子词模型直接在汉字流上切，还原时也不会凭空多出空格——这正是语言无关设计省下的麻烦。</p>
+
+  <h2>④ 优缺点与影响</h2>
+  <ul>
+    <li><b>优点：真正端到端、可逆、语言无关。</b>去掉了脆弱的、语言相关的预切分步骤，把空格当数据处理，使得同一套流水线可以直接用于任意语言，且严格无损还原。这是它成为多语言 / 开源模型事实标准的根本原因。</li>
+    <li><b>优点：算法可插拔。</b>BPE 要确定性、Unigram 要概率化 + 子词正则（subword regularization），换个参数即可，不用换库。</li>
+    <li><b>代价：全流水线要统一约定。</b>你必须在整个训练 + 推理链路上锁定它的归一化方式（NFKC 等）和 ▁ 约定，一旦某一端不一致就会 token 错位。</li>
+    <li><b>注意：算法层的取舍仍继承自内核。</b>选 BPE 就继承 BPE 的贪心 + 确定性缺点，选 Unigram 就继承 Unigram 的训练更重但更稳健——SentencePiece 本身不改变这些。</li>
+  </ul>
+
+  <h2>⑤ 被哪些模型使用</h2>
+  <p>SentencePiece 是<b>多语言 / 开源模型早期的事实标准</b>，尤其在「tiktoken 大词表时代」到来之前。具体点名：</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>模型</th><th>SentencePiece 模式</th><th>词表大小</th><th>特殊处理</th></tr></thead>
+    <tbody>
+      <tr><td><span class="mbadge meta">LLaMA 1 / 2</span></td><td>BPE 模式</td><td>32,000</td><td>数字<b>逐位拆分</b>（每个数字单独成 token，利于算术泛化）；<b>byte-fallback</b> 兜底词表外字符（回退成 UTF-8 字节 token，因此也不会真吐 unk）<span class="cite" title="LLaMA arXiv:2302.13971 §Tokenizer；Llama 2 arXiv:2307.09288">[9]</span></td></tr>
+      <tr><td><span class="mbadge google">T5</span></td><td>Unigram 模式</td><td>~32k</td><td>Google 的多语言文本到文本模型，Unigram 是 SentencePiece 的默认算法</td></tr>
+      <tr><td><span class="mbadge google">Gemma</span></td><td>SentencePiece</td><td><b>256,000</b>（超大词表）</td><td>含 split-digits + 字节级编码兜底，对多语言极友好；Gemma 3 与 Gemini 2.0 共用同一 SentencePiece<span class="cite" title="Gemma 官方 tokenizer 文档 gemma-llm.readthedocs.io">[13]</span></td></tr>
+      <tr><td><span class="mbadge dim">XLM-R</span></td><td>SentencePiece</td><td>多语言大词表</td><td>跨语言表示学习的代表作，靠 SentencePiece 的语言无关性覆盖上百种语言</td></tr>
+      <tr><td><span class="mbadge meta">mBART</span></td><td>SentencePiece</td><td>多语言</td><td>多语言去噪自编码翻译模型，同样依赖语言无关流水线</td></tr>
+    </tbody>
+  </table></div>
+  <p>补充一个关键叙事：<b>LLaMA 系列后来「叛变」了。</b>LLaMA 1 / 2 用的是 SentencePiece-BPE（32k 词表），但到了 <b>LLaMA 3 就转向了 tiktoken 风格的字节级 BPE</b>，词表也从 32k 一举放大到 128,256。这次迁移是「SentencePiece → tiktoken」路线切换的典型案例，也标志着大词表时代的到来——正是下一页的主题。</p>
+
+  <div class="note">
+    <div class="t">📎 小结 &amp; 承上启下</div>
+    SentencePiece 的价值不在「发明算法」，而在「把 subword 分词做成语言无关、可逆、端到端」。它内含 BPE / Unigram 两个内核，用 <code>▁</code> 把空格当数据，删掉了脆弱的语言相关预切分，因此成了多语言与开源模型（LLaMA 1/2、T5、Gemma、XLM-R、mBART）早期的默认选择。<br>
+    但故事在 2019 年 GPT-2 之后开始分岔：另一条路线不做 Unicode 字符、也不依赖 SentencePiece 的归一化，而是直接在 <b>256 个字节</b>上跑 BPE。下一节先看这条<a href="m7-bbpe.html">字节级 BPE</a>路线的机制，再进入它催生的<a href="m8-tiktoken.html">「大词表时代」</a>——连 LLaMA 3 都最终投奔了过去。
+  </div>
+
+  <div class="pagenav">
+    <a href="m5-unigram.html"><div class="lbl">← 上一节</div><div class="ttl">Unigram</div></a>
+    <a class="next" href="m7-bbpe.html"><div class="lbl">下一节 →</div><div class="ttl">字节级 BPE</div></a>
+  </div>
+</div>
+</body>
+</html>
