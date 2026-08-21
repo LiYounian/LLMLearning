@@ -1,0 +1,85 @@
+{
+ "note": "gpt2/r50k = GPT-2/GPT-3 的 5 万词表；cl100k = GPT-4 的约 10 万词表",
+ "tokens": [
+  {
+   "s": "SolidGoldMagikarp",
+   "note": "Reddit 用户名 /u/SolidGoldMagikarp，因常被 mention 而进入分词器词表",
+   "gpt2_single": false,
+   "gpt2_id": null,
+   "gpt2_ntok": 2,
+   "cl_ntok": 5
+  },
+  {
+   "s": " petertodd",
+   "note": "比特币开发者用户名；被报告会诱发大量诡异/敌意续写",
+   "gpt2_single": true,
+   "gpt2_id": 37444,
+   "gpt2_ntok": 1,
+   "cl_ntok": 3
+  },
+  {
+   "s": " davidjl",
+   "note": "Reddit 用户 davidjl123（爱数格子的账号），高频出现在计数类帖子",
+   "gpt2_single": true,
+   "gpt2_id": 23282,
+   "gpt2_ntok": 1,
+   "cl_ntok": 1
+  },
+  {
+   "s": " guiActiveUn",
+   "note": "游戏 RuneScape 源码里的 UI 变量名，被爬进语料",
+   "gpt2_single": true,
+   "gpt2_id": 29372,
+   "gpt2_ntok": 1,
+   "cl_ntok": 2
+  },
+  {
+   "s": " externalToEVA",
+   "note": "同上，代码标识符类 glitch token",
+   "gpt2_single": true,
+   "gpt2_id": 30212,
+   "gpt2_ntok": 1,
+   "cl_ntok": 4
+  },
+  {
+   "s": "rawdownloadcloneembedreportprint",
+   "note": "论坛按钮文本被反复拼接，成了一个超长单 token",
+   "gpt2_single": true,
+   "gpt2_id": 30906,
+   "gpt2_ntok": 1,
+   "cl_ntok": 6
+  },
+  {
+   "s": " TheNitrome",
+   "note": "网站 Nitrome 相关高频串",
+   "gpt2_single": true,
+   "gpt2_id": 42089,
+   "gpt2_ntok": 1,
+   "cl_ntok": 3
+  },
+  {
+   "s": " RandomRedditor",
+   "note": "Reddit 相关用户名片段",
+   "gpt2_single": true,
+   "gpt2_id": 36173,
+   "gpt2_ntok": 1,
+   "cl_ntok": 3
+  },
+  {
+   "s": "EStreamFrame",
+   "note": "代码/日志里的高频标识符",
+   "gpt2_single": true,
+   "gpt2_id": 43177,
+   "gpt2_ntok": 1,
+   "cl_ntok": 3
+  },
+  {
+   "s": " SolidGoldMagikarp",
+   "note": "带前导空格的版本，与不带空格是不同 token",
+   "gpt2_single": true,
+   "gpt2_id": 43453,
+   "gpt2_ntok": 1,
+   "cl_ntok": 5
+  }
+ ]
+}

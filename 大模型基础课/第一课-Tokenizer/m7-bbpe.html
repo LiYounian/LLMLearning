@@ -65,7 +65,28 @@
     一个汉字 UTF-8 占 3 字节。如果词表里没为常见汉字/词组学到合并规则，一个汉字可能被切成 2–3 个 token，中文文本的 token 数会明显多于等长英文。这正是后来 Qwen、DeepSeek 等中文强相关模型<b>把词表做大、专门为中文优化合并</b>的动因——去 <a href="compare.html">切词对比页</a> 亲眼看 GPT-2 把一句中文切成 54 个 token、DeepSeek 只要 15 个。
   </div>
 
-  <h2>④ 被哪些主流大模型使用</h2>
+  <h2>④ 中文为什么"吃亏"：亲手在字节上跑 BPE（可交互）</h2>
+  <p>一个汉字 UTF-8 占 <b>3 个字节</b>。在字节级 BPE 里，模型看到的起点是<b>字节</b>，要先把一个字的 3 个字节合并成"整字 token"，再把整字合并成"词 token"。下面这个教学玩具让你亲手体验：看着"深度学习"从 <b>12 个字节 token</b> 一步步被合并。你会发现——要把它压到 1–2 个 token 需要<b>相当多的合并规则</b>，这正是<b>中文/CJK 需要更大词表</b>的直观原因。</p>
+  <div class="demo"><div id="zhbpe"></div></div>
+  <div class="note g">
+    <div class="t">💡 结论</div>
+    英文常用词往往几个字母就成一个 token（词表花费小）；中文每个字先要"耗掉"若干合并才能成为整字，再成词。<b>同样大的词表，能覆盖的中文词就更少</b> → 中文要达到与英文相当的压缩率，词表必须更大、且要专门喂中文语料。这就是 Qwen/DeepSeek 把词表做到 12–15 万、并重点优化中文合并的原因（对比见 <a href="compare.html">切词对比页</a>）。
+  </div>
+
+  <h2>⑤ 进阶：一个 token 会"跨字符边界"吗？（真实实测）</h2>
+  <p>常见疑问：一串字里，<b>会不会出现"前一个字的后半字节 + 后一个字的前半字节"被合成一个 token</b>的现象？答案是——<b>会，而且我用真实 Qwen 分词器抓到了</b>。</p>
+  <div class="note o">
+    <div class="t">🔬 实测证据（Qwen2.5）</div>
+    韩语 <code>토크나이저</code> 里，Qwen 产出一个 token，它的字节 = <b><code>토</code> 的最后一个字节 + <code>크</code> 的第一个字节</b>——不含任何一个完整字符，正是"前字尾 + 后字头"。印地语（天城文）里也大量出现。脚本见 <code>scripts/probe_crosschar.py</code>。
+  </div>
+  <p><b>为什么会</b>：BPE 合并纯按"字节对频次"驱动，<b>对字符边界毫无感知</b>；正则预切分只挡住"跨词/跨空格/跨标点"的合并，同一段同种文字内部，<b>跨字符边界的相邻字节对照样是合并候选</b>。只要它够高频就会被合并。</p>
+  <p><b>为什么中文里几乎看不到</b>（<code>深度学习模型…</code> 实测 34 字全部边界对齐）：中文语料多，Qwen 先把每个汉字自己的 3 字节合成"整字 token"（字内字节对超高频），再合成词，于是都卡在字/词边界。而覆盖不足的文字（此处韩语/印地语）没学全整字合并，裸字节对就赢了 → 冒出跨界碎片 token。</p>
+  <div class="note">
+    <div class="t">🧭 一句话</div>
+    原理上<b>永远可能</b>（BPE 是"边界盲"的）；实践中<b>取决于训练覆盖</b>——高覆盖语言 token 边界对齐，低覆盖文字会出现"前字尾+后字头"的跨界 token。
+  </div>
+
+  <h2>⑥ 被哪些主流大模型使用</h2>
   <p>字节级 BPE 是<b>当今生成式大模型的绝对主流</b>。它几乎统一了整个赛道：</p>
   <div class="tablewrap"><table>
     <thead><tr><th>模型</th><th>实现</th><th>词表</th><th>备注</th></tr></thead>
@@ -81,7 +102,7 @@
   </table></div>
   <p style="font-size:13px;color:var(--fg-faint)">完整对照（含 Kimi 闭源型号的说明）见 <a href="models.html">模型×方法矩阵</a>。</p>
 
-  <h2>⑤ 小结：字节级 BPE 的完整流水线</h2>
+  <h2>⑦ 小结：字节级 BPE 的完整流水线</h2>
   <pre><code>文本 "你好"
   → UTF-8 编码：[228,189,160, 229,165,189]   （6 个字节）
   → (GPT-2) 字节→可见字符映射（可逆化妆）
@@ -95,6 +116,7 @@
 </div>
 
 <script src="assets/byte-demo.js"></script>
-<script>initByteDemo("byte-demo");</script>
+<script src="assets/byte-bpe-zh.js"></script>
+<script>initByteDemo("byte-demo");initZhBpe("zhbpe");</script>
 </body>
 </html>

@@ -21,7 +21,7 @@
 │  —— 方法详解（按发布时间线，每页含：出身/算法/例子/权衡/被哪些模型使用）——
 ├── m1-word.html                  词级分词 word-level（2013）
 ├── m2-char.html                  字符级分词 character-level（2015）
-├── m3-bpe.html                   BPE 字节对编码（1994/2016）—— 含【可交互训练动画 + 切词 demo】
+├── m3-bpe.html                   BPE 字节对编码（1994/2016）—— 含【训练动画 + 切词 demo + Qwen 真实流水线着色可视化】
 ├── m4-wordpiece.html             WordPiece（2012/2018，似然增益合并）
 ├── m5-unigram.html               Unigram 语言模型分词（2018，EM 剪枝）
 ├── m6-sentencepiece.html         SentencePiece 框架（2018，▁ 语言无关可逆）
@@ -33,7 +33,8 @@
 ├── compare.html                  切词对比 —— 含【真实分词器 token 数条形图 + 实际切分】
 ├── references.html               参考文献与来源（35 条，可点击溯源）
 ├── scripts/
-│   └── gen_token_compare.py      用真实分词器(tiktoken+HF)跑 token 数, 生成 token_data.{json,js}
+│   ├── gen_token_compare.py      用真实分词器(tiktoken+HF)跑 token 数, 生成 token_data.{json,js}
+│   └── gen_qwen_pipeline.py      用真实 Qwen2.5 分词器跑"文字→字节→token"对齐数据, 生成 qwen_pipeline.{json,js}
 └── assets/
     ├── style.css                 统一暗色主题样式
     ├── bpe-demo.js               BPE 训练可视化器 + 切分器
@@ -67,6 +68,8 @@ python3 gen_token_compare.py   # 需要 tiktoken + transformers/tokenizers, 联�
 
 - [x] 用真实 tiktoken/HF tokenizer 跑"同一句话在各模型下切成几个 token"的对比条形图 → **已完成，见 compare 页**
 - [x] 以方法为中心、按发布时间线重构目录，每个方法可点进详解并标注使用模型 → **v3 完成**
-- [ ] 加中文语料的 BPE 训练 demo（展示为什么中文需要大词表）
-- [ ] BLT 熵分块的动画示意
-- [ ] glitch token 的可点击案例展示
+- [x] m3-bpe 加真实 Qwen 分词流水线着色可视化（文字→字节→切割）
+- [x] 中文语料的字节级 BPE 训练 demo（m7-bbpe，展示为什么中文需要大词表）
+- [x] BLT 熵分块的交互动画示意（m9-frontier，阈值滑块）
+- [x] glitch token 的可点击案例画廊（m9-frontier，真实 tiktoken ID）
+- [x] 实测并讲解"token 跨字符边界"现象（m7-bbpe，Qwen 韩/印地语实例，脚本 probe_crosschar.py）
